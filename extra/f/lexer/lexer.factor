@@ -102,6 +102,9 @@ GENERIC: last-token ( obj -- token/f )
 M: io:token first-token ;
 M: io:token last-token ;
 
+M: string first-token ;
+M: string last-token ;
+
 M: sequence first-token [ f ] [ first first-token ] if-empty ;
 M: sequence last-token [ f ] [ last last-token ] if-empty ;
 
@@ -192,11 +195,15 @@ ERROR: lua-comment-error string ;
     3 read "\"\"\"" input-stream get stream>> stream-read-until-string
     3 cut* 3array [ second ] keep <long-string> ;
     
+: read-identifier ( token1 token2 -- token )
+    " \r\n" read-until drop
+    [ text>> ] bi@ [ 1string ] dip '[ _ _ 3append ] change-text ;
+
 : lex-string/token ( -- string/token/f )
     " \n\r\"[" read-until [
         dup text>> {
             { CHAR: " [ read-string ] }
-            { CHAR: [ [ peek1 text>> CHAR: = = [ lex-lua-string ] [ drop ] if ] }
+            { CHAR: [ [ peek1 text>> CHAR: = = [ lex-lua-string ] [ read-identifier ] if ] }
             [ 2drop ]
         } case
     ] [
