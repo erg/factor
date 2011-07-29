@@ -72,11 +72,12 @@ TUPLE: lexed-token < lexed string ;
         [ third >>text ] bi ; inline
 
 TUPLE: line-comment < lexed ;
-TUPLE: lua-string < lexed start text stop ;
+TUPLE: lua-string < lexed name text ;
 
-: <lua-string> ( tokens text -- lua-string )
+: <lua-string> ( name text tokens -- lua-string )
     lua-string new-lexed
-        swap >>text ; inline
+        swap >>text
+        swap >>name ; inline
 
 TUPLE: lua-comment < lexed start text stop ;
 
@@ -107,13 +108,9 @@ M: lexed last-token tokens>> [ f ] [ last last-token ] if-empty ;
     [ peek1 text blank? [ read1 ] [ f ] if ] loop>array drop ;
 
 : lex-til-eol ( -- comment )
-    ! [ peek1 text "\r\n" member? [ f ] [ read1 text ] if ] loop>array >string ;
     "\r\n" read-until drop ;
 
-TUPLE: string-word name string delimiter ;
-
-ERROR: bad-long-string ;
-ERROR: bad-short-string ;
+ERROR: bad-string ;
 
 ERROR: stream-read-until-string-error needle string stream ;
 
@@ -124,7 +121,6 @@ ERROR: stream-read-until-string-error needle string stream ;
         [
             stream stream-read1 :> ch
             ch [ needle building get >string stream stream-read-until-string-error ] unless
-            
             i needle nth ch = [ i 1 + i! ] [ 0 i! ] if
             ch ,
             len i = not
@@ -134,75 +130,17 @@ ERROR: stream-read-until-string-error needle string stream ;
 : read-until-string ( needle -- string' )
     input-stream get stream-read-until-string ;
 
-: read-long-string ( -- string end )
-    tell-input
-    [
-        [
-            3 peek text "\"\"\"" sequence= [
-                3 read text
-                [ peek1 text CHAR: " = [ read1 text ] [ f ] if ] loop>array
-                append 3 cut* tell-input [ 3 - ] change-column# swap tell/string>token
-                [ % ] [ , ] bi*
-                f
-            ] [
-                peek1 text {
-                    { CHAR: \ [ 2 read text % ] }
-                    [ drop read1 [ text , ] [ bad-long-string ] if* ]
-                } case
-                t
-            ] if
-        ] loop
-    ] { } make unclip-last [ >string tell/string>token ] dip ;
-
-: read-short-string ( -- string end )
-    tell-input
-    [
-        [
-            peek1 text CHAR: " = [
-                1 read ,
-                f
-            ] [
-                peek1 text {
-                    { CHAR: \ [ 2 read text % ] }
-                    [ drop read1 dup [ bad-short-string ] unless text , ]
-                } case
-                t
-            ] if
-        ] loop
-    ] { } make unclip-last [ >string tell/string>token ] dip ;
-
-: read-string ( string delimiter -- lexed-string )
-    2 peek text >string "\"\"" = [
-        2 read drop
-        [ drop "\"\"\"" ] change-text
-        read-long-string
-    ] [
-        [ 1string ] change-text
-        read-short-string
-    ] if 4array <lexed-string> ;
-
-: lex-string/token ( -- string/token/f )
-    " \n\r\"" read-until [
-        dup text>> CHAR: " = [
-            read-string
-        ] [
-            drop
-        ] if
-    ] [
-        drop f
-    ] if* ;
-
 ERROR: bad-separator string ;    
-ERROR: lua-string-error string ;
-: lex-lua-string ( -- string )
-    1 read
+ERROR: lua-string-error name string ;
+: lex-lua-string ( start first -- string )
+    [ 1string ] change-text
     " [\r\n" read-until text>> CHAR: [ = [
         text>> dup [ CHAR: = = ] all? [ bad-separator ] unless
         [ '[ _ "[" 3append ] change-text ]
         [ length CHAR: = <string> "]" "]" surround ] bi
         
         [ input-stream get stream>> stream-read-until-string ] keep length cut*
-        3array [ second ] keep
+        4array [ first text>> ] [ third ] [ ] tri
         <lua-string>
      ] [
         [ text>> ] bi@ append lua-string-error
@@ -222,6 +160,38 @@ ERROR: lua-comment-error string ;
      ] [
         [ text>> ] bi@ append lua-comment-error
     ] if ;
+
+: read-short-string ( -- string end )
+    tell-input
+    [
+        [
+            peek1 text CHAR: " = [
+                1 read ,
+                f
+            ] [
+                peek1 text {
+                    { CHAR: \ [ 2 read text % ] }
+                    [ drop read1 dup [ bad-string ] unless text , ]
+                } case
+                t
+            ] if
+        ] loop
+    ] { } make unclip-last [ >string tell/string>token ] dip ;
+
+: read-string ( string delimiter -- lexed-string )
+    [ 1string ] change-text
+    read-short-string 4array <lexed-string> ;    
+    
+: lex-string/token ( -- string/token/f )
+    " \n\r\"[" read-until [
+        dup text>> {
+            { CHAR: " [ read-string ] }
+            { CHAR: [ [ peek1 text>> CHAR: = = [ lex-lua-string ] [ drop ] if ] }
+            [ 2drop ]
+        } case
+    ] [
+        drop f
+    ] if* ;
     
 : lex-token ( -- token/string/comment/f )
     lex-blanks
@@ -229,7 +199,6 @@ ERROR: lua-comment-error string ;
     text {
         { [ dup "!" head? ] [ drop 1 read lex-til-eol 2array <line-comment> ] }
         { [ dup "#!" head? ] [ drop 2 read lex-til-eol 2array <line-comment> ] }
-        { [ dup "[=" head? ] [ drop lex-lua-string ] }
         { [ dup "(*" head? ] [ drop lex-lua-comment ] }
         { [ dup f = ] [ drop f ] }
         [ drop lex-string/token ]
