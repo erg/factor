@@ -62,9 +62,13 @@ TUPLE: lexed tokens ;
     new
         swap >>tokens ; inline
 
-TUPLE: lexed-string < lexed name text ;
+TUPLE: long-string < lexed text ;
 
-TUPLE: lexed-token < lexed string ;
+: <long-string> ( text tokens -- string )
+    long-string new-lexed
+        swap >>text ; inline
+
+TUPLE: lexed-string < lexed name text ;
 
 : <lexed-string> ( tokens -- lexed-string )
     [ lexed-string new-lexed ] keep
@@ -72,6 +76,10 @@ TUPLE: lexed-token < lexed string ;
         [ third >>text ] bi ; inline
 
 TUPLE: line-comment < lexed ;
+
+: <line-comment> ( sequence -- line-comment )
+    line-comment new-lexed ; inline
+    
 TUPLE: lua-string < lexed name text ;
 
 : <lua-string> ( name text tokens -- lua-string )
@@ -87,9 +95,7 @@ TUPLE: lua-comment < lexed start text stop ;
 
 UNION: comment line-comment lua-comment ;
 
-: <line-comment> ( sequence -- line-comment )
-    line-comment new-lexed ; inline
-    
+
 GENERIC: first-token ( obj -- token/f )
 GENERIC: last-token ( obj -- token/f )
 
@@ -180,7 +186,11 @@ ERROR: lua-comment-error string ;
 
 : read-string ( string delimiter -- lexed-string )
     [ 1string ] change-text
-    read-short-string 4array <lexed-string> ;    
+    read-short-string 4array <lexed-string> ;
+
+: read-long-string ( -- long-string )
+    3 read "\"\"\"" input-stream get stream>> stream-read-until-string
+    3 cut* 3array [ second ] keep <long-string> ;
     
 : lex-string/token ( -- string/token/f )
     " \n\r\"[" read-until [
@@ -195,12 +205,13 @@ ERROR: lua-comment-error string ;
     
 : lex-token ( -- token/string/comment/f )
     lex-blanks
-    2 peek
+    3 peek
     text {
         { [ dup "!" head? ] [ drop 1 read lex-til-eol 2array <line-comment> ] }
         { [ dup "#!" head? ] [ drop 2 read lex-til-eol 2array <line-comment> ] }
         { [ dup "(*" head? ] [ drop lex-lua-comment ] }
         { [ dup f = ] [ drop f ] }
+        { [ dup "\"\"\"" head? ] [ drop read-long-string ] }
         [ drop lex-string/token ]
     } cond ;
 
