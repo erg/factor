@@ -62,38 +62,40 @@ TUPLE: lexed tokens ;
     new
         swap >>tokens ; inline
 
-TUPLE: long-string < lexed text ;
+TUPLE: @long-string < lexed text ;
 
-: <long-string> ( text tokens -- string )
-    long-string new-lexed
+: <@long-string> ( text tokens -- string )
+    @long-string new-lexed
         swap >>text ; inline
 
-TUPLE: lexed-string < lexed name text ;
+TUPLE: @lexed-string < lexed name text ;
 
-: <lexed-string> ( tokens -- lexed-string )
-    [ lexed-string new-lexed ] keep
+: <@lexed-string> ( tokens -- lexed-string )
+    [ @lexed-string new-lexed ] keep
         [ first >>name ]
         [ third >>text ] bi ; inline
 
-TUPLE: line-comment < lexed ;
+TUPLE: @lua-string < lexed name text ;
 
-: <line-comment> ( sequence -- line-comment )
-    line-comment new-lexed ; inline
-    
-TUPLE: lua-string < lexed name text ;
-
-: <lua-string> ( name text tokens -- lua-string )
-    lua-string new-lexed
+: <@lua-string> ( name text tokens -- lua-string )
+    @lua-string new-lexed
         swap >>text
         swap >>name ; inline
 
-TUPLE: lua-comment < lexed start text stop ;
+UNION: @string @long-string @lexed-string @lua-string ;
+        
+TUPLE: @line-comment < lexed ;
 
-: <lua-comment> ( tokens text -- lua-comment )
-    lua-comment new-lexed
+: <@line-comment> ( sequence -- line-comment )
+    @line-comment new-lexed ; inline
+ 
+TUPLE: @lua-comment < lexed start text stop ;
+
+: <@lua-comment> ( tokens text -- lua-comment )
+    @lua-comment new-lexed
         swap >>text ; inline
 
-UNION: comment line-comment lua-comment ;
+UNION: comment @line-comment @lua-comment ;
 
 
 GENERIC: first-token ( obj -- token/f )
@@ -150,7 +152,7 @@ ERROR: lua-string-error name string ;
         
         [ input-stream get stream>> stream-read-until-string ] keep length cut*
         4array [ first text>> ] [ third ] [ ] tri
-        <lua-string>
+        <@lua-string>
      ] [
         [ text>> ] bi@ append lua-string-error
     ] if ;
@@ -165,7 +167,7 @@ ERROR: lua-comment-error string ;
         
         [ input-stream get stream>> stream-read-until-string ] keep length cut*
         3array [ second ] keep
-        <lua-comment>
+        <@lua-comment>
      ] [
         [ text>> ] bi@ append lua-comment-error
     ] if ;
@@ -189,11 +191,11 @@ ERROR: lua-comment-error string ;
 
 : read-string ( string delimiter -- lexed-string )
     [ 1string ] change-text
-    read-short-string 4array <lexed-string> ;
+    read-short-string 4array <@lexed-string> ;
 
 : read-long-string ( -- long-string )
     3 read "\"\"\"" input-stream get stream>> stream-read-until-string
-    3 cut* 3array [ second ] keep <long-string> ;
+    3 cut* 3array [ second ] keep <@long-string> ;
     
 : read-identifier ( token1 token2 -- token )
     " \r\n" read-until drop
@@ -214,8 +216,8 @@ ERROR: lua-comment-error string ;
     lex-blanks
     3 peek
     text {
-        { [ dup "!" head? ] [ drop 1 read lex-til-eol 2array <line-comment> ] }
-        { [ dup "#!" head? ] [ drop 2 read lex-til-eol 2array <line-comment> ] }
+        { [ dup "!" head? ] [ drop 1 read lex-til-eol 2array <@line-comment> ] }
+        { [ dup "#!" head? ] [ drop 2 read lex-til-eol 2array <@line-comment> ] }
         { [ dup "(*" head? ] [ drop lex-lua-comment ] }
         { [ dup f = ] [ drop f ] }
         { [ dup "\"\"\"" head? ] [ drop read-long-string ] }
