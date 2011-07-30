@@ -133,7 +133,8 @@ ERROR: token-expected expected ;
             _ \ token-expected boa parsing-error
         ] if*
     ] loop
-    pop-parsed [ push-all-parsed ] keep but-last ;
+    pop-parsed [ push-all-parsed ] keep but-last
+    [ comment? not ] filter ;
 
 ERROR: premature-eof ;
 
@@ -150,7 +151,8 @@ ERROR: premature-eof ;
         read-token [ dup push-parsed text _ = not ] [ _ token-expected ] if*
     ] loop
     pop-parsed [ push-all-parsed ] keep
-    but-last [ text ] map ;
+    but-last [ text ] map
+    [ comment? not ] filter ;
 
 : chunk ( -- token/f )
     lex-chunk [ premature-eof ] unless*
