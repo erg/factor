@@ -131,6 +131,18 @@ M: assoc assoc-clone-like ( assoc exemplar -- newassoc )
 : assoc-union ( assoc1 assoc2 -- union )
     [ [ [ assoc-size ] bi@ + ] [ drop ] 2bi new-assoc ] 2keep
     [ assoc-union! ] bi@ ;
+    
+ERROR: key-exists value key assoc ;
+
+: set-at-unique ( value key assoc -- )
+    2dup key? [ key-exists ] [ set-at ] if ;
+    
+: assoc-union-unique! ( assoc1 assoc2 -- assoc1 )
+    over [ set-at-unique ] with-assoc assoc-each ;
+    
+: assoc-union-unique ( assoc1 assoc2 -- union )
+    [ [ [ assoc-size ] bi@ + ] [ drop ] 2bi new-assoc ] 2keep
+    [ assoc-union-unique! ] bi@ ;
 
 : assoc-combine ( seq -- union )
     H{ } clone [ assoc-union! ] reduce ;
