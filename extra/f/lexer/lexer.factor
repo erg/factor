@@ -2,11 +2,11 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors ascii classes combinators
 combinators.short-circuit constructors continuations
-destructors f.dictionary fry grouping io io.encodings.utf8
+destructors f.dictionary f.namespaces fry grouping io
+io.encodings.utf8
 io.files io.streams.document io.streams.string
 kernel lexer make math namespaces nested-comments sequences
 splitting strings words arrays locals ;
-QUALIFIED-WITH: io.streams.document io
 IN: f.lexer
 
 : loop>sequence ( quot exemplar -- seq )
@@ -15,11 +15,11 @@ IN: f.lexer
 : loop>array ( quot -- seq )
     { } loop>sequence ; inline
 
-TUPLE: lexer stream comment-nesting-level ;
+TUPLE: lexer stream compound-namespace ;
 
 : new-lexer ( lexer -- lexer )
     new
-        0 >>comment-nesting-level ; inline
+        <compound-namespace> >>compound-namespace ; inline
 
 : <lexer> ( stream -- lexer )
     lexer new-lexer
@@ -97,12 +97,11 @@ TUPLE: @lua-comment < lexed start text stop ;
 
 UNION: comment @line-comment @lua-comment ;
 
-
 GENERIC: first-token ( obj -- token/f )
 GENERIC: last-token ( obj -- token/f )
 
-M: io:token first-token ;
-M: io:token last-token ;
+M: @token first-token ;
+M: @token last-token ;
 
 M: string first-token ;
 M: string last-token ;
@@ -113,7 +112,7 @@ M: sequence last-token [ f ] [ last last-token ] if-empty ;
 M: lexed first-token tokens>> [ f ] [ first first-token ] if-empty ;
 M: lexed last-token tokens>> [ f ] [ last last-token ] if-empty ;
 
-: text ( token/f -- string/f ) dup token? [ text>> ] when ;
+: text ( token/f -- string/f ) dup @token? [ text>> ] when ;
 
 : lex-blanks ( -- )
     [ peek1 text blank? [ read1 ] [ f ] if ] loop>array drop ;

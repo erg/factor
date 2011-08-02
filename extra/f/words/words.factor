@@ -3,7 +3,7 @@
 USING: accessors kernel ;
 IN: f.words
 
-TUPLE: word < identity-tuple
+TUPLE: #word < identity-tuple
     namespace name stack-effect definition ;
 
 : new-word ( namespace name stack-effect definition class -- word )
@@ -14,9 +14,9 @@ TUPLE: word < identity-tuple
         swap >>namespace ; inline
 
 : <word> ( namespace name stack-effect definition -- word )
-    \ word new-word ; inline
+    #word new-word ; inline
 
-TUPLE: parsing-word < word ;
+TUPLE: #parsing-word < #word ;
 
 : <parsing-word> ( namespace name definition -- parsing-word )
-    [ (( -- obj )) ] dip \ parsing-word new-word ; inline
+    [ (( -- obj )) ] dip #parsing-word new-word ; inline

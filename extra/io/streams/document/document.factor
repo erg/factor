@@ -9,18 +9,18 @@ TUPLE: document-stream < disposable stream line# column# previous-character ;
 TUPLE: document-reader < document-stream ;
 TUPLE: document-writer < document-stream ;
 
-TUPLE: token text offset line# column# ;
+TUPLE: @token text offset line# column# ;
 
-: <token> ( stream string -- token )
+: <@token> ( stream string -- token )
     swap
-    [ token new ] 2dip
+    [ @token new ] 2dip
         [ >>text ] dip
         [ line#>> >>line# ]
         [ column#>> >>column# ] bi
         tell-input >>offset ; inline
 
 : tell/string>token ( tell string -- token )
-    token new
+    @token new
         swap >>text
         swap [ line#>> >>line# ] [ column#>> >>column# ] bi ; inline
         
@@ -62,7 +62,7 @@ M: document-reader stream-element-type drop +character+ ;
 
 M: document-reader stream-read1
     dup stream>> stream-read1 [
-        [ <token> ]
+        [ <@token> ]
         [ update-stream1 ]
         2bi
     ] [
@@ -71,11 +71,11 @@ M: document-reader stream-read1
 
 M: document-reader stream-peek1
     dup stream>> stream-peek1
-    [ <token> ] [ drop f ] if* ;
+    [ <@token> ] [ drop f ] if* ;
 
 M: document-reader stream-read
     [ nip ] [ stream>> stream-read ] 2bi [
-        [ <token> ]
+        [ <@token> ]
         [ update-stream ]
         2bi
     ] [
@@ -90,12 +90,12 @@ M: document-reader stream-read-until
         ] when
         [
             [ nip >>previous-character drop ]
-            [ drop <token> ]
+            [ drop <@token> ]
             [ drop update-line-read ] 3tri
         ] 3keep
         nip
         [
-            <token>
+            <@token>
         ] [
             CHAR: \n = [ next-line ] [ [ 1 + ] change-column# drop ] if
         ] 2bi
@@ -105,7 +105,7 @@ M: document-reader stream-read-until
 
 M: document-reader stream-peek
     [ nip ] [ stream>> stream-peek ] 2bi
-    [ <token> ] [ drop f ] if* ;
+    [ <@token> ] [ drop f ] if* ;
 
 TUPLE: document-stream-marker offset line# column# ;
 
@@ -195,7 +195,7 @@ M: document-stream dispose* stream>> dispose ;
     [ swap update-stream1 ] 2bi ;
 
 : seek-token ( token strema -- string stream )
-    over token? [ seek-forward [ text>> ] dip ] when ;
+    over @token? [ seek-forward [ text>> ] dip ] when ;
 
 M: document-writer stream-write
     seek-token document-stream-write ;

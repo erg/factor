@@ -2,10 +2,9 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators f.lexer f.manifests
 f.parser2 io.streams.document kernel namespaces sequences sets
-splitting ;
+splitting f.namespaces ;
 QUALIFIED: f.words
 QUALIFIED: sets
-FROM: io.streams.document => token ;
 IN: f.identifiers
 
 : maybe-create-vocabulary ( string hashtable -- )
@@ -22,7 +21,7 @@ IN: f.identifiers
     [ in<< ] 2bi ;
 
 : parse-in ( -- string )
-    token dup set-in ;
+    @token dup set-in ;
 
 : current-vocabulary ( -- vocabulary )
     manifest get [ in>> ] [ identifiers>> ] bi at ;
@@ -104,7 +103,7 @@ ERROR: no-IN:-form ;
 : method-identifier ( -- pair )
     token token 2array dup add-identifier ;
 
-: ensure-in ( -- ) manifest get in>> [ no-IN:-form ] unless ;
+: ensure-in-manifest ( -- ) manifest get ensure-in drop ;
 
 : trim-private ( string -- string )
     ".private" ?tail drop ;
@@ -113,10 +112,10 @@ ERROR: no-IN:-form ;
     trim-private ".private" append ;
 
 : private-on ( -- )
-    ensure-in
+    ensure-in-manifest
     manifest get in>>
     append-private set-in ;
 
 : private-off ( -- )
-    ensure-in
+    ensure-in-manifest
     manifest get in>> trim-private set-in ;

@@ -4,8 +4,7 @@ USING: accessors arrays assocs checksums checksums.crc32
 combinators f.lexer f.manifests fry io io.files io.pathnames
 kernel math namespaces nested-comments prettyprint sequences
 sets splitting strings vectors vocabs vocabs.loader
-vocabs.refresh.monitor ;
-QUALIFIED: f.words
+vocabs.refresh.monitor f.words ;
 QUALIFIED: sets
 IN: f.parser2
 
@@ -21,8 +20,6 @@ IN: f.parser2
 
 : peek-token ( -- token/string/f )
     [ (peek-token) text ] with-input-rewind ;
-
-GENERIC: resolve ( object -- object' )
 
 : parse-stack ( -- obj )
     manifest get parsed>> ;
@@ -60,7 +57,7 @@ GENERIC: resolve ( object -- object' )
 
 : maybe-call-parsing-word ( string -- )
     dup text manifest get search-syntax [
-        dup f.words:parsing-word? [
+        dup #parsing-word? [
             [
                 [ manifest get parsing-word-stack>> push ]
                 [ 1vector parse-stack push ] bi

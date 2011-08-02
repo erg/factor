@@ -43,19 +43,6 @@ manifests [ H{ } clone ] initialize
     
 : add-namespace-to-syntax ( vocabulary manifest -- )
     syntax-namespaces>> push ;
-
-ERROR: key-exists value key assoc ;
-
-: set-at-unique ( value key assoc -- )
-    2dup key? [ key-exists ] [ set-at ] if ;
-    
-: assoc-union-unique! ( assoc1 assoc2 -- assoc1 )
-    over [ set-at-unique ] with-assoc assoc-each ;
-    
-: assoc-union-unique ( assoc1 assoc2 -- union )
-    [ [ [ assoc-size ] bi@ + ] [ drop ] 2bi new-assoc ] 2keep
-    [ assoc-union-unique! ] bi@ ;
-
     
 ERROR: ambiguous-word words ;
 

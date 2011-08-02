@@ -1,10 +1,10 @@
 ! Copyright (C) 2011 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors assocs classes f.cheat f.lexer f.namespaces
-fry kernel prettyprint sequences f.identifiers ;
+USING: accessors assocs classes f.cheat f.identifiers f.lexer
+f.namespaces fry io.streams.document kernel prettyprint
+sequences ;
 QUALIFIED-WITH: f.cheat f
 QUALIFIED-WITH: kernel k
-QUALIFIED-WITH: io.streams.document io
 IN: f.process
 
 TUPLE: processing using in namespaces other last-defined top-level ;
@@ -16,11 +16,6 @@ TUPLE: processing using in namespaces other last-defined top-level ;
         V{ } clone >>other
         V{ } clone >>top-level ;
         
-ERROR: no-in object processing ;
-
-: ensure-in ( object processing -- object processing )
-    dup in>> [ no-in ] unless ;
-    
 : get-namespace ( string processing -- namespace )
     namespaces>> 2dup at [
         2nip
@@ -106,7 +101,7 @@ M: @about process define-symbol ;
 
 M: @alias process [ [ ] [ new>> ] bi ] dip define-identifier ;
 M: @typedef process [ [ ] [ new>> ] bi ] dip define-identifier ;
-M: io:token process top-level ;
+M: @token process top-level ;
 M: @quotation process top-level ;
 M: @lexed-string process top-level ;
 M: @array process top-level ;
