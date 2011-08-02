@@ -186,7 +186,7 @@ ERROR: premature-eof ;
         dup exists? [
             <pathname>
             "Parsing " write dup .
-            dup dup crc32 checksum-file <manifest>
+            dup dup crc32 checksum-file <#manifest>
             '[ _ parse-factor-stream ] with-file-lexer
         ] [
             drop f
@@ -202,7 +202,7 @@ ERROR: premature-eof ;
     vocab-syntax-path [ path>manifest ] [ f ] if* ;
     
 : parse-factor ( string -- manifest )
-    f dup crc32 checksum-bytes <manifest>
+    f dup crc32 checksum-bytes <#manifest>
     '[ _ parse-factor-stream ] with-string-lexer ;
 
 ERROR: expected expected got ;
