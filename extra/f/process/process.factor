@@ -3,40 +3,27 @@
 USING: accessors assocs classes f.cheat f.identifiers f.lexer
 f.namespaces fry io.streams.document kernel prettyprint
 sequences ;
-QUALIFIED-WITH: f.cheat f
 QUALIFIED-WITH: kernel k
 IN: f.process
 
-TUPLE: processing using in namespaces other last-defined top-level ;
+TUPLE: processing using in dependents last-defined top-level ;
 
 : <processing> ( -- processing )
     processing new
         V{ "syntax" } clone >>using
-        H{ } clone >>namespaces
-        V{ } clone >>other
+        V{ } clone >>dependents
         V{ } clone >>top-level ;
-        
-: get-namespace ( string processing -- namespace )
-    namespaces>> 2dup at [
-        2nip
-    ] [
-        [ [ <namespace> ] [ ] bi ] dip [ set-at ] 3keep 2drop
-    ] if* ;
-
-: current-namespace ( processing -- namespace )
-    [ in>> ] [ ] bi get-namespace ;
     
 : define-sym ( object processing -- )
     ensure-in
-    [ [ [ ] [ name>> ] bi ] dip [ in>> ] [ ] bi get-namespace init-symbol ]
-    [ [ name>> ] dip last-defined<< ] 2bi ;
+    <compound-namespace>
+    over in>> >>in
+    [ nip add-word-to-namespace ]
+    [ drop [ name>> ] dip last-defined<< ]
+    [ nip >>namespace drop ] 3tri ;
     
-: define-identifier ( object string processing -- )
-    [ current-namespace init-symbol ]
-    [ last-defined<< drop ] 3bi ;
-    
-: define-other ( object processing -- )
-    other>> push ;
+: define-dependent ( object processing -- )
+    dependents>> push ;
     
 : mark-last-defined ( object processing -- )
     2drop ;
@@ -78,7 +65,7 @@ M: @mixin process define-sym ;
 M: @constructor process define-sym ;
 M: @predicate process define-sym ;
 M: @function process define-sym ;
-M: @function-alias process [ [ ] [ alias>> ] bi ] dip define-identifier ;
+M: @function-alias process define-sym ;
 M: @constant process define-sym ;
 M: @hook process define-sym ;
 M: @macro process define-sym ;
@@ -99,8 +86,8 @@ M: @article process define-sym ;
 M: @typed process define-sym ;
 M: @about process define-sym ;
 
-M: @alias process [ [ ] [ new>> ] bi ] dip define-identifier ;
-M: @typedef process [ [ ] [ new>> ] bi ] dip define-identifier ;
+M: @alias process define-sym ;
+M: @typedef process define-sym ;
 M: @token process top-level ;
 M: @quotation process top-level ;
 M: @lexed-string process top-level ;
@@ -115,10 +102,11 @@ M: @assoc-tuple process top-level ;
 M: @vector process top-level ;
 M: @lua-string process top-level ;
 
-M: @symbols process [ sequence>> ] dip '[ dup _ define-identifier ] each ;
-M: @singletons process [ sequence>> ] dip '[ dup _ define-identifier ] each ;
-M: @instance process define-other ;
-M: @method process define-other ;
+M: @symbols process [ sequence>> ] dip '[ _ define-sym ] each ;
+M: @singletons process [ sequence>> ] dip '[ _ define-sym ] each ;
+
+M: @instance process define-dependent ;
+M: @method process define-dependent ;
 
 M: @inline process mark-last-defined ;
 M: @foldable process mark-last-defined ;

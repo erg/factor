@@ -15,11 +15,10 @@ IN: f.lexer
 : loop>array ( quot -- seq )
     { } loop>sequence ; inline
 
-TUPLE: lexer stream compound-namespace ;
+TUPLE: lexer stream ;
 
 : new-lexer ( lexer -- lexer )
-    new
-        <compound-namespace> >>compound-namespace ; inline
+    new ; inline
 
 : <lexer> ( stream -- lexer )
     lexer new-lexer
@@ -56,11 +55,12 @@ TUPLE: file-lexer < lexer path ;
 : with-file-lexer ( path quot -- )
     [ <file-lexer> ] dip with-lexer ; inline
 
-TUPLE: lexed tokens ;
+TUPLE: lexed tokens namespace ;
 
 : new-lexed ( tokens class -- parsed )
     new
-        swap >>tokens ; inline
+        swap >>tokens
+        <compound-namespace> >>namespace ; inline
 
 TUPLE: @long-string < lexed text ;
 

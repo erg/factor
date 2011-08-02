@@ -12,182 +12,111 @@ IN: f.cheat
     [ [ drop \ lexed ] dip define-tuple-class ]
     [
         [ 2drop name>> "<" ">" surround parser:create-in ]
-        [ nip length swap '[ [ pop-parsed ] _ ndip _ boa ] ]
-        [ 2drop [ all-slots rest [ name>> ] map ] [ name>> 1array ] bi <effect> ] 3tri define-inline
+        [ nip length swap '[ [ pop-parsed <compound-namespace> ] _ ndip _ boa ] ]
+        [ 2drop [ all-slots rest rest [ name>> ] map ] [ name>> 1array ] bi <effect> ] 3tri define-inline
     ] 3bi ;
 >>
-<<
-SYNTAX: TOKEN:
-    parse-tuple-definition
-    define-token ;
->>
+<< SYNTAX: TOKEN: parse-tuple-definition define-token ; >>
 
-TOKEN: @main name ;
-
-TUPLE: identifier-stack-effect identifier stack-effect ;
-C: <identifier-stack-effect> identifier-stack-effect
-
-TOKEN: @stack-effect in out ;
-
-TOKEN: @help name stack-effect body ;
-
-TOKEN: @word name stack-effect body ;
-
-TOKEN: @local-word name stack-effect body ;
-
-TOKEN: @method object name stack-effect body ;
-
-TOKEN: @local-method object name stack-effect body ;
-
-TOKEN: @macro name stack-effect body ;
-
-TOKEN: @local-macro name stack-effect body ;
-
-TOKEN: @hook name variable stack-effect ;
-
+! Singleton tokens
 TOKEN: @inline ;
-
 TOKEN: @recursive ;
-
 TOKEN: @flushable ;
-
 TOKEN: @foldable ;
-
 TOKEN: @begin-private ;
-
 TOKEN: @end-private ;
 
-TOKEN: @instance instance mixin ;
-
+! Namespace tokens
 TOKEN: @using vocabularies ;
-
 TOKEN: @unuse vocabulary ;
-
 TOKEN: @in vocabulary ;
-
-TOKEN: @predicate name superclass stack-effect body ;
-
-TOKEN: @mixin name ;
-
-TOKEN: @math name stack-effect ;
-
-TOKEN: @memo name stack-effect body ;
-
-TOKEN: @local-memo name stack-effect body ;
-
-TOKEN: @generic name stack-effect ;
-
-TOKEN: @generic# name arity stack-effect ;
-
-TOKEN: @constructor name class stack-effect ;
-
-TOKEN: @long-constructor name stack-effect body ;
-
-TOKEN: @symbols sequence ;
-
-TOKEN: @singletons sequence ;
-
-TOKEN: @error name slots ;
-
-TOKEN: @union name members ;
-
-TOKEN: @slot name ;
-
-TOKEN: @hashtable object ;
-
-TOKEN: @array object ;
-
-TOKEN: @vector object ;
-
-TOKEN: @quotation object ;
-
-TOKEN: @byte-array object ;
-
-TOKEN: @hex object ;
-
-TOKEN: @literal object ;
-
 TOKEN: @qualified vocabulary ;
-
 TOKEN: @qualified-with vocabulary prefix ;
-
 TOKEN: @from vocabulary words ;
-
 TOKEN: @forget name ;
-
 TOKEN: @rename word vocabulary new-name ;
-
 TOKEN: @exclude vocabulary words ;
 
+! Named tokens
 TOKEN: @defer name ;
-
-TOKEN: @char ch ;
-
+TOKEN: @main name ;
+TOKEN: @help name stack-effect body ;
+TOKEN: @word name stack-effect body ;
+TOKEN: @local-word name stack-effect body ;
+TOKEN: @macro name stack-effect body ;
+TOKEN: @local-macro name stack-effect body ;
+TOKEN: @hook name variable stack-effect ;
+TOKEN: @predicate name superclass stack-effect body ;
+TOKEN: @mixin name ;
+TOKEN: @math name stack-effect ;
+TOKEN: @memo name stack-effect body ;
+TOKEN: @local-memo name stack-effect body ;
+TOKEN: @generic name stack-effect ;
+TOKEN: @generic# name arity stack-effect ;
+TOKEN: @constructor name class stack-effect ;
+TOKEN: @long-constructor name stack-effect body ;
+TUPLE: @symbol name ;
+C: <@symbol> @symbol
+TOKEN: @symbols sequence ;
+TUPLE: @singleton name ;
+C: <@singleton> @singleton
+TOKEN: @singletons sequence ;
+TOKEN: @error name slots ;
+TOKEN: @union name members ;
+TOKEN: @slot name ;
 TOKEN: @tuple name superclass slots ;
-
 TOKEN: @boa-tuple name slots ;
-
 TOKEN: @assoc-tuple name slots ;
-
-TOKEN: @function-alias alias return name parameters ;
-
+TOKEN: @function-alias name return old parameters ;
 TOKEN: @function return name parameters ;
-
 TOKEN: @struct name slots ;
-
 TOKEN: @gl-function return name obj parameters ;
-
 TOKEN: @callback return name parameters ;
-
-TOKEN: @typedef old new ;
-
+TOKEN: @typedef old name ;
 TOKEN: @ctype name ;
-
-TOKEN: @alias new old ;
-
+TOKEN: @alias name old ;
 TOKEN: @library name ;
-
-TOKEN: @parse-time code ;
-
 TOKEN: @constant name value ;
-
 TOKEN: @syntax name body ;
-
 TOKEN: @functor-syntax name body ;
-
-TOKEN: @locals-assignment identifiers ;
-
-TOKEN: @literal-syntax word ;
-
-TOKEN: @literal-quotation objects ;
-
-TOKEN: @literal-array objects ;
-
-TOKEN: @let quotation ;
-
-TOKEN: @lambda bindings quotation ;
-
-TOKEN: @flags objects ;
-
-TOKEN: @postponed word ;
-
 TOKEN: @article name title objects ;
-
 TOKEN: @about name ;
-
-TOKEN: @call stack-effect ;
-
-TOKEN: @execute stack-effect ;
-
 TOKEN: @ebnf name text ;
 TOKEN: @functor name text ;
 TOKEN: @peg name stack-effect body ;
 TOKEN: @com-interface name stuff ;
-
 TOKEN: @typed name stack-effect body ;
 TOKEN: @local-typed name stack-effect body ;
-
 TOKEN: @new-syntax name tuple slots parser ;
+
+! Dependent tokens
+TOKEN: @instance instance mixin ;
+TOKEN: @method object name stack-effect body ;
+TOKEN: @local-method object name stack-effect body ;
+
+! Literal tokens
+TOKEN: @hashtable object ;
+TOKEN: @array object ;
+TOKEN: @vector object ;
+TOKEN: @quotation object ;
+TOKEN: @byte-array object ;
+TOKEN: @hex object ;
+TOKEN: @literal object ;
+TOKEN: @char ch ;
+TOKEN: @flags objects ;
+TOKEN: @parse-time objects ;
+TOKEN: @postponed word ;
+TOKEN: @locals-assignment identifiers ;
+TOKEN: @literal-syntax word ;
+TOKEN: @literal-quotation objects ;
+TOKEN: @literal-array objects ;
+TOKEN: @let quotation ;
+TOKEN: @lambda bindings quotation ;
+TOKEN: @call stack-effect ;
+TOKEN: @execute stack-effect ;
+TOKEN: @stack-effect in out ;
+TUPLE: named-stack-effect name stack-effect ;
+C: <named-stack-effect> named-stack-effect
 
 : function-parameters ( -- seq )
     peek-token ";" = [
@@ -221,7 +150,7 @@ DEFER: stack-effect
         peek-token {
             { [ dup "--" = ] [ drop f ] }
             { [ dup ")" = ] [ drop f ] }
-            { [ dup ":" tail? ] [ drop token stack-effect/token <identifier-stack-effect> drop t ] }
+            { [ dup ":" tail? ] [ drop token stack-effect/token <named-stack-effect> drop t ] }
             [ drop token drop t ]
         } cond
     ] loop
@@ -313,11 +242,11 @@ DEFER: stack-effect
             add-dummy-parsing-word
         "FORGET:" [ token <@forget> ] add-dummy-parsing-word
 
-        "SYMBOLS:" [ ";" tokens-until <@symbols> ] add-dummy-parsing-word
-        "SYMBOL:" [ token 1array <@symbols> ] add-dummy-parsing-word
+        "SYMBOLS:" [ ";" tokens-until [ <@symbol> ] map <@symbols> ] add-dummy-parsing-word
+        "SYMBOL:" [ token <@symbol> 1array <@symbols> ] add-dummy-parsing-word
 
-        "SINGLETONS:" [ ";" tokens-until <@singletons> ] add-dummy-parsing-word
-        "SINGLETON:" [ token 1array <@singletons> ] add-dummy-parsing-word
+        "SINGLETONS:" [ ";" tokens-until [ <@singleton> ] map <@singletons> ] add-dummy-parsing-word
+        "SINGLETON:" [ token <@singleton> 1array <@singletons> ] add-dummy-parsing-word
 
         "UNION:" [ token body <@union> ] add-dummy-parsing-word
         "SLOT:" [ token <@slot> ] add-dummy-parsing-word

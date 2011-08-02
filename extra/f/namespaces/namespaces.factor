@@ -33,10 +33,6 @@ M: #namespace add-word-to-namespace ( word namespace -- )
 : add-parsing-word ( namespace name quot -- )
     <#parsing-word> dup namespace>> add-word-to-namespace ;
 
-: init-symbol ( object string namespace -- )
-    ensure-unique
-    words>> set-at ;
-
 TUPLE: #compound-namespace < identity-tuple in namespaces ;
 
 : <compound-namespace> ( -- compound-namespace )
@@ -51,6 +47,9 @@ TUPLE: #compound-namespace < identity-tuple in namespaces ;
         [ [ <namespace> ] keep ] dip namespaces>> [ set-at ] 3keep 2drop
     ] if ;
 
+: init-symbol ( object string namespace -- )
+    lookup-namespace ensure-unique add-word-to-namespace ;
+    
 M: #compound-namespace add-word-to-namespace
     ensure-in
     [ in>> ] keep lookup-namespace add-word-to-namespace ;
