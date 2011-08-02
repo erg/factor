@@ -31,7 +31,7 @@ M: #namespace add-word-to-namespace ( word namespace -- )
     [ [ ] [ name>> ] bi ] [ words>> ] bi* set-at ;
 
 : add-parsing-word ( namespace name quot -- )
-    <parsing-word> dup namespace>> add-word-to-namespace ;
+    <#parsing-word> dup namespace>> add-word-to-namespace ;
 
 : init-symbol ( object string namespace -- )
     ensure-unique

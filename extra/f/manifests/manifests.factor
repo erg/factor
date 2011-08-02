@@ -6,7 +6,7 @@ IN: f.manifests
 
 GENERIC: preload-syntax-namespaces ( manifest -- manifest )
 
-TUPLE: manifest
+TUPLE: #manifest
     path
     checksum
     objects
@@ -17,8 +17,8 @@ TUPLE: manifest
     just-parsed
     syntax-namespaces ;
     
-: <manifest> ( path checksum -- obj )
-    manifest new
+: <#manifest> ( path checksum -- obj )
+    #manifest new
         swap >>checksum
         swap >>path
         V{ } clone >>objects
@@ -28,7 +28,8 @@ TUPLE: manifest
         V{ } clone >>parsing-word-stack
         V{ } clone >>syntax-namespaces
     preload-syntax-namespaces ; inline
-    
+
+SYMBOL: manifest
 SYMBOL: manifests
 manifests [ H{ } clone ] initialize
 
@@ -37,6 +38,8 @@ manifests [ H{ } clone ] initialize
 
 : set-manifest ( manifest vocab -- )
     manifests get-global set-at ;
+
+: current-manifest ( -- manifest ) manifest get ;
 
 : manifest-uptodate? ( manifest -- ? )
     [ path>> crc32 checksum-file ] [ checksum>> ] bi = ;

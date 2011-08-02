@@ -26,7 +26,7 @@ TUPLE: processing using in namespaces other last-defined top-level ;
 : current-namespace ( processing -- namespace )
     [ in>> ] [ ] bi get-namespace ;
     
-: define-symbol ( object processing -- )
+: define-sym ( object processing -- )
     ensure-in
     [ [ [ ] [ name>> ] bi ] dip [ in>> ] [ ] bi get-namespace init-symbol ]
     [ [ name>> ] dip last-defined<< ] 2bi ;
@@ -64,40 +64,40 @@ M: @qualified-with process 2drop ;
 M: @qualified process 2drop ;
 M: @rename process 2drop ;
 M: @exclude process 2drop ;
-M: @slot process define-symbol ;
+M: @slot process define-sym ;
 M: @functor-syntax process 2drop ;
 
-M: @generic process define-symbol ;
-M: @generic# process define-symbol ;
-M: @word process define-symbol ;
-M: @math process define-symbol ;
-M: @union process define-symbol ;
-M: @error process define-symbol ;
-M: @tuple process define-symbol ;
-M: @mixin process define-symbol ;
-M: @constructor process define-symbol ;
-M: @predicate process define-symbol ;
-M: @function process define-symbol ;
+M: @generic process define-sym ;
+M: @generic# process define-sym ;
+M: @word process define-sym ;
+M: @math process define-sym ;
+M: @union process define-sym ;
+M: @error process define-sym ;
+M: @tuple process define-sym ;
+M: @mixin process define-sym ;
+M: @constructor process define-sym ;
+M: @predicate process define-sym ;
+M: @function process define-sym ;
 M: @function-alias process [ [ ] [ alias>> ] bi ] dip define-identifier ;
-M: @constant process define-symbol ;
-M: @hook process define-symbol ;
-M: @macro process define-symbol ;
-M: @local-macro process define-symbol ;
-M: @local-word process define-symbol ;
-M: @gl-function process define-symbol ;
-M: @local-memo process define-symbol ;
-M: @memo process define-symbol ;
-M: @struct process define-symbol ;
-M: @ebnf process define-symbol ;
-M: @functor process define-symbol ;
-M: @peg process define-symbol ;
-M: @syntax process define-symbol ;
-M: @library process define-symbol ;
-M: @ctype process define-symbol ;
-M: @com-interface process define-symbol ;
-M: @article process define-symbol ;
-M: @typed process define-symbol ;
-M: @about process define-symbol ;
+M: @constant process define-sym ;
+M: @hook process define-sym ;
+M: @macro process define-sym ;
+M: @local-macro process define-sym ;
+M: @local-word process define-sym ;
+M: @gl-function process define-sym ;
+M: @local-memo process define-sym ;
+M: @memo process define-sym ;
+M: @struct process define-sym ;
+M: @ebnf process define-sym ;
+M: @functor process define-sym ;
+M: @peg process define-sym ;
+M: @syntax process define-sym ;
+M: @library process define-sym ;
+M: @ctype process define-sym ;
+M: @com-interface process define-sym ;
+M: @article process define-sym ;
+M: @typed process define-sym ;
+M: @about process define-sym ;
 
 M: @alias process [ [ ] [ new>> ] bi ] dip define-identifier ;
 M: @typedef process [ [ ] [ new>> ] bi ] dip define-identifier ;
@@ -128,7 +128,6 @@ M: @flushable process mark-last-defined ;
 M: @begin-private process nip do-begin-private ;
 M: @end-private process nip do-end-private ;
 M: object process over class . top-level>> push ;
-
 
 : process-manifest ( manifest -- processing )
     objects>> <processing> [ '[ _ process ] each ] keep ;
