@@ -290,6 +290,8 @@ HOOK: (receive) io-backend ( datagram -- packet addrspec )
 
 ERROR: invalid-port object ;
 
+ERROR: invalid-destination-ip object ;
+
 : check-port ( packet addrspec port -- packet addrspec port )
     2dup addr>> [ class ] bi@ assert=
     pick class byte-array assert= ;
@@ -297,8 +299,12 @@ ERROR: invalid-port object ;
 : check-connectionless-port ( port -- port )
     dup { [ datagram-port? ] [ raw-port? ] } 1|| [ invalid-port ] unless ;
     
+: check-invalid-destination-ip ( addrspec -- addrspec )
+    dup host>> { f "0.0.0.0" } member? [ invalid-destination-ip ] when ;
+    
 : check-send ( packet addrspec port -- packet addrspec port )
-    check-connectionless-port dup check-disposed check-port ;
+    [ check-invalid-destination-ip ] [ check-connectionless-port ] bi*
+    dup check-disposed check-port ;
     
 : check-receive ( port -- port )
     check-connectionless-port dup check-disposed ;

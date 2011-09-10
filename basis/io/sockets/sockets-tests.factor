@@ -169,3 +169,10 @@ os unix? [
 ! Binding to all interfaces should work
 [ ] [ f 0 <inet4> <datagram> dispose ] unit-test
 [ ] [ f 0 <inet6> <datagram> dispose ] unit-test
+
+! Issue #85
+[ B{ 1 } "0.0.0.0" 4444 <inet4> dup <datagram> send ]
+[ invalid-destination-ip? ] must-fail-with
+
+[ B{ 1 } f 4444 <inet4> dup <datagram> send ]
+[ invalid-destination-ip? ] must-fail-with
