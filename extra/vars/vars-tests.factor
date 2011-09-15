@@ -1,12 +1,14 @@
 ! Copyright (C) 2011 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: debugger kernel math tools.test vars vars.private ;
+USING: debugger globals kernel math tools.test vars
+vars.private ;
 IN: vars.tests
 
 ! The order in which these tests are defined matters.
 
 SYMBOL: vartest
 
+[ ] [ vartest gunset ] unit-test
 [ ] [ vartest vunset ] unit-test
 
 [ 555 ]
@@ -17,10 +19,10 @@ SYMBOL: vartest
 [ 555 vartest [ 111 vartest [ + dup ] vchange ] with-var ] unit-test
 
 [ "vartest1234" vget ]
-[ T{ undefined-var { var "vartest1234" } } = ] must-fail-with
+[ T{ undefined-variable { variable "vartest1234" } } = ] must-fail-with
 
 [ 555 vartest [ vartest vget ] with-var vartest vget ]
-[ T{ undefined-var { var vartest } } = ] must-fail-with
+[ T{ undefined-variable { variable vartest } } = ] must-fail-with
 
 [ 666 ] [
     555 vartest [
@@ -52,7 +54,7 @@ SYMBOL: vartest
 ] unit-test
 
 [ vartest vget ]
-[ T{ undefined-var { var vartest } } = ] must-fail-with
+[ T{ undefined-variable { variable vartest } } = ] must-fail-with
 
 [ f ] [ vartest voff vartest vget ] unit-test
 [ t ] [ vartest von vartest vget ] unit-test
@@ -61,7 +63,7 @@ SYMBOL: vartest
 [
     vartest vunset
     vartest vget
-] [ T{ undefined-var { var vartest } } = ] must-fail-with
+] [ T{ undefined-variable { variable vartest } } = ] must-fail-with
 
 [
     5 vartest [ "oops" throw ] with-var
@@ -70,7 +72,7 @@ SYMBOL: vartest
 [
     [ 5 vartest [ "oops" throw ] with-var ] try
     vartest vget
-] [ T{ undefined-var { var vartest } } = ] must-fail-with
+] [ T{ undefined-variable { variable vartest } } = ] must-fail-with
 
 [ "abc" vunset "abc" pop-var ]
-[ T{ undefined-var { var "abc" } } = ] must-fail-with
+[ T{ unbalanced-with-var { variable "abc" } } = ] must-fail-with

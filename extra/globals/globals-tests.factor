@@ -10,7 +10,7 @@ SYMBOL: gtest
 [ ] [ gtest gunset ] unit-test
 
 [ gtest gget ]
-[ T{ undefined-global { global gtest } } = ] must-fail-with
+[ T{ undefined-variable { variable gtest } } = ] must-fail-with
 
 [ 1 ]
 [ 1 gtest gset gtest gget ] unit-test
@@ -24,5 +24,5 @@ SYMBOL: gtest
 [ ] [ gtest gunset ] unit-test
 
 [ gtest gget ]
-[ T{ undefined-global { global gtest } } = ] must-fail-with
+[ T{ undefined-variable { variable gtest } } = ] must-fail-with
 

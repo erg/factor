@@ -1,18 +1,15 @@
 ! Copyright (C) 2011 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: assocs continuations fry kernel math sequences threads
-values vectors ;
+values vectors globals ;
 IN: vars
 
-ERROR: undefined-var var ;
-
 : vchange ( variable quot -- )
-    over vars 2dup at [
-        2nip
-        [ [ nip ] dip last swap call ] keep set-last
+    over vars at [
+        [ nip ] dip
+        [ last swap call ] keep set-last
     ] [
-        [ f swap call 1vector ] 2dip set-at
-        drop
+        gchange
     ] if* ; inline
 
 : voff ( variable -- ) [ drop f ] vchange ; inline
@@ -23,24 +20,23 @@ ERROR: undefined-var var ;
     vars ?at [
         last
     ] [
-        undefined-var
+        gget
     ] if ; inline
 
 : vset ( object variable -- )
     swap '[ drop _ ] vchange ; inline
 
-: vunset ( variable -- )
-    vars delete-at ;
-
 <PRIVATE
 
-! Used to implement with-var
+! Used to implement with-var; don't call directly
 : push-var ( value variable -- )
     vars 2dup at [
         2nip push
     ] [
         [ 1vector ] 2dip set-at
     ] if* ; inline
+
+ERROR: unbalanced-with-var variable ;
 
 : pop-var ( variable -- )
     dup vars 2dup at [
@@ -50,8 +46,16 @@ ERROR: undefined-var var ;
             2drop delete-at drop
         ] if
     ] [
-        drop undefined-var
+        drop unbalanced-with-var
     ] if* ; inline
+
+: vunset ( variable -- )
+    vars
+    2dup delete-at* nip [
+        2drop
+    ] [
+        drop gunset
+    ] if ;
 
 PRIVATE>
 

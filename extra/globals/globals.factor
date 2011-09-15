@@ -5,22 +5,29 @@ IN: globals
 
 VALUE: globals
 
-ERROR: undefined-global global ;
+ERROR: undefined-variable variable ;
 
 \ globals [ H{ } clone ] initialize-value
 
 : goff ( variable -- )
-    [ f ] dip \ globals get-value set-at ;
+    [ f ] dip globals set-at ;
 
 : gon ( variable -- )
-    [ t ] dip \ globals get-value set-at ;
+    [ t ] dip globals set-at ;
 
 : gget ( variable -- object )
-    \ globals get-value ?at [ undefined-global ] unless ;
+    globals ?at [ undefined-variable ] unless ;
 
 : gset ( object variable -- )
-    \ globals get-value set-at ;
+    globals set-at ;
 
 : gunset ( variable -- )
-    \ globals get-value delete-at ;
+    globals delete-at ;
 
+:: gchange ( variable quot -- )
+    variable globals ?at [
+        quot call
+    ] [
+        drop
+        f quot call
+    ] if variable globals set-at ; inline
