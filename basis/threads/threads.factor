@@ -57,6 +57,7 @@ state
 runnable
 mailbox
 { variables hashtable }
+{ vars hashtable }
 sleep-entry ;
 
 : self ( -- thread )
@@ -77,6 +78,9 @@ sleep-entry ;
 
 : tchange ( ..a key quot: ( ..a value -- ..b newvalue ) -- ..b )
     [ tnamespace ] dip change-at ; inline
+
+: vars ( -- assoc )
+    self vars>> ; inline
 
 : threads ( -- assoc )
     64 special-object { hashtable } declare ; inline
@@ -111,6 +115,7 @@ PRIVATE>
         swap >>quot
         \ thread counter >>id
         H{ } clone >>variables
+        H{ } clone >>vars
         <box> >>context ; inline
 
 : <thread> ( quot name -- thread )
