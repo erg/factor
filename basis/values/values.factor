@@ -48,3 +48,6 @@ M: value-word definition drop f ;
 
 : change-value ( word quot -- )
     [ [ get-value ] dip call ] [ drop ] 2bi set-value ; inline
+
+: initialize-value ( variable quot -- )
+    [ unless* ] curry change-value ; inline
