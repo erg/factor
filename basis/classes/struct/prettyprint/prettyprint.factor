@@ -33,6 +33,7 @@ IN: classes.struct.prettyprint
             [ \ bits: pprint-word bits>> pprint* ]
             [ drop ] if
         ]
+        [ endian>> [ pprint-word ] when* ]
     } cleave block>
     \ } pprint-word block> ;
 

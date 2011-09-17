@@ -11,7 +11,7 @@ locals macros make math math.order parser quotations sequences
 slots slots.private specialized-arrays vectors words summary
 namespaces assocs vocabs.parser math.functions
 classes.struct.bit-accessors bit-arrays
-stack-checker.dependencies system layouts ;
+stack-checker.dependencies system layouts endian ;
 FROM: delegate.private => group-words slot-group-words ;
 QUALIFIED: math
 IN: classes.struct
@@ -30,7 +30,7 @@ TUPLE: struct
 ! fields. Note that 'offset' is in bits, not bytes, to support
 ! bitfields.
 TUPLE: struct-slot-spec < slot-spec
-    type packed? ;
+    type packed? endian ;
 
 ! For a struct-bit-slot-spec, offset is in bits, not bytes
 TUPLE: struct-bit-slot-spec < struct-slot-spec
@@ -294,6 +294,15 @@ M: struct binary-zero? binary-object <direct-uchar-array> [ 0 = ] all? ; inline
 : make-packed-slots ( slots -- slot-specs )
     make-slots [ t >>packed? ] map! ;
 
+: set-endian-slots ( seq endian -- seq )
+    '[ dup endian>> [ _ >>endian ] unless ] map! ;
+
+: make-le-packed-slots ( slots -- slot-specs )
+    make-packed-slots little-endian set-endian-slots ;
+
+: make-be-packed-slots ( slots -- slot-specs )
+    make-packed-slots big-endian set-endian-slots ;
+
 PRIVATE>
 
 : define-struct-class ( class slots -- )
@@ -301,10 +310,18 @@ PRIVATE>
     [ compute-struct-offsets ] [ struct-alignment ]
     (define-struct-class) ;
 
-: define-packed-struct-class ( class slots -- )
-    make-packed-slots
+: (define-packed-struct-class) ( class slot-specs -- )
     [ compute-struct-offsets ] [ drop 1 ]
     (define-struct-class) ;
+
+: define-packed-struct-class ( class slots -- )
+    make-packed-slots (define-packed-struct-class) ;
+
+: define-le-packed-struct-class ( class slots -- )
+    make-le-packed-slots (define-packed-struct-class) ;
+
+: define-be-packed-struct-class ( class slots -- )
+    make-be-packed-slots (define-packed-struct-class) ;
 
 : define-union-struct-class ( class slots -- )
     make-slots
@@ -343,6 +360,8 @@ ERROR: bad-type-for-bits type ;
             { initial: [ [ first >>initial ] [ rest ] bi ] }
             { read-only [ [ t >>read-only ] dip ] }
             { bits: [ [ first set-bits ] [ rest ] bi ] }
+            { big-endian [ [ big-endian >>endian ] dip ] }
+            { little-endian [ [ little-endian >>endian ] dip ] }
             [ bad-slot-attribute ]
         } case
     ] unless ;
@@ -376,6 +395,12 @@ SYNTAX: STRUCT:
 
 SYNTAX: PACKED-STRUCT:
     parse-struct-definition define-packed-struct-class ;
+
+SYNTAX: LE-PACKED-STRUCT:
+    parse-struct-definition define-le-packed-struct-class ;
+
+SYNTAX: BE-PACKED-STRUCT:
+    parse-struct-definition define-be-packed-struct-class ;
 
 SYNTAX: UNION-STRUCT:
     parse-struct-definition define-union-struct-class ;
