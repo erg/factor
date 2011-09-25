@@ -12,13 +12,13 @@ SYMBOL: new-definitions
 
 TUPLE: redefine-error def ;
 
-: redefine-error ( definition -- )
+: throw-redefine-error ( definition -- )
     \ redefine-error boa throw-continue ;
 
 <PRIVATE
 
 : add-once ( key assoc -- )
-    2dup key? [ over redefine-error ] when conjoin ;
+    2dup key? [ over throw-redefine-error ] when conjoin ;
 
 : (remember-definition) ( definition loc assoc -- )
     [ over set-where ] dip add-once ;
@@ -32,7 +32,7 @@ PRIVATE>
     old-definitions get [ delete-at ] with each ;
 
 : remember-class ( class loc -- )
-    [ dup new-definitions get first key? [ dup redefine-error ] when ] dip
+    [ dup new-definitions get first key? [ dup throw-redefine-error ] when ] dip
     new-definitions get second (remember-definition) ;
 
 : forward-reference? ( word -- ? )
