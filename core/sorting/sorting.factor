@@ -13,7 +13,7 @@ IN: sorting
 
 <PRIVATE
 
-TUPLE: merge
+TUPLE: #merge
 { seq    array }
 { accum  vector }
 { accum1 vector }
@@ -85,7 +85,7 @@ TUPLE: merge
     dup accum>> 0 >>length 2drop ; inline
 
 : <merge> ( seq -- merge )
-    \ merge new
+    \ #merge new
         over >vector >>accum1
         swap length <vector> >>accum2
         dup accum1>> underlying>> >>seq
