@@ -48,14 +48,14 @@ IN: ui.tools.operations
 } define-operation
 
 ! Restart
-[ restart? ] \ restart H{
+[ #restart? ] \ restart H{
     { +primary+ t }
     { +secondary+ t }
     { +listener+ t }
 } define-operation
 
 ! Continuation
-[ continuation? ] \ traceback-window H{
+[ #continuation? ] \ traceback-window H{
     { +primary+ t }
     { +secondary+ t }
 } define-operation
@@ -94,7 +94,7 @@ IN: ui.tools.operations
 : com-reload ( error -- )
     file>> run-file ;
 
-[ compiler-error? ] \ com-reload H{
+[ #compiler-error? ] \ com-reload H{
     { +listener+ t }
 } define-operation
 

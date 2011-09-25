@@ -40,9 +40,9 @@ SYMBOL: restarts
 
 PRIVATE>
 
-TUPLE: continuation data call retain name catch ;
+TUPLE: #continuation data call retain name catch ;
 
-C: <continuation> continuation
+C: <continuation> #continuation
 
 : continuation ( -- continuation )
     datastack callstack retainstack namestack catchstack
@@ -152,9 +152,9 @@ C: <condition> condition ( error restarts cc -- condition )
 : throw-continue ( error -- )
     { { "Continue" t } } throw-restarts drop ;
 
-TUPLE: restart name obj continuation ;
+TUPLE: #restart name obj continuation ;
 
-C: <restart> restart
+C: <restart> #restart
 
 : restart ( restart -- * )
     [ obj>> ] [ continuation>> ] bi continue-with ;

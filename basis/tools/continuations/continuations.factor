@@ -12,7 +12,7 @@ IN: tools.continuations
 
 : after-break ( object -- )
     {
-        { [ dup continuation? ] [ (continue) ] }
+        { [ dup #continuation? ] [ (continue) ] }
         { [ dup not ] [ "Single stepping abandoned" rethrow ] }
     } cond ;
 
