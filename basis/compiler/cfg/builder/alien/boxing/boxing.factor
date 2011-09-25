@@ -14,7 +14,7 @@ SYMBOL: struct-return-area
 ! pairs have shape { rep on-stack? }
 GENERIC: flatten-c-type ( c-type -- pairs )
 
-M: c-type flatten-c-type
+M: #c-type flatten-c-type
     rep>> f f 3array 1array ;
 
 M: long-long-type flatten-c-type
@@ -56,7 +56,7 @@ M: object flatten-struct-type-return
 
 GENERIC: unbox ( src c-type -- vregs reps )
 
-M: c-type unbox
+M: #c-type unbox
     [ rep>> ] [ unboxer>> ] bi
     [
         {
@@ -87,7 +87,7 @@ M: struct-c-type unbox ( src c-type -- vregs reps )
 
 GENERIC: unbox-parameter ( src c-type -- vregs reps )
 
-M: c-type unbox-parameter unbox ;
+M: #c-type unbox-parameter unbox ;
 
 M: long-long-type unbox-parameter unbox ;
 
@@ -122,7 +122,7 @@ M: struct-c-type flatten-parameter-type frob-struct flatten-c-type ;
 
 GENERIC: box ( vregs reps c-type -- dst )
 
-M: c-type box
+M: #c-type box
     [ [ first ] bi@ ] [ boxer>> ] bi*
     {
         { "from_float" [ drop ] }
