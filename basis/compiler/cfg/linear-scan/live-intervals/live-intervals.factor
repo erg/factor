@@ -99,7 +99,7 @@ SYMBOLS: from to ;
 ! Mapping from vreg to live-interval
 SYMBOL: live-intervals
 
-: live-interval ( vreg -- live-interval )
+: >live-interval ( vreg -- live-interval )
     leader live-intervals get
     [ dup rep-of reg-class-of <live-interval> ] cache ;
 
@@ -108,19 +108,19 @@ GENERIC: compute-live-intervals* ( insn -- )
 M: insn compute-live-intervals* drop ;
 
 :: record-def ( vreg n spill-slot? -- )
-    vreg live-interval :> live-interval
+    vreg >live-interval :> live-interval
 
     n live-interval shorten-range
     n live-interval spill-slot? (add-use) vreg rep-of >>def-rep drop ;
 
 :: record-use ( vreg n spill-slot? -- )
-    vreg live-interval :> live-interval
+    vreg >live-interval :> live-interval
 
     from get n live-interval add-range
     n live-interval spill-slot? (add-use) vreg rep-of >>use-rep drop ;
 
 :: record-temp ( vreg n -- )
-    vreg live-interval :> live-interval
+    vreg >live-interval :> live-interval
 
     n n live-interval add-range
     n live-interval f (add-use) vreg rep-of >>def-rep drop ;
@@ -162,7 +162,7 @@ M: hairy-clobber-insn compute-live-intervals* ( insn -- )
 : handle-live-out ( bb -- )
     live-out dup assoc-empty? [ drop ] [
         [ from get to get ] dip keys
-        [ live-interval add-range ] with with each
+        [ >live-interval add-range ] with with each
     ] if ;
 
 ! A location where all registers have to be spilled
