@@ -38,10 +38,10 @@ TUPLE: label offset ;
     dup label? [ get ] unless
     compiled-offset >>offset drop ;
 
-TUPLE: label-fixup { label label } { class integer } { offset integer } ;
+TUPLE: #label-fixup { label label } { class integer } { offset integer } ;
 
 : label-fixup ( label class -- )
-    compiled-offset \ label-fixup boa label-table get push ;
+    compiled-offset \ #label-fixup boa label-table get push ;
 
 ! Relocation table
 SYMBOL: relocation-table

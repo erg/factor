@@ -9,18 +9,18 @@ SYMBOL: compiler-errors
 
 compiler-errors [ H{ } clone ] initialize
 
-TUPLE: compiler-error < source-file-error ;
+TUPLE: #compiler-error < source-file-error ;
 
-M: compiler-error error-type drop +compiler-error+ ;
+M: #compiler-error error-type drop +compiler-error+ ;
 
 SYMBOL: +linkage-error+
 SYMBOL: linkage-errors
 
 linkage-errors [ H{ } clone ] initialize
 
-TUPLE: linkage-error < source-file-error ;
+TUPLE: #linkage-error < source-file-error ;
 
-M: linkage-error error-type drop +linkage-error+ ;
+M: #linkage-error error-type drop +linkage-error+ ;
 
 : clear-compiler-error ( word -- )
     compiler-errors linkage-errors
@@ -39,10 +39,10 @@ T{ error-type
 } define-error-type
 
 : <compiler-error> ( error word -- compiler-error )
-    \ compiler-error <definition-error> ;
+    \ #compiler-error <definition-error> ;
 
 : <linkage-error> ( error word -- linkage-error )
-    \ linkage-error <definition-error> ;
+    \ #linkage-error <definition-error> ;
 
 : linkage-error ( name message word class -- )
     '[ _ boa ] dip <linkage-error> dup asset>> linkage-errors get set-at ; inline
@@ -61,12 +61,14 @@ TUPLE: no-such-library name message ;
 
 M: no-such-library summary drop "Library not found" ;
 
-: no-such-library ( name message word -- ) \ no-such-library linkage-error ;
+: no-such-library-error ( name message word -- )
+    \ no-such-library linkage-error ;
 
 TUPLE: no-such-symbol name message ;
 
 M: no-such-symbol summary drop "Symbol not found" ;
 
-: no-such-symbol ( name message word -- ) \ no-such-symbol linkage-error ;
+: no-such-symbol-error ( name message word -- )
+    \ no-such-symbol linkage-error ;
 
 ERROR: not-compiled word error ;
