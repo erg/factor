@@ -22,7 +22,7 @@ M: generic definition drop f ;
     [ dup "combination" word-prop perform-combination ]
     bi ;
 
-PREDICATE: method < word
+PREDICATE: #method < word
     "method-generic" word-prop >boolean ;
 
 : method ( class generic -- method/f )
@@ -105,10 +105,10 @@ GENERIC: update-generic ( class generic -- )
 : method-word-name ( class generic -- string )
     [ name>> ] bi@ "=>" glue ;
 
-M: method parent-word
+M: #method parent-word
     "method-generic" word-prop ;
 
-M: method crossref?
+M: #method crossref?
     "forgotten" word-prop not ;
 
 : method-word-props ( class generic -- assoc )
@@ -148,10 +148,10 @@ PREDICATE: default-method < word "default" word-prop ;
     dupd <default-method> "default-method" set-word-prop ;
 
 ! Definition protocol
-M: method definer
+M: #method definer
     drop \ M: \ ; ;
 
-M: method forget*
+M: #method forget*
     dup "forgotten" word-prop [ drop ] [
         [
             dup default-method? [ drop ] [

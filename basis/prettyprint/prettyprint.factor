@@ -76,7 +76,7 @@ SYMBOL: ->
 
 : frame-word. ( triple -- )
     first {
-        { [ dup method? ] [ "Method: " write pprint ] }
+        { [ dup #method? ] [ "Method: " write pprint ] }
         { [ dup word? ] [ "Word: " write pprint ] }
         [ drop ]
     } cond ;

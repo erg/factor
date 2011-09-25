@@ -102,7 +102,7 @@ GENERIC: smart-usage ( defspec -- seq )
 
 M: object smart-usage usage [ irrelevant? not ] filter ;
 
-M: method smart-usage "method-generic" word-prop smart-usage ;
+M: #method smart-usage "method-generic" word-prop smart-usage ;
 
 M: f smart-usage drop \ f smart-usage ;
 
@@ -123,7 +123,7 @@ M: f smart-usage drop \ f smart-usage ;
     [ [ vocab-name ] [ words [ generic? not ] filter ] bi ] dip map
     [
         [ [ word? ] [ generic? not ] bi and ] filter [
-            dup method?
+            dup #method?
             [ "method-generic" word-prop ] when
             vocabulary>>
         ] map
