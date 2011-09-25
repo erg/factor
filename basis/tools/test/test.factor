@@ -20,7 +20,7 @@ SYMBOL: test-failures
 
 test-failures [ V{ } clone ] initialize
 
-T{ error-type
+T{ #error-type
    { type +test-failure+ }
    { word ":test-failures" }
    { plural "unit test failures" }

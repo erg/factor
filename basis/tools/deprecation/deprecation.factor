@@ -11,16 +11,16 @@ SYMBOL: deprecation-notes
 
 deprecation-notes [ H{ } clone ] initialize
 
-TUPLE: deprecation-note < source-file-error ;
+TUPLE: #deprecation-note < source-file-error ;
 
-M: deprecation-note error-type drop +deprecation-note+ ;
+M: #deprecation-note error-type drop +deprecation-note+ ;
 
 TUPLE: deprecated-usages asset usages ;
 
 : :deprecations ( -- )
     deprecation-notes get-global values errors. ;
 
-T{ error-type
+T{ #error-type
     { type +deprecation-note+ }
     { word ":deprecations" }
     { plural "deprecated word usages" }
@@ -30,7 +30,7 @@ T{ error-type
 } define-error-type
 
 : <deprecation-note> ( error word -- deprecation-note )
-    \ deprecation-note <definition-error> ;
+    \ #deprecation-note <definition-error> ;
 
 : deprecation-note ( word usages -- )
     [ deprecated-usages boa ]
