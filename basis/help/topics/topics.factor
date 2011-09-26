@@ -47,14 +47,14 @@ GENERIC: set-article-parent ( parent topic -- )
 
 M: object article-name article-title ;
 
-TUPLE: article title content loc ;
+TUPLE: #article title content loc ;
 
 : <article> ( title content -- article )
-    f \ article boa ;
+    f \ #article boa ;
 
-M: article valid-article? drop t ;
-M: article article-title title>> ;
-M: article article-content content>> ;
+M: #article valid-article? drop t ;
+M: #article article-title title>> ;
+M: #article article-content content>> ;
 
 ERROR: no-article name ;
 
