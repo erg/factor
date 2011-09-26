@@ -63,10 +63,10 @@ SYMBOL: file
 :: (must-infer) ( quot -- error ? )
     [ quot infer drop f f ] [ t ] recover ;
 
-TUPLE: did-not-fail ;
-CONSTANT: did-not-fail T{ did-not-fail }
+TUPLE: #did-not-fail ;
+CONSTANT: did-not-fail T{ #did-not-fail }
 
-M: did-not-fail summary drop "Did not fail" ;
+M: #did-not-fail summary drop "Did not fail" ;
 
 :: (must-fail-with) ( quot pred -- error ? )
     [ { } quot with-datastack drop did-not-fail t ]
