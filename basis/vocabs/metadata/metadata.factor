@@ -118,15 +118,15 @@ ERROR: bad-platform name ;
 : filter-don't-test ( vocabs -- vocabs' )
     [ don't-test? not ] filter ;
 
-TUPLE: unsupported-platform vocab requires ;
+TUPLE: unsupported-platform-error vocab requires ;
 
 : unsupported-platform ( vocab requires -- )
-    \ unsupported-platform boa throw-continue ;
+    \ unsupported-platform-error boa throw-continue ;
 
-M: unsupported-platform summary
+M: unsupported-platform-error summary
     drop "Current operating system not supported by this vocabulary" ;
 
 [
     dup vocab-platforms dup supported-platform?
-    [ 2drop ] [ [ vocab-name ] dip unsupported-platform ] if
+    [ 2drop ] [ [ vocab-name ] dip unsupported-platform-error ] if
 ] check-vocab-hook set-global
