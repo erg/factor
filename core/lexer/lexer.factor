@@ -86,7 +86,7 @@ M: lexer skip-word ( lexer -- )
 
 : scan ( -- str/f ) lexer get parse-token ;
 
-PREDICATE: unexpected-eof < unexpected got>> not ;
+PREDICATE: #unexpected-eof < unexpected got>> not ;
 
 : unexpected-eof ( word -- * ) f unexpected ;
 
