@@ -71,77 +71,77 @@ GENERIC: satisfied? ( dependency -- ? )
     boa conditional-dependencies get
     dup [ conjoin ] [ 2drop ] if ; inline
 
-TUPLE: depends-on-class-predicate class1 class2 result ;
+TUPLE: #depends-on-class-predicate class1 class2 result ;
 
 : depends-on-class-predicate ( class1 class2 result -- )
-    \ depends-on-class-predicate add-conditional-dependency ;
+    \ #depends-on-class-predicate add-conditional-dependency ;
 
-M: depends-on-class-predicate satisfied?
+M: #depends-on-class-predicate satisfied?
     {
         [ [ class1>> classoid? ] [ class2>> classoid? ] bi and ]
         [ [ [ class1>> ] [ class2>> ] bi evaluate-class-predicate ] [ result>> ] bi eq? ]
     } 1&& ;
 
-TUPLE: depends-on-instance-predicate object class result ;
+TUPLE: #depends-on-instance-predicate object class result ;
 
 : depends-on-instance-predicate ( object class result -- )
-    \ depends-on-instance-predicate add-conditional-dependency ;
+    \ #depends-on-instance-predicate add-conditional-dependency ;
 
-M: depends-on-instance-predicate satisfied?
+M: #depends-on-instance-predicate satisfied?
     {
         [ class>> classoid? ]
         [ [ [ object>> ] [ class>> ] bi instance? ] [ result>> ] bi eq? ]
     } 1&& ;
 
-TUPLE: depends-on-next-method class generic next-method ;
+TUPLE: #depends-on-next-method class generic next-method ;
 
 : depends-on-next-method ( class generic next-method -- )
     over depends-on-conditionally
-    \ depends-on-next-method add-conditional-dependency ;
+    \ #depends-on-next-method add-conditional-dependency ;
 
-M: depends-on-next-method satisfied?
+M: #depends-on-next-method satisfied?
     {
         [ class>> classoid? ]
         [ [ [ class>> ] [ generic>> ] bi next-method ] [ next-method>> ] bi eq? ]
     } 1&& ;
 
-TUPLE: depends-on-method class generic method ;
+TUPLE: #depends-on-method class generic method ;
 
 : depends-on-method ( class generic method -- )
     over depends-on-conditionally
-    \ depends-on-method add-conditional-dependency ;
+    \ #depends-on-method add-conditional-dependency ;
 
-M: depends-on-method satisfied?
+M: #depends-on-method satisfied?
     {
         [ class>> classoid? ]
         [ [ [ class>> ] [ generic>> ] bi method-for-class ] [ method>> ] bi eq? ]
     } 1&& ;
 
-TUPLE: depends-on-tuple-layout class layout ;
+TUPLE: #depends-on-tuple-layout class layout ;
 
 : depends-on-tuple-layout ( class layout -- )
     [ drop depends-on-conditionally ]
-    [ \ depends-on-tuple-layout add-conditional-dependency ] 2bi ;
+    [ \ #depends-on-tuple-layout add-conditional-dependency ] 2bi ;
 
-M: depends-on-tuple-layout satisfied?
+M: #depends-on-tuple-layout satisfied?
     [ class>> tuple-layout ] [ layout>> ] bi eq? ;
 
-TUPLE: depends-on-flushable word ;
+TUPLE: #depends-on-flushable word ;
 
 : depends-on-flushable ( word -- )
     [ depends-on-conditionally ]
-    [ \ depends-on-flushable add-conditional-dependency ] bi ;
+    [ \ #depends-on-flushable add-conditional-dependency ] bi ;
 
-M: depends-on-flushable satisfied?
+M: #depends-on-flushable satisfied?
     word>> flushable? ;
 
-TUPLE: depends-on-final class ;
+TUPLE: #depends-on-final class ;
 
 : depends-on-final ( word -- )
     [ depends-on-conditionally ]
-    [ \ depends-on-final add-conditional-dependency ] bi ;
+    [ \ #depends-on-final add-conditional-dependency ] bi ;
 
-M: depends-on-final satisfied?
+M: #depends-on-final satisfied?
     class>> { [ class? ] [ final-class? ] } 1&& ;
 
 : init-dependencies ( -- )
