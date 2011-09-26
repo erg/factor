@@ -61,11 +61,11 @@ button H{
 : <button> ( label quot -- button )
     button new-button ;
 
-TUPLE: button-pen
+TUPLE: #button-pen
 plain rollover
 pressed selected pressed-selected ;
 
-C: <button-pen> button-pen
+C: <button-pen> #button-pen
 
 : button-pen ( button pen -- button pen )
     over find-button {
@@ -78,13 +78,13 @@ C: <button-pen> button-pen
         [ drop plain>> ]
     } cond ;
 
-M: button-pen draw-interior
+M: #button-pen draw-interior
     button-pen dup [ draw-interior ] [ 2drop ] if ;
 
-M: button-pen draw-boundary
+M: #button-pen draw-boundary
     button-pen dup [ draw-boundary ] [ 2drop ] if ;
 
-M: button-pen pen-pref-dim
+M: #button-pen pen-pref-dim
     [
         {
             [ plain>> pen-pref-dim ]
@@ -94,10 +94,10 @@ M: button-pen pen-pref-dim
         } 2cleave
     ] [ vmax ] reduce-outputs ;
 
-M: button-pen pen-background
+M: #button-pen pen-background
     button-pen pen-background ;
 
-M: button-pen pen-foreground
+M: #button-pen pen-foreground
     button-pen pen-foreground ;
 
 <PRIVATE

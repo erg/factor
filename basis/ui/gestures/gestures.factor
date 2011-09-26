@@ -69,14 +69,14 @@ M: propagate-key-gesture send-queued-gesture
 : propagate-key-gesture ( gesture world -- )
     \ propagate-key-gesture queue-gesture ;
 
-TUPLE: user-input string world ;
+TUPLE: #user-input string world ;
 
-M: user-input send-queued-gesture
+M: #user-input send-queued-gesture
     [ string>> ] [ world>> world-focus ] bi
     [ user-input* ] with each-parent drop ;
 
 : user-input ( string world -- )
-    '[ _ \ user-input queue-gesture ] unless-empty ;
+    '[ _ \ #user-input queue-gesture ] unless-empty ;
 
 ! Gesture objects
 TUPLE: drag # ;             C: <drag> drag
