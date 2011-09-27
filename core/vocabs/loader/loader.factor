@@ -50,8 +50,12 @@ PRIVATE>
     [ [ dup last ] dip append suffix ] when*
     "/" join ;
 
+: trim-private ( name -- name' )
+    ".private" ?tail drop ;
+
 : find-vocab-root ( vocab -- path/f )
-    vocab-name dup root-cache get at
+    vocab-name trim-private
+    dup root-cache get at
     [ ] [ ".factor" vocab-dir+ find-root-for ] ?if ;
 
 : vocab-append-path ( vocab path -- newpath )
@@ -143,7 +147,20 @@ SYMBOL: blacklist
 : add-to-blacklist ( error vocab -- )
     vocab-name blacklist get dup [ set-at ] [ 3drop ] if ;
 
-GENERIC: (load-vocab) ( name -- vocab )
+! Load foo when we load foo.private unless foo.private already exists.
+! foo.private could already exist because bootstrap defines primitives
+! in that vocabulary or because it has already been loaded elsewhere.
+! Either way, it is safe to not load it.
+: lookup-vocab ( name -- name'/vocab load? )
+    dup ".private" tail? [
+        dup vocab [
+            nip f
+        ] [
+            trim-private t
+        ] if*
+    ] [ t ] if ;
+
+GENERIC: (load-vocab) ( obj -- vocab )
 
 M: vocab (load-vocab)
     [
@@ -156,7 +173,8 @@ M: vocab (load-vocab)
 M: vocab-link (load-vocab)
     vocab-name (load-vocab) ;
 
-M: string (load-vocab) create-vocab (load-vocab) ;
+M: string (load-vocab)
+    lookup-vocab [ create-vocab (load-vocab) ] when ;
 
 PRIVATE>
 

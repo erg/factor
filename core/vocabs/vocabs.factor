@@ -132,7 +132,8 @@ M: vocab-spec forget* forget-vocab ;
 
 SYMBOL: load-vocab-hook ! ( name -- vocab )
 
-: load-vocab ( name -- vocab ) load-vocab-hook get call( name -- vocab ) ;
+: load-vocab ( obj -- vocab )
+    load-vocab-hook get call( name -- vocab ) ;
 
 PREDICATE: runnable-vocab < vocab
     vocab-main >boolean ;
