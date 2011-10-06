@@ -3,6 +3,11 @@
 USING: accessors alien.c-types alien.endian kernel sequences ;
 IN: io.sockets.igmp
 
+! http://tldp.org/HOWTO/Multicast-HOWTO-6.html
+! setsockopt: IP_ADD_MEMBERSHIP
+! IP_DROP_MEMBERSHIP
+! struct ip_mreq
+
 BE-PACKED-STRUCT: igmp-header
     { type uchar }
     { code uchar }
