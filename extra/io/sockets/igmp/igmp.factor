@@ -4,9 +4,13 @@ USING: accessors alien.c-types alien.endian kernel sequences ;
 IN: io.sockets.igmp
 
 ! http://tldp.org/HOWTO/Multicast-HOWTO-6.html
+! http://tldp.org/HOWTO/Multicast-HOWTO-7.html
 ! setsockopt: IP_ADD_MEMBERSHIP
 ! IP_DROP_MEMBERSHIP
 ! struct ip_mreq
+
+! IP_MULTICAST_IF
+! http://www.cs.unc.edu/~jeffay/dirt/FAQ/comp249-001-F99/mcast-socket.html
 
 BE-PACKED-STRUCT: igmp-header
     { type uchar }
