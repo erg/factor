@@ -376,6 +376,7 @@ interactor "interactor" f {
 
 interactor "completion" f {
     { T{ key-down f f "TAB" } code-completion-popup }
+    { T{ key-down f { C+ } "f" } file-completion-popup }
     { T{ key-down f { C+ } "p" } recall-previous }
     { T{ key-down f { C+ } "n" } recall-next }
     { T{ key-down f { C+ } "r" } history-completion-popup }

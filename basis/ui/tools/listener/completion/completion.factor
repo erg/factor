@@ -26,9 +26,9 @@ SLOT: history
 TUPLE: word-completion manifest ;
 C: <word-completion> word-completion
 
-SINGLETONS: vocab-completion char-completion history-completion ;
+SINGLETONS: vocab-completion char-completion history-completion file-completion ;
 UNION: definition-completion word-completion vocab-completion ;
-UNION: listener-completion definition-completion char-completion history-completion ;
+UNION: listener-completion definition-completion char-completion history-completion file-completion ;
 
 GENERIC: completion-quot ( interactor completion-mode -- quot )
 
@@ -38,6 +38,7 @@ GENERIC: completion-quot ( interactor completion-mode -- quot )
 M: word-completion completion-quot [ words-matching ] (completion-quot) ;
 M: vocab-completion completion-quot [ vocabs-matching ] (completion-quot) ;
 M: char-completion completion-quot [ chars-matching ] (completion-quot) ;
+M: file-completion completion-quot [ files-matching ] (completion-quot) ;
 M: history-completion completion-quot drop '[ _ history-completions ] ;
 
 GENERIC: completion-element ( completion-mode -- element )
@@ -50,6 +51,7 @@ GENERIC: completion-banner ( completion-mode -- string )
 M: word-completion completion-banner drop "Words" ;
 M: vocab-completion completion-banner drop "Vocabularies" ;
 M: char-completion completion-banner drop "Unicode code point names" ;
+M: file-completion completion-banner drop "Files" ;
 M: history-completion completion-banner drop "Input history" ;
 
 ! Completion modes also implement the row renderer protocol
@@ -167,6 +169,9 @@ completion-popup H{
 
 : code-completion-popup ( interactor -- )
     dup completion-mode show-completion-popup ;
+
+: file-completion-popup ( interactor -- )
+    file-completion show-completion-popup ;
 
 : history-completion-popup ( interactor -- )
     history-completion show-completion-popup ;

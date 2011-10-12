@@ -95,3 +95,7 @@ PRIVATE>
 : chars-matching ( str -- seq )
     name-map keys dup zip completions ;
 
+: files-matching ( str -- seq )
+    "resource:" f recursive-directory-files "resource:" absolute-path '[
+        [ _ ?head drop ] keep
+    ] { } map>assoc completions ;
