@@ -1,8 +1,8 @@
 ! Copyright (C) 2011 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors combinators combinators.short-circuit
-destructors io io.private kernel locals math sequences
-vectors ;
+destructors io io.private kernel locals math namespaces
+sequences vectors ;
 IN: io.streams.peek
 
 TUPLE: peek-stream stream peeked ;
@@ -40,6 +40,7 @@ M: peek-stream stream-read1
     ] if-empty ;
 
 M:: peek-stream stream-read ( n stream -- sequence )
+B
     stream peeked>> :> peeked
     peeked length :> #peeked
     #peeked 0 = [
@@ -48,13 +49,21 @@ M:: peek-stream stream-read ( n stream -- sequence )
         ! Have we already peeked enough?
         #peeked n > [
             peeked <reversed> n cut [ stream stream-like ]
-            [ <reversed> stream stream-clone-resizable stream peeked<< ] bi*
+            ! [ <reversed> stream stream-clone-resizable stream peeked<< ] bi*
+            [ <reversed> >vector stream peeked<< ] bi*
         ] [
+       B   
             peeked <reversed>
             n #peeked - stream stream>> stream-read
-            stream stream-element-exemplar append-as
+            
+            append V{ } like
 
-            stream stream-exemplar-growable clone stream peeked<<
+            dup stream peeked<<
+            
+            ! stream stream-element-exemplar append-as
+            ! V{ } append-as clone stream peeked<<
+
+            ! stream stream-exemplar-growable clone stream peeked<<
         ] if
     ] if ;
 
@@ -69,11 +78,15 @@ M: peek-stream stream-read-until
 M: peek-stream stream-write stream>> stream-write ;
 M: peek-stream stream-write1 stream>> stream-write1 ;
 M: peek-stream stream-flush stream>> stream-flush ;
+M: peek-stream stream-tell ( stream -- n )
+    [ stream>> stream-tell ] [ peeked>> length - ] bi ;
 
-: stream-peek1 ( stream -- ch )
+: stream-peek1 ( stream -- obj )
+B
     dup peeked>> [
         dup stream>> stream-read1 [
-            [ 1vector over stream-clone-resizable >>peeked drop ] keep
+            ! [ 1vector over stream-clone-resizable >>peeked drop ] keep
+            [ 1vector >>peeked drop ] keep
         ] [
             drop f
         ] if*
@@ -82,6 +95,7 @@ M: peek-stream stream-flush stream>> stream-flush ;
     ] if-empty ;
 
 : stream-peek ( n stream -- seq )
+B
     2dup peeked>> { [ length <= ] [ length 0 > ] } 1&& [
         [ peeked>> <reversed> swap head ] [ stream-element-exemplar like ] bi
     ] [
@@ -89,3 +103,7 @@ M: peek-stream stream-flush stream>> stream-flush ;
         [ stream-read ] 2bi
         [ reverse swap peeked>> push-all ] keep
     ] if ;
+    
+: peek1 ( -- obj ) input-stream get stream-peek1 ;
+
+: peek ( n -- obj ) input-stream get stream-peek ;
