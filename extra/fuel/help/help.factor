@@ -30,7 +30,7 @@ IN: fuel.help
     dup "related" word-prop remove ; inline
 
 : fuel-parent-topics ( word -- seq )
-    help-path [ dup article-title swap 2array ] map ; inline
+    article-parents rest [ dup article-title swap 2array ] map ; inline
 
 SYMBOL: $doc-path
 

@@ -9,7 +9,7 @@ HELP: article-parent
 { $values { "topic" "an article name or a word" } { "parent" "an article name or a word" } }
 { $description "Outputs a help topic which contains " { $snippet "topic" } " as a subsection, or " { $link f } "." } ;
 
-HELP: help-path
+HELP: article-parents
 { $values { "topic" "an article name or a word" } { "seq" "a new sequence" } }
 { $description "Outputs a sequence of all help articles which contain " { $snippet "topic" } " as a subsection, traversing all the way up to the root." } ;
 

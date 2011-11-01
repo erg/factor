@@ -113,7 +113,7 @@ M: word set-article-parent swap "help-parent" set-word-prop ;
 
 : ($navigation) ( topic -- )
     help-path-style get [
-        [ help-path [ reverse $breadcrumbs ] unless-empty ]
+        [ article-parents rest [ reverse $breadcrumbs ] unless-empty ]
         [ $navigation-table ] bi
     ] with-style ;
 

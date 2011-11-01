@@ -2,7 +2,8 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: arrays definitions generic assocs math fry
 io kernel namespaces prettyprint prettyprint.sections
-sequences words summary classes help.topics help.markup ;
+sequences words summary classes help.topics help.markup
+sets accessors ;
 IN: help.crossref
 
 : article-links ( topic elements -- seq )
@@ -12,10 +13,20 @@ IN: help.crossref
 : article-children ( topic -- seq )
     { $subsection $subsections } article-links [ >link ] map ;
 
-: help-path ( topic -- seq )
-    [ article-parent ] follow rest ;
+: article-parents ( topic -- seq )
+    [ article-parent ] follow ;
+
+ERROR: subsection-circularity parent children ;
+
+: check-article-cycles ( parent article -- parent article )
+    dup
+    [ article-children [ link? ] filter [ name>> ] map ]
+    [ article-parents ]
+    bi 2dup intersects?
+    [ subsection-circularity ] [ 2drop ] if ;
 
 : set-article-parents ( parent article -- )
+    check-article-cycles
     article-children [ set-article-parent ] with each ;
 
 : xref-article ( topic -- )

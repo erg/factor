@@ -1,7 +1,7 @@
-USING: help.crossref help.topics help.markup tools.test words
-definitions assocs sequences kernel namespaces parser arrays
-io.streams.string continuations debugger compiler.units eval
-help.syntax ;
+USING: accessors arrays compiler.units continuations debugger
+definitions eval help.crossref help.markup help.syntax
+help.topics io.streams.string kernel parser sequences
+tools.test words ;
 IN: help.crossref.tests
 
 [ ] [
@@ -63,3 +63,19 @@ ARTICLE: "crossref-test-2" "Crossref test 2"
 { $markup-example { $subsection "crossref-test-1" } } ;
 
 [ { } ] [ "crossref-test-2" >link article-children ] unit-test
+
+[ """USING: help.syntax help.markup ; ARTICLE: "romanloop" "Foo" { $subsection "romanloop" } ;""" eval( -- ) ]
+[ error>> subsection-circularity? ] must-fail-with
+
+[ """USING: help.syntax help.markup ;
+ARTICLE: "article0" "foo0000" { $subsections "article1" } ;
+ARTICLE: "article1" "foo0001" { $subsections "article0" } ;
+""" eval( -- )
+] [ error>> subsection-circularity? ] must-fail-with
+
+[ """USING: help.syntax help.markup ;
+ARTICLE: "article2" "foo0002" { $subsections "article3" } ;
+ARTICLE: "article3" "foo0003" { $subsections "article4" } ;
+ARTICLE: "article4" "foo0004" { $subsections "article2" } ;
+""" eval( -- )
+] [ error>> subsection-circularity? ] must-fail-with
