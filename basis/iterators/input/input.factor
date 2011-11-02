@@ -3,3 +3,5 @@
 USING: ;
 IN: iterators.input
 
+MIXIN: input-iterator
+GENERIC: iterator-read-front1 ( obj -- elt ? )

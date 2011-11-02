@@ -3,3 +3,5 @@
 USING: ;
 IN: iterators
 
+GENERIC: <iterator> ( obj -- iterator )
+

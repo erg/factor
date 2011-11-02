@@ -3,3 +3,6 @@
 USING: ;
 IN: iterators.output
 
+MIXIN: output-iterator
+
+GENERIC: iterator-push-back1 ( elt obj -- ? )
