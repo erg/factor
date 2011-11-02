@@ -28,7 +28,7 @@ IN: algorithms
     [ <iterator> ] 2dip
     pick swap iterator-as>output-iterator [
         '[ _ iterator-push-back1 ] compose never iterator-find drop
-    ] keep iterator-like ; inline
+    ] keep iterator>object ; inline
 
 : map ( obj quot -- obj' )
     over map-as ; inline

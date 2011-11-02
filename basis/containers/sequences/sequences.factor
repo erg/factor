@@ -36,5 +36,10 @@ M: sequence-iterator iterator-push-back1
         3drop drop
     ] if ;
 
-M: sequence-iterator iterator-like
-    sequence>> ;
+M: sequence-iterator iterator>object sequence>> ;
+
+M: sequence-iterator object-capacity sequence>> object-capacity ;
+
+M: sequence iterator-as>output-iterator ( iterator exemplar -- iterator' )
+    [ object-capacity ] dip new-object <iterator> ;
+

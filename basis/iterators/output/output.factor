@@ -10,6 +10,7 @@ GENERIC: iterator-push-back1 ( elt obj -- )
 : iterator>output-iterator ( iterator -- iterator' )
     sequence>> clone <iterator> ;
 
-: iterator-as>output-iterator ( iterator exemplar -- iterator' )
-    [ sequence>> object-capacity ] dip new-object <iterator> ;
+GENERIC: iterator-as>output-iterator ( iterator exemplar -- iterator' )
 
+M: sequence iterator-as>output-iterator ( iterator exemplar -- iterator' )
+    [ object-capacity ] dip new-object <iterator> ;
