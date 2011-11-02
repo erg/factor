@@ -15,9 +15,12 @@ INSTANCE: sequence-iterator output-iterator
 
 M: sequence <iterator> <sequence-iterator> ;
 
+: capacity-check? ( n obj -- ? )
+    dupd object-capacity < [ 0 >= ] [ drop f ] if ; inline
+
 M: sequence-iterator iterator-read-front1
     [ ] [ n>> ] [ sequence>> ] tri
-    2dup bounds-check? [
+    2dup capacity-check? [
         [ [ 1 + ] change-n drop ] 2dip
         nth t
     ] [
@@ -26,9 +29,12 @@ M: sequence-iterator iterator-read-front1
 
 M: sequence-iterator iterator-push-back1
     [ ] [ n>> ] [ sequence>> ] tri
-    2dup bounds-check? [
+    2dup capacity-check? [
         [ [ 1 + ] change-n drop ] 2dip
-        set-nth t
+        set-nth
     ] [
-        3drop drop f
+        3drop drop
     ] if ;
+
+M: sequence-iterator iterator-like
+    sequence>> ;
