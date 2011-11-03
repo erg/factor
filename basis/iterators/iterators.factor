@@ -4,7 +4,6 @@ USING: arrays growable kernel sequences vectors ;
 IN: iterators
 
 GENERIC: <iterator> ( obj -- iterator )
-GENERIC: <output-iterator> ( length/f obj -- iterator )
 GENERIC: iterator>object ( iterator -- obj )
 
 GENERIC: new-object ( n exemplar -- obj )

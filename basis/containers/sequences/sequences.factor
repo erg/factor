@@ -34,14 +34,20 @@ M: sequence <output-iterator>
 : capacity-check? ( n obj -- ? )
     dupd object-capacity < [ 0 >= ] [ drop f ] if ; inline
 
-M: sequence-iterator iterator-read-front1
+M: sequence-iterator iterator-peek-front1
     [ ] [ n>> ] [ sequence>> ] tri
     2dup capacity-check? [
-        [ [ 1 + ] change-n drop ] 2dip
-        nth t
+        [ drop ] 2dip nth t
     ] [
         3drop f f
     ] if ;
+
+M: sequence-iterator iterator-advance
+    [ 1 + ] change-n drop ;
+
+M: sequence-iterator iterator-read-front1
+    [ iterator-peek-front1 ]
+    [ iterator-advance ] bi ;
 
 M: sequence-iterator iterator-push-back1
     [ ] [ n>> ] [ sequence>> ] tri
@@ -52,13 +58,12 @@ M: sequence-iterator iterator-push-back1
         3drop drop
     ] if ;
 
-M: sequence-iterator iterator>object sequence>> ;
+M: sequence-iterator iterator>object
+    [ sequence>> ] [ n>> ] bi head ;
 
 M: sequence-output-iterator iterator>object
-    [ sequence>> ] [ exemplar>> ] bi like ;
+    [ [ sequence>> ] [ n>> ] bi head ]
+    [ exemplar>> ] bi like ;
 
 M: sequence-iterator object-capacity sequence>> object-capacity ;
-
-M: sequence iterator-as>output-iterator ( iterator exemplar -- iterator' )
-    [ object-capacity ] dip new-object <iterator> ;
 

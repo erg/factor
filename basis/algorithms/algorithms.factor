@@ -1,7 +1,7 @@
 ! Copyright (C) 2011 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: iterators iterators.input iterators.output kernel locals
-fry math ;
+fry math generalizations ;
 FROM: sequences => collector-for ;
 IN: algorithms
 
@@ -22,12 +22,15 @@ IN: algorithms
 : never ( quot -- quot' ) [ f ] compose ; inline
 : always ( quot -- quot' ) [ t ] compose ; inline
 : invert ( quot -- quot' ) [ not ] compose ; inline
+: predicate-yes ( -- quot' ) [ drop t ] ; inline
+: predicate-no ( -- quot' ) [ drop f ] ; inline
 
 :: iterator-find ( iterator quot: ( ..a obj -- ..b ? ) -- obj )
-    iterator iterator-read-front1 :> ( obj present? ) present? [
+    iterator iterator-peek-front1 :> ( obj present? ) present? [
         obj quot call [
             obj
         ] [
+            iterator iterator-advance
             iterator quot iterator-find
         ] if
     ] [
@@ -40,19 +43,19 @@ IN: algorithms
 : each ( obj quot -- obj )
     [ <iterator> ] dip never iterator-find drop ; inline
 
-:: map-copy ( input output quot -- output )
-    [ input iterator-read-front1 ]
-    [ quot call output iterator-push-back1 ] while drop
+:: map-copy-pred ( input output quot pred -- output )
+    [ input iterator-peek-front1 [ dup pred call ] [ f ] if ]
+    [ quot call output iterator-push-back1 input iterator-advance ] while drop
     output iterator>object ; inline
 
-: (map-as) ( obj exemplar quot -- obj' input-iterator )
+: (map-as) ( obj exemplar quot pred -- obj' input-iterator )
     [
         [ drop <iterator> ]
         [ [ object-capacity ] dip <output-iterator> ] 2bi
-    ] dip [ map-copy ] 3keep 2drop ; inline
+    ] 2dip [ map-copy-pred ] 4 nkeep 3drop ; inline
 
 : map-as ( obj quot exemplar -- obj' )
-    swap (map-as) drop ; inline
+    swap predicate-yes (map-as) drop ; inline
 
 : map ( obj quot -- obj' ) over map-as ; inline
 
@@ -65,13 +68,15 @@ TUPLE: lazy-filter quot ;
 C: <lazy-filter> lazy-filter
 
 : <map> ( quot -- obj ) <lazy-map> ; inline
+
 : <filter> ( quot -- obj ) <lazy-filter> ; inline
 
 : <map-as> ( obj/quot quot exemplar -- obj/quot lazy-map exemplar ) [ <map> ] dip ; inline
 
-! : take-as ( obj quot exemplar -- obj' iterator ) [ '[ over @ ] ] dip (map-as) ; inline
+: take-as ( obj quot exemplar -- obj' iterator )
+    swap [ [ ] ] dip (map-as) ; inline
 
-! : take ( obj quot -- obj' iterator ) over take-as ; inline
+: take ( obj quot -- obj' iterator ) over take-as ; inline
 
 : map-sum ( ... seq quot: ( ... elt -- ... n ) -- ... n )
     [ 0 ] 2dip [ dip + ] curry [ swap ] prepose each ; inline

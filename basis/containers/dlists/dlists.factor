@@ -14,21 +14,19 @@ TUPLE: dlist-iterator dlist front back ;
 
 M: dlist <iterator> <dlist-iterator> ;
 
+M: dlist-iterator iterator-peek-front1
+    front>> [ obj>> t ] [ f f ] if* ;
+
+M: dlist-iterator iterator-advance
+    dup [ [ next>> ] change-front ] when drop ;
+
 M: dlist-iterator iterator-read-front1
-    dup front>> [
-        [ [ next>> ] change-front drop ] dip
-        obj>> t
-    ] [
-        drop f f
-    ] if* ;
+    [ iterator-peek-front1 ] [ iterator-advance ] bi ;
 
 M: dlist-iterator iterator-push-back1
     dlist>> push-back ;
 
 M: dlist new-object 2drop <dlist> ;
-
-M: dlist iterator-as>output-iterator ( iterator exemplar -- iterator' )
-    2drop <dlist> <iterator> ;
 
 M: dlist-iterator iterator>object dlist>> ;
 

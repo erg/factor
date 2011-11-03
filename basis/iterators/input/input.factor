@@ -5,3 +5,5 @@ IN: iterators.input
 
 MIXIN: input-iterator
 GENERIC: iterator-read-front1 ( obj -- elt ? )
+GENERIC: iterator-advance ( obj -- )
+GENERIC: iterator-peek-front1 ( obj -- elt ? )

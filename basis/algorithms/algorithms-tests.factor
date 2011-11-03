@@ -1,6 +1,6 @@
 ! Copyright (C) 2011 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: algorithms dlists math tools.test ;
+USING: algorithms dlists iterators.input kernel math tools.test ;
 FROM: sequences => iota ;
 IN: algorithms.tests
 
@@ -17,3 +17,7 @@ IN: algorithms.tests
 [ 2 ] [ { 1 2 3 } [ odd? ] count ] unit-test
 [ 2 ] [ V{ 1 2 3 } [ odd? ] count ] unit-test
 [ 2 ] [ DL{ 1 2 3 } [ odd? ] count ] unit-test
+
+[ { 1 2 } ] [ { 1 2 3 4 5 } [ 3 < ] take drop ] unit-test
+[ 3 t ] [ { 1 2 3 4 5 } [ 3 < ] take nip iterator-read-front1 ] unit-test
+[ 3 t ] [ DL{ 1 2 3 4 5 } [ 3 < ] take nip iterator-read-front1 ] unit-test

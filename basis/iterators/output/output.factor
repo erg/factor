@@ -7,13 +7,5 @@ MIXIN: output-iterator
 
 GENERIC: iterator-push-back1 ( elt obj -- )
 
-: iterator>output-iterator ( iterator -- iterator' )
-    sequence>> clone <iterator> ;
-
-GENERIC: iterator-as>output-iterator ( iterator exemplar -- iterator' )
-
-M: sequence iterator-as>output-iterator ( iterator exemplar -- iterator' )
-    [ object-capacity ] dip new-object <iterator> ;
-
-GENERIC: new-output-iterator-like ( length/f exemplar -- iterator' )
+GENERIC: <output-iterator> ( length/f obj -- iterator )
 
