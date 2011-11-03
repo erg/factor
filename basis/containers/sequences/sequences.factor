@@ -1,7 +1,7 @@
 ! Copyright (C) 2011 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors iterators iterators.input iterators.output
-kernel math sequences ;
+kernel math sequences vectors ;
 IN: containers.sequences
 
 TUPLE: sequence-iterator sequence n ;
@@ -13,7 +13,23 @@ INSTANCE: sequence-iterator output-iterator
         swap >>sequence
         0 >>n ; inline
 
+! If we don't know the output length, use this
+TUPLE: sequence-output-iterator < sequence-iterator exemplar ;
+
+: <sequence-output-iterator> ( exemplar -- iterator )
+    sequence-output-iterator new
+        swap >>exemplar
+        100 <vector> >>sequence
+        0 >>n ; inline
+
 M: sequence <iterator> <sequence-iterator> ;
+
+M: sequence <output-iterator> 
+    over [
+        new-object <sequence-iterator>
+    ] [
+        nip <sequence-output-iterator>
+    ] if ;
 
 : capacity-check? ( n obj -- ? )
     dupd object-capacity < [ 0 >= ] [ drop f ] if ; inline
@@ -37,6 +53,9 @@ M: sequence-iterator iterator-push-back1
     ] if ;
 
 M: sequence-iterator iterator>object sequence>> ;
+
+M: sequence-output-iterator iterator>object
+    [ sequence>> ] [ exemplar>> ] bi like ;
 
 M: sequence-iterator object-capacity sequence>> object-capacity ;
 

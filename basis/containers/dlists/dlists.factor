@@ -31,3 +31,8 @@ M: dlist iterator-as>output-iterator ( iterator exemplar -- iterator' )
     2drop <dlist> <iterator> ;
 
 M: dlist-iterator iterator>object dlist>> ;
+
+M: dlist <output-iterator>
+    2drop <dlist> <dlist-iterator> ; inline
+
+M: dlist object-capacity drop f ;
