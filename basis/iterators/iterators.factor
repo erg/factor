@@ -3,7 +3,10 @@
 USING: arrays growable kernel sequences vectors ;
 IN: iterators
 
+MIXIN: iterator
 GENERIC: <iterator> ( obj -- iterator )
+M: iterator <iterator> ;
+
 GENERIC: iterator>object ( iterator -- obj )
 
 GENERIC: new-object ( n exemplar -- obj )

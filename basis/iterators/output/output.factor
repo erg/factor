@@ -7,5 +7,4 @@ MIXIN: output-iterator
 
 GENERIC: iterator-push-back1 ( elt obj -- )
 
-GENERIC: <output-iterator> ( length/f obj -- iterator )
-
+GENERIC: <output-iterator> ( length/f iterator/obj -- iterator )
