@@ -18,7 +18,7 @@ M: dlist-iterator iterator-peek-front1
     [ ] [ front>> [ obj>> t ] [ f f ] if* ] bi ;
 
 M: dlist-iterator iterator-advance
-    dup [ [ next>> ] change-front ] when ;
+    dup [ [ [ next>> ] [ f ] if* ] change-front ] when ;
 
 M: dlist-iterator iterator-read-front1
     iterator-peek-front1 [ iterator-advance ] 2dip ;

@@ -22,8 +22,8 @@ IN: algorithms
 : never ( quot -- quot' ) [ f ] compose ; inline
 : always ( quot -- quot' ) [ t ] compose ; inline
 : invert ( quot -- quot' ) [ not ] compose ; inline
-: predicate-yes ( -- quot' ) [ drop t ] ; inline
-: predicate-no ( -- quot' ) [ drop f ] ; inline
+: predicate-true ( -- quot' ) [ drop t ] ; inline
+: predicate-false ( -- quot' ) [ drop f ] ; inline
 
 :: iterator-find ( iterator0 quot: ( ..a obj -- ..b ? ) -- iterator obj )
     iterator0 iterator-peek-front1 :> ( iterator1 obj present? )
@@ -43,12 +43,14 @@ IN: algorithms
 : each ( obj quot -- obj )
     [ <iterator> ] dip never iterator-find 2drop ; inline
 
-:: copy-pred ( input0 output quot pred -- input output )
+:: copy-pred ( input0 output map-quot continue-pred take-pred -- input output )
     input0 iterator-peek-front1 :> ( input1 elt1 present? )
     present? [
-        elt1 pred call [
-            elt1 quot call output iterator-push-back1
-            input1 iterator-advance output quot pred copy-pred
+        elt1 continue-pred call [
+            elt1 take-pred call [
+                elt1 map-quot call output iterator-push-back1
+            ] when
+            input1 iterator-advance output map-quot continue-pred take-pred copy-pred
         ] [
             input1 output
         ] if
@@ -58,15 +60,24 @@ IN: algorithms
 
 : make-copy-iterators ( obj exemplar -- input-iterator output-iterator )
     [ drop <iterator> ]
-    [ [ object-capacity ] dip <output-iterator> ] 2bi ;
+    [ [ object-capacity ] dip <output-iterator> ] 2bi ; inline
 
-: (map-as) ( obj exemplar quot pred -- obj' input-iterator output-iterator )
-    [ make-copy-iterators ] 2dip copy-pred ; inline
+: (map-as) ( obj exemplar quot continue-prad take-pred -- obj' input-iterator output-iterator )
+    [ make-copy-iterators ] 3dip copy-pred ; inline
 
-: map-as ( obj quot exemplar -- obj' )
-    swap predicate-yes (map-as) nip iterator>object ; inline
+: map-as ( obj map-quot exemplar -- obj' )
+    swap predicate-true dup (map-as) nip iterator>object ; inline
 
 : map ( obj quot -- obj' ) over map-as ; inline
+
+: filter-as ( obj take-pred exemplar -- obj' )
+    swap [ [ ] predicate-true ] dip (map-as) nip iterator>object ; inline
+
+! : reduce
+! : accumulate
+! : map-reduce
+
+: filter ( obj quot -- obj' ) over filter-as ; inline
 
 ! : map! ( obj quot -- obj' ) over map-as! ; inline
 
@@ -80,10 +91,11 @@ C: <lazy-filter> lazy-filter
 
 : <filter> ( quot -- obj ) <lazy-filter> ; inline
 
-: <map-as> ( obj/quot quot exemplar -- obj/quot lazy-map exemplar ) [ <map> ] dip ; inline
+: <map-as> ( obj/quot quot exemplar -- obj/quot lazy-map exemplar )
+    [ <map> ] dip ; inline
 
 : take-as ( obj pred exemplar -- iterator obj )
-    swap [ [ ] ] dip (map-as) iterator>object ; inline
+    swap [ [ ] ] dip dup (map-as) iterator>object ; inline
 
 : take ( obj pred -- iterator obj' ) over take-as ; inline
 
