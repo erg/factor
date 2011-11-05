@@ -6,6 +6,8 @@ IN: containers.dlists
 
 TUPLE: dlist-iterator dlist front back ;
 
+INSTANCE: dlist-iterator iterator
+
 : <dlist-iterator> ( dlist -- iterator )
     dlist-iterator new
         swap [ >>dlist ] keep
@@ -34,3 +36,4 @@ M: dlist <output-iterator>
     2drop <dlist> <dlist-iterator> ; inline
 
 M: dlist object-capacity drop f ;
+M: dlist-iterator object-capacity drop f ;

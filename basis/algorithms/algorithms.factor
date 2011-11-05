@@ -2,7 +2,6 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: iterators iterators.input iterators.output kernel locals
 fry math generalizations ;
-FROM: sequences => collector-for ;
 IN: algorithms
 
 ! if you have lazy map and copy (from input iterator to output iterator) to start with
@@ -18,6 +17,13 @@ IN: algorithms
 ! the output iterator could be a vector/dlist writer that pushes onto the end, or a mutable range over a preallocated fixed-size sequence
 ! you can choose that given an exemplar type and a length i think
 ! so it only needs to be generic on the exemplar type
+! TUPLE: lazy-map quot ;
+! C: <lazy-map> lazy-map
+! TUPLE: lazy-filter quot ;
+! C: <lazy-filter> lazy-filter
+! : <map> ( quot -- obj ) <lazy-map> ; inline
+! : <filter> ( quot -- obj ) <lazy-filter> ; inline
+! : <map-as> ( obj/quot quot exemplar -- obj/quot lazy-map exemplar ) [ <map> ] dip ; inline
 
 : never ( quot -- quot' ) [ f ] compose ; inline
 : always ( quot -- quot' ) [ t ] compose ; inline
@@ -43,6 +49,12 @@ IN: algorithms
 : each ( obj quot -- obj )
     [ <iterator> ] dip never iterator-find 2drop ; inline
 
+: reduce ( obj identity quot -- obj' )
+    swapd each ; inline
+
+! : map-reduce ( ..a seq map-quot: ( ..a x -- ..b elt ) reduce-quot: ( ..b prev elt -- ..a next ) -- ..a result )
+    ! [ [ unclip-slice ] dip [ call ] keep ] dip compose reduce ; inline
+
 :: copy-pred ( input0 output map-quot continue-pred take-pred -- input output )
     input0 iterator-peek-front1 :> ( input1 elt1 present? )
     present? [
@@ -57,6 +69,13 @@ IN: algorithms
     ] [
         input1 output
     ] if ; inline
+
+! : head-as ( obj n exemplar -- obj' ) swap [ ] [ ] predicate-true ;
+! : head ( obj n -- obj' ) over head-as ; inline
+! : reduce
+! : accumulate
+! : map-reduce
+! : map! ( obj quot -- obj' ) over map-as! ; inline
 
 : make-copy-iterators ( obj exemplar -- input-iterator output-iterator )
     [ drop <iterator> ]
@@ -73,31 +92,12 @@ IN: algorithms
 : filter-as ( obj take-pred exemplar -- obj' )
     swap [ [ ] predicate-true ] dip (map-as) nip iterator>object ; inline
 
-! : reduce
-! : accumulate
-! : map-reduce
+: filter ( obj take-pred -- obj' ) over filter-as ; inline
 
-: filter ( obj quot -- obj' ) over filter-as ; inline
-
-! : map! ( obj quot -- obj' ) over map-as! ; inline
-
-TUPLE: lazy-map quot ;
-C: <lazy-map> lazy-map
-
-TUPLE: lazy-filter quot ;
-C: <lazy-filter> lazy-filter
-
-: <map> ( quot -- obj ) <lazy-map> ; inline
-
-: <filter> ( quot -- obj ) <lazy-filter> ; inline
-
-: <map-as> ( obj/quot quot exemplar -- obj/quot lazy-map exemplar )
-    [ <map> ] dip ; inline
-
-: take-as ( obj pred exemplar -- iterator obj )
+: take-as ( obj take-pred exemplar -- iterator obj )
     swap [ [ ] ] dip dup (map-as) iterator>object ; inline
 
-: take ( obj pred -- iterator obj' ) over take-as ; inline
+: take ( obj take-pred -- iterator obj' ) over take-as ; inline
 
 : map-sum ( ... seq quot: ( ... elt -- ... n ) -- ... n )
     [ 0 ] 2dip [ dip + ] curry [ swap ] prepose each ; inline
