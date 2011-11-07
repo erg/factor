@@ -8,22 +8,22 @@ IN: lists.tests
 ] unit-test
 
 { { 3 4 5 6 } } [
-    T{ cons f 1       
-        T{ cons f 2 
-            T{ cons f 3
-                T{ cons f 4
+    T{ cons-cell f 1       
+        T{ cons-cell f 2 
+            T{ cons-cell f 3
+                T{ cons-cell f 4
                 +nil+ } } } } [ 2 + ] lmap>array
 ] unit-test
 
 { 10 } [
-    T{ cons f 1       
-        T{ cons f 2 
-            T{ cons f 3
-                T{ cons f 4
+    T{ cons-cell f 1       
+        T{ cons-cell f 2 
+            T{ cons-cell f 3
+                T{ cons-cell f 4
                 +nil+ } } } } 0 [ + ] foldl
 ] unit-test
     
-{ T{ cons f 2 T{ cons f 3 T{ cons f 4 T{ cons f 5 +nil+ } } } } } [
+{ T{ cons-cell f 2 T{ cons-cell f 3 T{ cons-cell f 4 T{ cons-cell f 5 +nil+ } } } } } [
     { 1 2 3 4 } sequence>list [ 1 + ] lmap
 ] unit-test
     

@@ -10,13 +10,13 @@ GENERIC: car ( cons -- car )
 GENERIC: cdr ( cons -- cdr )
 GENERIC: nil? ( object -- ?   )
     
-TUPLE: cons { car read-only } { cdr read-only } ;
+TUPLE: cons-cell { car read-only } { cdr read-only } ;
 
-C: cons cons
+C: cons cons-cell
 
-M: cons car ( cons -- car ) car>> ;
+M: cons-cell car ( cons -- car ) car>> ;
 
-M: cons cdr ( cons -- cdr ) cdr>> ;
+M: cons-cell cdr ( cons -- cdr ) cdr>> ;
 
 SINGLETON: +nil+
 M: +nil+ nil? drop t ;
@@ -93,5 +93,5 @@ PRIVATE>
 : list>array ( list -- array )  
     [ ] lmap>array ;
 
-INSTANCE: cons list
+INSTANCE: cons-cell list
 INSTANCE: +nil+ list
