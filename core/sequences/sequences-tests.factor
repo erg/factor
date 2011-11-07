@@ -300,7 +300,7 @@ M: bogus-hashcode hashcode* 2drop 0 >bignum ;
 [ V{ 0 3 } ] [ "A" { "A" "B" "C" "A" "D" } indices ] unit-test
 
 [ "asdf" iota ] must-fail
-[ T{ iota { n 10 } } ] [ 10 iota ] unit-test
+[ T{ iota-sequence { n 10 } } ] [ 10 iota ] unit-test
 [ 0 ] [ 10 iota first ] unit-test
 
 [ "hi" 3 ] [

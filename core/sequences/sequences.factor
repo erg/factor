@@ -101,14 +101,14 @@ M: f like drop [ f ] when-empty ; inline
 INSTANCE: f immutable-sequence
 
 ! Integer sequences
-TUPLE: iota { n integer read-only } ;
+TUPLE: iota-sequence { n integer read-only } ;
 
-: iota ( n -- iota ) \ iota boa ; inline
+: iota ( n -- iota ) \ iota-sequence boa ; inline
 
-M: iota length n>> ; inline
-M: iota nth-unsafe drop ; inline
+M: iota-sequence length n>> ; inline
+M: iota-sequence nth-unsafe drop ; inline
 
-INSTANCE: iota immutable-sequence
+INSTANCE: iota-sequence immutable-sequence
 
 <PRIVATE
 
