@@ -3,7 +3,7 @@
 USING: alien.c-types alien.syntax classes.struct unix.types ;
 IN: unix.statvfs.macosx
 
-STRUCT: statvfs
+STRUCT: statvfs-struct
     { f_bsize ulong }
     { f_frsize ulong }
     { f_blocks fsblkcnt_t }
@@ -20,4 +20,4 @@ STRUCT: statvfs
 CONSTANT: ST_RDONLY   HEX: 1 ! Read-only file system
 CONSTANT: ST_NOSUID   HEX: 2 ! Does not honor setuid/setgid
 
-FUNCTION: int statvfs ( c-string path, statvfs* buf ) ;
+FUNCTION: int statvfs ( c-string path, statvfs-struct* buf ) ;

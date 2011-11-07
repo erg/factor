@@ -62,7 +62,7 @@ M: unix can-seek-handle? ( handle -- ? )
     fd>> SEEK_CUR 0 lseek -1 = not ;
 
 M: unix handle-length ( handle -- n/f )
-    fd>> \ stat <struct> [ fstat -1 = not ] keep
+    fd>> \ stat-struct <struct> [ fstat -1 = not ] keep
     swap [ st_size>> ] [ drop f ] if ;
 
 SYMBOL: +retry+ ! just try the operation again without blocking

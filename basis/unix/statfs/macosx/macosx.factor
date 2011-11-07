@@ -97,7 +97,7 @@ CONSTANT: MFSTYPENAMELEN 16
 STRUCT: fsid_t
     { val int32_t[2] } ;
 
-STRUCT: statfs64
+STRUCT: statfs64-struct
     { f_bsize uint32_t }
     { f_iosize int32_t }
     { f_blocks uint64_t }
@@ -115,5 +115,5 @@ STRUCT: statfs64
     { f_mntfromname { char MAXPATHLEN } }
     { f_reserved uint32_t[8] } ;
 
-FUNCTION: int statfs64 ( c-string path, statfs64* buf ) ;
-FUNCTION: int getmntinfo64 ( statfs64** mntbufp, int flags ) ;
+FUNCTION: int statfs64 ( c-string path, statfs64-struct* buf ) ;
+FUNCTION: int getmntinfo64 ( statfs64-struct** mntbufp, int flags ) ;

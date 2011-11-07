@@ -5,7 +5,7 @@ IN: unix.stat
 ! Mac OS X
 
 ! stat64 structure
-STRUCT: stat
+STRUCT: stat-struct
     { st_dev dev_t }
     { st_mode mode_t }
     { st_nlink nlink_t }
@@ -26,9 +26,9 @@ STRUCT: stat
     { st_qspare0 __int64_t }
     { st_qspare1 __int64_t } ;
 
-FUNCTION: int stat64  ( c-string pathname, stat* buf ) ;
-FUNCTION: int lstat64 ( c-string pathname, stat* buf ) ;
-FUNCTION: int fstat64 ( int fd, stat* buf ) ;
+FUNCTION: int stat64  ( c-string pathname, stat-struct* buf ) ;
+FUNCTION: int lstat64 ( c-string pathname, stat-struct* buf ) ;
+FUNCTION: int fstat64 ( int fd, stat-struct* buf ) ;
 
 : stat ( path buf -- n ) stat64 ;
 : lstat ( path buf -- n ) lstat64 ;

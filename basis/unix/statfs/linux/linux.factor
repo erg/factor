@@ -3,7 +3,7 @@
 USING: alien.c-types alien.syntax unix.types unix.stat classes.struct ;
 IN: unix.statfs.linux
 
-STRUCT: statfs64
+STRUCT: statfs64-struct
     { f_type __SWORD_TYPE }
     { f_bsize __SWORD_TYPE }
     { f_blocks __fsblkcnt64_t }

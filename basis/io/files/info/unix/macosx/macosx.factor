@@ -7,7 +7,7 @@ io.files.unix kernel math sequences specialized-arrays
 system unix unix.getfsstat.macosx unix.statfs.macosx
 unix.statvfs.macosx ;
 SPECIALIZED-ARRAY: uint
-SPECIALIZED-ARRAY: statfs64
+SPECIALIZED-ARRAY: statfs64-struct
 IN: io.files.info.unix.macosx
 
 TUPLE: macosx-file-info < unix-file-info birth-time flags gen ;
@@ -27,16 +27,16 @@ io-size owner type-id filesystem-subtype ;
 
 M: macosx file-systems ( -- array )
     f void* <ref> dup 0 getmntinfo64 dup io-error
-    [ void* deref ] dip \ statfs64 <c-direct-array>
+    [ void* deref ] dip \ statfs64-struct <c-direct-array>
     [ f_mntonname>> utf8 alien>string file-system-info ] { } map-as ;
 
 M: macosx new-file-system-info macosx-file-system-info new ;
 
 M: macosx file-system-statfs ( normalized-path -- statfs )
-    \ statfs64 <struct> [ statfs64 io-error ] keep ;
+    \ statfs64-struct <struct> [ statfs64 io-error ] keep ;
 
 M: macosx file-system-statvfs ( normalized-path -- statvfs )
-    \ statvfs <struct> [ statvfs io-error ] keep ;
+    \ statvfs-struct <struct> [ statvfs io-error ] keep ;
 
 M: macosx statfs>file-system-info ( file-system-info byte-array -- file-system-info' )
     {
