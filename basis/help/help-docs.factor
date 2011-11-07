@@ -129,6 +129,10 @@ ARTICLE: "help-impl" "Help system implementation"
     word-help
     word-help*
 }
+"Looking up an article by name:"
+{ $subsections
+    lookup-article
+}
 "Help article implementation:"
 { $subsections
     article
