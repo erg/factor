@@ -17,7 +17,7 @@ HOOK: (mapped-file-r/w) os ( path length -- address handle )
 
 : prepare-mapped-file ( path quot -- mapped-file path' length )
     [
-        [ normalize-path ] [ file-info size>> ] bi
+        [ normalize-path ] [ get-file-info size>> ] bi
         [ dup 0 <= [ bad-mmap-size ] [ 2drop ] if ]
         [ nip mapped-file new-disposable swap >>length ]
     ] dip 2tri [ >>address ] [ >>handle ] bi* ; inline

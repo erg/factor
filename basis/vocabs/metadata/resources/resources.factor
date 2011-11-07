@@ -7,7 +7,7 @@ IN: vocabs.metadata.resources
 <PRIVATE
 
 : (expand-vocab-resource) ( resource-path -- filenames )
-    dup file-info directory?
+    dup get-file-info directory?
     [ dup '[ _ directory-tree-files [ append-path ] with map ] [ prefix ] bi ]
     [ 1array ] if ;
 
@@ -16,7 +16,7 @@ IN: vocabs.metadata.resources
 
 : copy-vocab-resource ( to from file -- )
     [ append-path ] curry bi@
-    dup file-info directory?
+    dup get-file-info directory?
     [ drop make-directories ]
     [ swap [ parent-directory make-directories ] [ copy-file ] bi ] if ;
     

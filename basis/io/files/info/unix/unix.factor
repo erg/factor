@@ -41,7 +41,7 @@ M: unix statvfs>file-system-info drop ;
     dup [ blocks>> ] [ block-size>> ] bi * >>total-space
     dup [ total-space>> ] [ free-space>> ] bi - >>used-space ;
 
-M: unix file-system-info
+M: unix get-file-system-info
     normalize-path
     [ new-file-system-info ] dip
     [ file-system-statfs statfs>file-system-info ]
@@ -57,10 +57,10 @@ HOOK: stat>file-info os ( stat -- file-info )
 
 HOOK: stat>type os ( stat -- file-info )
 
-M: unix file-info ( path -- info )
+M: unix get-file-info ( path -- info )
     normalize-path file-status stat>file-info ;
 
-M: unix link-info ( path -- info )
+M: unix get-link-info ( path -- info )
     normalize-path link-status stat>file-info ;
 
 M: unix new-file-info ( -- class ) unix-file-info new ;
@@ -177,7 +177,7 @@ CONSTANT: ALL-EXECUTE   OCT: 0000111
     [ normalize-path ] dip [ chmod ] unix-system-call drop ;
 
 : file-permissions ( path -- n )
-    normalize-path file-info permissions>> ;
+    normalize-path get-file-info permissions>> ;
 
 : add-file-permissions ( path n -- )
     over file-permissions bitor set-file-permissions ;
@@ -232,13 +232,13 @@ M: string set-file-group ( path string -- )
     f swap set-file-ids ;
 
 : file-user-id ( path -- uid )
-    normalize-path file-info uid>> ;
+    normalize-path get-file-info uid>> ;
 
 : file-user-name ( path -- string )
     file-user-id user-name ;
 
 : file-group-id ( path -- gid )
-    normalize-path file-info gid>> ;
+    normalize-path get-file-info gid>> ;
 
 : file-group-name ( path -- string )
     file-group-id group-name ;

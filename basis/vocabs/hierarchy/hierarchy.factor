@@ -18,7 +18,7 @@ M: vocab-prefix vocab-name name>> ;
 : vocab-subdirs ( dir -- dirs )
     [
         [
-            { [ link-info directory? ] [ "." head? not ] } 1&&
+            { [ get-link-info directory? ] [ "." head? not ] } 1&&
         ] filter
     ] with-directory-files natural-sort ;
 

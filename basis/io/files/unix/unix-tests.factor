@@ -58,31 +58,31 @@ prepare-test-file
 [ t ] [ test-file other-execute? ] unit-test
 
 [ t ] [ test-file f set-other-execute perms OCT: 776 = ] unit-test
-[ f ] [ test-file file-info other-execute? ] unit-test
+[ f ] [ test-file get-file-info other-execute? ] unit-test
 
 [ t ] [ test-file f set-other-write perms OCT: 774 = ] unit-test
-[ f ] [ test-file file-info other-write? ] unit-test
+[ f ] [ test-file get-file-info other-write? ] unit-test
 
 [ t ] [ test-file f set-other-read perms OCT: 770 = ] unit-test
-[ f ] [ test-file file-info other-read? ] unit-test
+[ f ] [ test-file get-file-info other-read? ] unit-test
 
 [ t ] [ test-file f set-group-execute perms OCT: 760 = ] unit-test
-[ f ] [ test-file file-info group-execute? ] unit-test
+[ f ] [ test-file get-file-info group-execute? ] unit-test
 
 [ t ] [ test-file f set-group-write perms OCT: 740 = ] unit-test
-[ f ] [ test-file file-info group-write? ] unit-test
+[ f ] [ test-file get-file-info group-write? ] unit-test
 
 [ t ] [ test-file f set-group-read perms OCT: 700 = ] unit-test
-[ f ] [ test-file file-info group-read? ] unit-test
+[ f ] [ test-file get-file-info group-read? ] unit-test
 
 [ t ] [ test-file f set-user-execute perms OCT: 600 = ] unit-test
-[ f ] [ test-file file-info other-execute? ] unit-test
+[ f ] [ test-file get-file-info other-execute? ] unit-test
 
 [ t ] [ test-file f set-user-write perms OCT: 400 = ] unit-test
-[ f ] [ test-file file-info other-write? ] unit-test
+[ f ] [ test-file get-file-info other-write? ] unit-test
 
 [ t ] [ test-file f set-user-read perms OCT: 000 = ] unit-test
-[ f ] [ test-file file-info other-read? ] unit-test
+[ f ] [ test-file get-file-info other-read? ] unit-test
 
 [ t ]
 [ test-file flags{ USER-ALL GROUP-ALL OTHER-EXECUTE } set-file-permissions perms OCT: 771 = ] unit-test
@@ -93,7 +93,7 @@ prepare-test-file
 [
     test-file now
     [ set-file-access-time ] 2keep
-    [ file-info accessed>> ]
+    [ get-file-info accessed>> ]
     [ [ [ truncate >integer ] change-second >gmt ] bi@ ] bi* =
 ] unit-test
 
@@ -101,14 +101,14 @@ prepare-test-file
 [
     test-file now
     [ set-file-modified-time ] 2keep
-    [ file-info modified>> ]
+    [ get-file-info modified>> ]
     [ [ [ truncate >integer ] change-second >gmt ] bi@ ] bi* =
 ] unit-test
 
 [ t ]
 [
     test-file now [ dup 2array set-file-times ] 2keep
-    [ file-info [ modified>> ] [ accessed>> ] bi ] dip
+    [ get-file-info [ modified>> ] [ accessed>> ] bi ] dip
     3array
     [ [ truncate >integer ] change-second >gmt ] map all-equal?
 ] unit-test

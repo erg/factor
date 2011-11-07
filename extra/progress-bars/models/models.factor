@@ -30,7 +30,7 @@ SYMBOL: file-size
 
 : with-file-reader-progress ( path encoding quot -- )
     '[
-        _ dup file-info size>> file-size set
+        _ dup get-file-info size>> file-size set
         _ _ [
             [ file-progress-loop ] "file-reader-progress" spawn drop
             \ progress-bar get 40 <file-progress-display> gadget. yield

@@ -106,7 +106,7 @@ TUPLE: cached-template path last-modified quot ;
 : load-template ( chloe -- cached-template )
     path>> ".xml" append
     [ ]
-    [ file-info modified>> ]
+    [ get-file-info modified>> ]
     [ file>xml compile-template ] tri
     \ cached-template boa ;
 
@@ -115,7 +115,7 @@ TUPLE: cached-template path last-modified quot ;
 : cached-template ( chloe -- cached-template/f )
     template-cache get at* [
         [
-            [ path>> file-info modified>> ]
+            [ path>> get-file-info modified>> ]
             [ last-modified>> ]
             bi =
         ] keep and

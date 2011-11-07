@@ -67,7 +67,7 @@ M: object >post-data
 : pathname>measured-stream ( pathname -- stream )
     string>>
     [ binary <file-reader> &dispose ]
-    [ file-info size>> ] bi
+    [ get-file-info size>> ] bi
     <measured-stream> ;
 
 : normalize-post-data ( request -- request )

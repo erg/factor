@@ -91,7 +91,7 @@ ERROR: file-not-found path bfs? quot ;
     '[ _ find-all-files ] map concat ; inline
 
 : link-size/0 ( path -- n )
-    [ link-info size-on-disk>> ] [ 2drop 0 ] recover ;
+    [ get-link-info size-on-disk>> ] [ 2drop 0 ] recover ;
 
 : directory-size ( path -- n )
     0 swap t [ link-size/0 + ] each-file ;

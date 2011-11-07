@@ -20,7 +20,7 @@ IN: io.directories.hierarchy
     '[ "" directory-tree-files @ ] with-directory ; inline
 
 : delete-tree ( path -- )
-    dup link-info directory? [
+    dup get-link-info directory? [
         [ [ [ delete-tree ] each ] with-directory-files ]
         [ delete-directory ]
         bi
@@ -30,7 +30,7 @@ DEFER: copy-tree-into
 
 : copy-tree ( from to -- )
     normalize-path
-    over link-info type>>
+    over get-link-info type>>
     {
         { +symbolic-link+ [ copy-link ] }
         { +directory+ [ '[ [ _ copy-tree-into ] each ] with-directory-files ] }

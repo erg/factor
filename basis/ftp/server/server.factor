@@ -71,12 +71,12 @@ C: <ftp-disconnect> ftp-disconnect
     resolve-symlinks server get serving-directory>> head? ;
 
 : can-serve-directory? ( path -- ? )
-    { [ exists? ] [ file-info directory? ] [ serving? ] } 1&& ;
+    { [ exists? ] [ get-file-info directory? ] [ serving? ] } 1&& ;
 
 : can-serve-file? ( path -- ? )
     {
         [ exists? ]
-        [ file-info type>> +regular-file+ = ]
+        [ get-file-info type>> +regular-file+ = ]
         [ serving? ]
     } 1&& ;
 
@@ -149,7 +149,7 @@ ERROR: type-error type ;
 : transfer-outgoing-file ( path -- )
     [ "Opening BINARY mode data connection for " ] dip
     [ file-name ] [
-        file-info size>> number>string
+        get-file-info size>> number>string
         "(" " bytes)." surround
     ] bi " " glue append 150 server-response ;
 
@@ -252,7 +252,7 @@ M: ftp-disconnect handle-passive-command ( stream obj -- )
 : handle-SIZE ( obj -- )
     tokenized>> second
     dup can-serve-file? [
-        file-info size>> number>string 213 server-response
+        get-file-info size>> number>string 213 server-response
     ] [
         not-a-plain-file
     ] if ;
@@ -279,7 +279,7 @@ M: ftp-disconnect handle-passive-command ( stream obj -- )
 : handle-MDTM ( obj -- )
     tokenized>> ?second [
         fixup-relative-path
-        dup file-info dup directory? [
+        dup get-file-info dup directory? [
             drop not-a-plain-file
         ] [
             nip

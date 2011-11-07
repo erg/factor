@@ -61,7 +61,7 @@ frequency pass-number ;
     ] with-scope
     [ mtab-csv>mtab-entry ] map ;
 
-M: linux file-systems
+M: linux get-file-systems
     parse-mtab [
         [ mount-point>> file-system-info ] keep
         {
@@ -84,7 +84,7 @@ M: linux file-systems
 
 ERROR: file-system-not-found ;
 
-M: linux file-system-info ( path -- file-system-info )
+M: linux get-file-system-info ( path -- file-system-info )
     normalize-path
     [
         [ new-file-system-info ] dip

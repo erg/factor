@@ -27,7 +27,7 @@ DEFER: add-child-monitor
 
 : add-child-monitor ( path -- )
     notify? [ dup { +add-file+ } monitor tget queue-change ] when
-    qualify-path dup link-info directory? [
+    qualify-path dup get-link-info directory? [
         [ add-child-monitors ]
         [
             '[

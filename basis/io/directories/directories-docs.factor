@@ -53,7 +53,7 @@ HELP: with-directory-files
         """USING: io.directories io.files.info io.pathnames ;
 home [
     [
-        dup link-info size>> 20 2^ >
+        dup get-link-info size>> 20 2^ >
         [ print ] [ drop ] if
     ] each
 ] with-directory-files"""

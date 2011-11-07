@@ -25,8 +25,8 @@ M: mock-io-backend (monitor)
         "Does not exist" throw
     ] if ;
 
-M: mock-io-backend link-info
-    global [ link-info ] bind ;
+M: mock-io-backend get-link-info
+    global [ get-link-info ] bind ;
 
 [ ] [ 0 counter boa dummy-monitor-created set ] unit-test
 [ ] [ 0 counter boa dummy-monitor-disposed set ] unit-test

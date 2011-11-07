@@ -18,7 +18,7 @@ TUPLE: file-responder root hook special index-names allow-listings ;
 
 : modified-since? ( filename -- ? )
     request get modified-since dup
-    [ [ file-info modified>> ] dip after? ] [ 2drop t ] if ;
+    [ [ get-file-info modified>> ] dip after? ] [ 2drop t ] if ;
 
 : <file-responder> ( root hook -- responder )
     file-responder new
@@ -32,7 +32,7 @@ TUPLE: file-responder root hook special index-names allow-listings ;
         [ binary <file-reader> &dispose ] dip <content>
         binary >>content-encoding
     ]
-    [ drop file-info [ size>> ] [ modified>> ] bi ] 2bi
+    [ drop get-file-info [ size>> ] [ modified>> ] bi ] 2bi
     [ "content-length" set-header ]
     [ "last-modified" set-header ] bi* ;
 
@@ -57,7 +57,7 @@ TUPLE: file-responder root hook special index-names allow-listings ;
 \ serve-file NOTICE add-input-logging
 
 : file>html ( name -- xml )
-    dup link-info directory? [ "/" append ] when
+    dup get-link-info directory? [ "/" append ] when
     dup [XML <li><a href=<->><-></a></li> XML] ;
 
 : directory>html ( path -- xml )
@@ -92,7 +92,7 @@ TUPLE: file-responder root hook special index-names allow-listings ;
 
 : serve-object ( filename -- response )
     serving-path dup exists?
-    [ dup file-info directory? [ serve-directory ] [ serve-file ] if ]
+    [ dup get-file-info directory? [ serve-directory ] [ serve-file ] if ]
     [ drop <404> ]
     if ;
 

@@ -87,13 +87,13 @@ TUPLE: windows-file-info < file-info attributes ;
         get-file-information BY_HANDLE_FILE_INFORMATION>file-info
     ] if ;
 
-M: windows file-info ( path -- info )
+M: windows get-file-info ( path -- info )
     normalize-path
     [ get-file-information-stat ]
     [ set-windows-size-on-disk ] bi ;
 
-M: windows link-info ( path -- info )
-    file-info ;
+M: windows get-link-info ( path -- info )
+    get-file-info ;
 
 CONSTANT: path-length $[ MAX_PATH 1 + ]
 
@@ -141,7 +141,7 @@ ERROR: not-absolute-path ;
 
 PRIVATE>
 
-M: windows file-system-info ( path -- file-system-info )
+M: windows get-file-system-info ( path -- file-system-info )
     normalize-path root-directory (file-system-info) ;
 
 CONSTANT: names-buf-length 16384
@@ -174,7 +174,7 @@ CONSTANT: names-buf-length 16384
         ]
     ] [ '[ _ FindVolumeClose win32-error=0/f ] ] bi [ ] cleanup ;
 
-M: windows file-systems ( -- array )
+M: windows get-file-systems ( -- array )
     find-volumes [ volume>paths ] map
     concat [
         [ (file-system-info) ]

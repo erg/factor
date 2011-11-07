@@ -13,7 +13,7 @@ IN: tools.deploy.test
 ERROR: image-too-big actual-size max-size ;
 
 : small-enough? ( n -- )
-    [ "test.image" temp-file file-info size>> ]
+    [ "test.image" temp-file get-file-info size>> ]
     [
         cell 4 / *
         cpu ppc? [ 100000 + ] when

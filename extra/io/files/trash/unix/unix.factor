@@ -25,9 +25,9 @@ IN: io.files.trash.unix
 
 : check-trash-path ( path -- )
     {
-        [ file-info directory? ]
+        [ get-file-info directory? ]
         [ sticky? ]
-        [ link-info type>> +symbolic-link+ = not ]
+        [ get-link-info type>> +symbolic-link+ = not ]
     } 1&& [ "invalid trash path" throw ] unless ;
 
 : trash-home ( -- path )

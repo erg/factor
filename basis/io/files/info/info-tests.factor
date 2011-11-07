@@ -9,8 +9,8 @@ IN: io.files.info.tests
 ] unit-test
 
 [ t ] [
-    temp-directory [ "test41" file-info size>> ] with-directory 4 =
+    temp-directory [ "test41" get-file-info size>> ] with-directory 4 =
 ] unit-test
 
-[ t ] [ "/" file-system-info file-system-info? ] unit-test
-[ t ] [ file-systems [ file-system-info? ] all? ] unit-test
+[ t ] [ "/" get-file-system-info file-system-info? ] unit-test
+[ t ] [ get-file-systems [ file-system-info? ] all? ] unit-test

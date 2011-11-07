@@ -9,7 +9,7 @@ IN: mason.disk
 : sufficient-disk-space? ( -- ? )
     ! We want at least 300Mb to be available before starting
     ! a build.
-    current-directory get file-system-info available-space>>
+    current-directory get get-file-system-info available-space>>
     gb > ;
 
 : check-disk-space ( -- )
@@ -20,7 +20,7 @@ IN: mason.disk
 : mb-str ( n -- string ) gb /i number>string ;
 
 : disk-usage ( -- string )
-    builds-dir get file-system-info
+    builds-dir get get-file-system-info
     [ used-space>> ] [ total-space>> ] bi
     [ [ mb-str ] bi@ " / " glue " Gb used" append ]
     [ [ 100 * ] dip /i number>string "(" "%)" surround ] 2bi

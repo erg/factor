@@ -57,6 +57,6 @@ ARTICLE: "io.files.links" "Symbolic links"
 "Copying links:"
 { $subsections copy-link }
 "Not all operating systems support symbolic links."
-{ $see-also link-info } ;
+{ $see-also get-link-info } ;
 
 ABOUT: "io.files.links"

@@ -17,7 +17,7 @@ INSTANCE: limited-stream input-stream
 
 : <limited-file-reader> ( path encoding -- stream' )
     [ <file-reader> ]
-    [ drop file-info size>> ] 2bi
+    [ drop get-file-info size>> ] 2bi
     <limited-stream> ;
 
 GENERIC# limit-stream 1 ( stream limit -- stream' )

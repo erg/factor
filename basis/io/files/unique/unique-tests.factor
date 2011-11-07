@@ -6,12 +6,12 @@ IN: io.files.unique.tests
 [ 123 ] [
     "core" ".test" [
         [ [ 123 CHAR: a <string> ] dip ascii set-file-contents ]
-        [ file-info size>> ] bi
+        [ get-file-info size>> ] bi
     ] cleanup-unique-file
 ] unit-test
 
 [ t ] [
-    [ current-directory get file-info directory? ] cleanup-unique-directory
+    [ current-directory get get-file-info directory? ] cleanup-unique-directory
 ] unit-test
 
 [ t ] [

@@ -24,7 +24,7 @@ IN: io.directories.tests
 
 [ ] [ "blahblah" temp-file dup exists? [ delete-directory ] [ drop ] if ] unit-test
 [ ] [ "blahblah" temp-file make-directory ] unit-test
-[ t ] [ "blahblah" temp-file file-info directory? ] unit-test
+[ t ] [ "blahblah" temp-file get-file-info directory? ] unit-test
 
 [ t ] [
     [ temp-directory "loldir" append-path delete-directory ] ignore-errors
@@ -76,7 +76,7 @@ IN: io.directories.tests
 [ ] [
     temp-directory [
         "file6" touch-file
-        "file6" link-info drop
+        "file6" get-link-info drop
     ] with-directory
 ] unit-test
 

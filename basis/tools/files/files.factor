@@ -74,7 +74,7 @@ M: object file-spec>string ( file-listing spec -- string )
 
 : list-files-slow ( listing-tool -- array )
     [ path>> ] [ sort>> ] [ specs>> ] tri '[
-        [ dup name>> link-info file-listing boa ] map
+        [ dup name>> get-link-info file-listing boa ] map
         _ [ sort-by ] when*
         [ _ [ file-spec>string ] with map ] map
     ] with-directory-entries ; inline
@@ -108,11 +108,11 @@ SYMBOLS: +device-name+ +mount-point+ +type+
         ] }
     } case ;
 
-: file-systems-info ( spec -- seq )
-    file-systems swap '[ _ [ file-system-spec ] with map ] map ;
+: get-file-systems-info ( spec -- seq )
+    get-file-systems swap '[ _ [ file-system-spec ] with map ] map ;
 
 : print-file-systems ( spec -- )
-    [ file-systems-info ]
+    [ get-file-systems-info ]
     [ [ unparse ] map ] bi prefix simple-table. ;
 
 CONSTANT: default-file-systems-spec
