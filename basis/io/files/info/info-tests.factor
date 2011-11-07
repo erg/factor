@@ -5,7 +5,7 @@ IN: io.files.info.tests
 
 [ t ] [
     temp-directory [ "hi41" "test41" utf8 set-file-contents ] with-directory
-    temp-directory "test41" append-path utf8 file-contents "hi41" =
+    temp-directory "test41" append-path utf8 get-file-contents "hi41" =
 ] unit-test
 
 [ t ] [

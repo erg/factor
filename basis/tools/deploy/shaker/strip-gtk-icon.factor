@@ -9,5 +9,5 @@ CONSTANT: get-icon-data
         deploy-vocab get
         dup vocab-dir "icon.png" append-path vocab-append-path
         [ exists? ] keep "resource:misc/icons/Factor_48x48.png" ?
-        binary file-contents
+        binary get-file-contents
     ]

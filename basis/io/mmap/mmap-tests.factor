@@ -10,7 +10,7 @@ IN: io.mmap.tests
 [ ] [ "mmap-test-file.txt" temp-file [ char <mapped-array> CHAR: 2 0 pick set-nth drop ] with-mapped-file ] unit-test
 [ 5 ] [ "mmap-test-file.txt" temp-file [ char <mapped-array> length ] with-mapped-file ] unit-test
 [ 5 ] [ "mmap-test-file.txt" temp-file [ char <mapped-array> length ] with-mapped-file-reader ] unit-test
-[ "22345" ] [ "mmap-test-file.txt" temp-file ascii file-contents ] unit-test
+[ "22345" ] [ "mmap-test-file.txt" temp-file ascii get-file-contents ] unit-test
 
 SPECIALIZED-ARRAY: uint
 

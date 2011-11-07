@@ -88,7 +88,7 @@ IN: io.files.tests
 ] unit-test
 
 [ t ] [
-    "test.txt" temp-file binary file-contents
+    "test.txt" temp-file binary get-file-contents
     B{ 0 1 2 } =
 ] unit-test
 
@@ -104,7 +104,7 @@ CONSTANT: pt-array-1
 ] unit-test
 
 [ t ] [
-    "test.txt" temp-file binary file-contents
+    "test.txt" temp-file binary get-file-contents
     pt-array-1 >c-ptr sequence=
 ] unit-test
 
@@ -116,7 +116,7 @@ CONSTANT: pt-array-1
 ] unit-test
 
 [ t ] [
-    "test.txt" temp-file binary file-contents
+    "test.txt" temp-file binary get-file-contents
     pt cast-array
     pt-array-1 rest-slice sequence=
 ] unit-test
@@ -169,7 +169,7 @@ CONSTANT: pt-array-1
             tell-output 1 assert=
         ] with-file-writer
     ] [
-        file-contents
+        get-file-contents
     ] 2bi
 ] unit-test
 
@@ -186,7 +186,7 @@ CONSTANT: pt-array-1
             tell-output 5 assert=
         ] with-file-writer
     ] [
-        file-contents
+        get-file-contents
     ] 2bi
 ] unit-test
 
@@ -203,7 +203,7 @@ CONSTANT: pt-array-1
             tell-output 7 assert=
         ] with-file-writer
     ] [
-        file-contents
+        get-file-contents
     ] 2bi
 ] unit-test
 

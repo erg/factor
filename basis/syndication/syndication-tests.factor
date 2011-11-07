@@ -5,7 +5,7 @@ IN: syndication.tests
 : load-news-file ( filename -- feed )
     #! Load an news syndication file and process it, returning
     #! it as an feed tuple.
-    binary file-contents parse-feed ;
+    binary get-file-contents parse-feed ;
 
 [ T{
     feed

@@ -33,7 +33,7 @@ CHLOE: write-title
 
 CHLOE: style
     dup "include" optional-attr [
-        utf8 file-contents [ add-style ] [code-with]
+        utf8 get-file-contents [ add-style ] [code-with]
     ] [
         compile-children>string [ add-style ] [code]
     ] ?if ;

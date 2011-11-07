@@ -38,13 +38,13 @@ ARTICLE: "vocabs.metadata" "Vocabulary metadata"
 }
 "Getting and setting arbitrary vocabulary metadata:"
 { $subsections
-    vocab-file-contents
+    get-vocab-file-contents
     set-vocab-file-contents
 } ;
 
 ABOUT: "vocabs.metadata"
 
-HELP: vocab-file-contents
+HELP: get-vocab-file-contents
 { $values { "vocab" "a vocabulary specifier" } { "name" string } { "seq" "a sequence of lines, or " { $link f } } }
 { $description "Outputs the contents of the file named " { $snippet "name" } " from the vocabulary's directory, or " { $link f } " if the file does not exist." } ;
 

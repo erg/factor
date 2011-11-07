@@ -7,7 +7,7 @@ IN: html.templates.fhtml.tests
     "vocab:html/templates/fhtml/test/"
     prepend
     [ ".fhtml" append <fhtml> [ call-template ] with-string-writer ]
-    [ ".html" append utf8 file-contents ] bi
+    [ ".html" append utf8 get-file-contents ] bi
     [ . . ] [ = ] 2bi ;
 
 [ t ] [ "example" test-template ] unit-test

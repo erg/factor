@@ -28,7 +28,7 @@ CONSTANT: test-file-contents "Files are so boring anymore."
 [
     [
         [
-            [ ftp-get ] [ path>> file-name ascii file-contents ] bi
+            [ ftp-get ] [ path>> file-name ascii get-file-contents ] bi
         ] cleanup-unique-working-directory
     ] test-ftp-server test-file-contents =
 ] unit-test
@@ -38,7 +38,7 @@ CONSTANT: test-file-contents "Files are so boring anymore."
     [
         "/" >>path
         [
-            [ ftp-get ] [ path>> file-name ascii file-contents ] bi
+            [ ftp-get ] [ path>> file-name ascii get-file-contents ] bi
         ] cleanup-unique-working-directory
     ] test-ftp-server test-file-contents =
 ] must-fail

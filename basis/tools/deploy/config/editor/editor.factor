@@ -10,7 +10,7 @@ IN: tools.deploy.config.editor
 
 : deploy-config ( vocab -- assoc )
     dup default-config swap
-    dup deploy-config-path vocab-file-contents
+    dup deploy-config-path get-vocab-file-contents
     parse-fresh [ first assoc-union ] unless-empty ;
 
 : set-deploy-config ( assoc vocab -- )

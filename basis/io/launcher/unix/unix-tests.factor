@@ -100,7 +100,7 @@ io.launcher.unix ;
         try-process
     ] with-directory
     temp-directory "aloha" append-path
-    utf8 file-contents
+    utf8 get-file-contents
 ] unit-test
 
 [ "append-test" temp-file delete-file ] ignore-errors
@@ -112,7 +112,7 @@ io.launcher.unix ;
             "append-test" temp-file <appender> >>stdout
         try-process
     ] times
-    "append-test" temp-file utf8 file-contents
+    "append-test" temp-file utf8 get-file-contents
 ] unit-test
 
 [ t ] [ "ls" utf8 <process-stream> stream-contents >boolean ] unit-test

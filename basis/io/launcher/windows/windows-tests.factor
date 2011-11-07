@@ -211,7 +211,7 @@ IN: io.launcher.windows.tests
         ] with-directory
     ] times
    
-    "append-test" temp-file ascii file-contents
+    "append-test" temp-file ascii get-file-contents
 ] unit-test
 
 [ "( scratchpad ) " ] [

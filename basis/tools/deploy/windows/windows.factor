@@ -25,7 +25,7 @@ CONSTANT: app-icon-resource-id "APPICON"
 
 : embed-ico ( vm vocab -- )
     dup vocab-windows-icon-path vocab-append-path dup exists?
-    [ binary file-contents app-icon-resource-id embed-icon-resource ]
+    [ binary get-file-contents app-icon-resource-id embed-icon-resource ]
     [ 2drop ] if ;
 
 M: windows deploy*

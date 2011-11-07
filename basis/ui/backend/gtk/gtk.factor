@@ -224,7 +224,7 @@ CONSTANT: action-key-codes
 ! This word gets replaced when deploying. See 'Vocabulary icons'
 ! in the docs and tools.deploy.shaker.gtk-icon
 : get-icon-data ( -- byte-array )
-    "resource:misc/icons/Factor_48x48.png" binary file-contents ;
+    "resource:misc/icons/Factor_48x48.png" binary get-file-contents ;
 
 : load-icon ( -- )
     get-icon-data [

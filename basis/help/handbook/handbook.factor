@@ -5,7 +5,9 @@ math system strings sbufs vectors byte-arrays quotations
 io.streams.byte-array classes.builtin parser lexer
 classes.predicate classes.union classes.intersection
 classes.singleton classes.tuple help.vocabs math.parser
-accessors definitions sets ;
+accessors definitions sets io.encodings.utf8 io.encodings.binary
+io.files ;
+
 IN: help.handbook
 
 ARTICLE: "conventions" "Conventions"
@@ -177,8 +179,6 @@ ARTICLE: "collections" "Collections"
 }
 "There are also many other vocabularies tagged " { $link T{ vocab-tag { name "collections" } } } " in the library." ;
 
-USING: io.encodings.utf8 io.encodings.binary io.files ;
-
 ARTICLE: "encodings-introduction" "An introduction to encodings"
 "In order to express text in terms of binary, some sort of encoding has to be used. In a modern context, this is understood as a two-way mapping between Unicode code points (characters) and some amount of binary. Since English isn't the only language in the world, ASCII is not sufficient as a mapping from binary to Unicode; it can't even express em-dashes or curly quotes. Unicode was designed as a universal character set that could potentially represent everything." $nl
 "Not all encodings can represent all Unicode code points, but Unicode can represent basically everything that exists in modern encodings. Some encodings are language-specific, and some can represent everything in Unicode. Though the world is moving toward Unicode and UTF-8, the reality today is that there are several encodings which must be taken into account." $nl
@@ -189,8 +189,8 @@ ARTICLE: "encodings-introduction" "An introduction to encodings"
 { $code "\"file.txt\" utf8 strict <file-reader>" }
 "In a similar way, encodings can be specified when opening a file for writing."
 { $code "USE: io.encodings.ascii" "\"file.txt\" ascii <file-writer>" }
-"An encoding is also needed for some words that don't return streams, such as " { $link file-contents } ", for example"
-{ $code "USE: io.encodings.utf16" "\"file.txt\" utf16 file-contents" }
+"An encoding is also needed for some words that don't return streams, such as " { $link get-file-contents } ", for example"
+{ $code "USING: io.files io.encodings.utf16 ;" "\"file.txt\" utf16 get-file-contents" }
 "Encoding descriptors are also used by " { $link "io.streams.byte-array" } " and taken by combinators like " { $link with-file-writer } " and " { $link with-byte-reader } " which deal with streams. It is " { $emphasis "not" } " used with " { $link "io.streams.string" } " because these deal with abstract text."
 $nl
 "When the " { $link binary } " encoding is used, a " { $link byte-array } " is expected for writing and returned for reading, since the stream deals with bytes. All other encodings deal with strings, since they are used to represent text." ;

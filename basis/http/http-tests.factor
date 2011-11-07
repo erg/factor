@@ -261,7 +261,7 @@ http.server.dispatchers db.tuples ;
 ] unit-test
 
 [ t ] [
-    "vocab:http/test/foo.html" ascii file-contents
+    "vocab:http/test/foo.html" ascii get-file-contents
     "http://localhost/nested/foo.html" add-addr http-get nip =
 ] unit-test
 
@@ -413,7 +413,7 @@ SYMBOL: a
 
 [ t ] [
     "http://localhost/" add-addr http-get nip
-    "vocab:http/test/foo.html" ascii file-contents =
+    "vocab:http/test/foo.html" ascii get-file-contents =
 ] unit-test
 
 [ ] [ stop-test-httpd ] unit-test

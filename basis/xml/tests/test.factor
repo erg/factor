@@ -15,7 +15,7 @@ SYMBOL: xml-file
     [ file>xml ] with-html-entities xml-file set
 ] unit-test
 [ t ] [
-    "vocab:xml/tests/test.xml" binary file-contents
+    "vocab:xml/tests/test.xml" binary get-file-contents
     [ bytes>xml ] with-html-entities xml-file get =
 ] unit-test
 [ "1.0" ] [ xml-file get prolog>> version>> ] unit-test

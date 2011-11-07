@@ -44,4 +44,4 @@ M: byte-vector hexdump. hexdump-bytes ;
     [ hexdump. ] with-string-writer ;
 
 : hexdump-file ( path -- )
-    binary file-contents hexdump. ;
+    binary get-file-contents hexdump. ;

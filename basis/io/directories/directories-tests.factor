@@ -47,7 +47,7 @@ IN: io.directories.tests
     temp-directory [
         "file1 contents" "file1" utf8 set-file-contents
         "file1" "file2" copy-file
-        "file2" utf8 file-contents
+        "file2" utf8 get-file-contents
     ] with-directory
     "file1" temp-file delete-file
     "file2" temp-file delete-file
@@ -57,7 +57,7 @@ IN: io.directories.tests
     temp-directory [
         "file3 contents" "file3" utf8 set-file-contents
         "file3" "file4" move-file
-        "file4" utf8 file-contents
+        "file4" utf8 get-file-contents
     ] with-directory
     "file4" temp-file delete-file
 ] unit-test
@@ -98,11 +98,11 @@ IN: io.directories.tests
 ] unit-test
 
 [ "Hello world.\nHello appender.\n" ] [
-    "test-foo.txt" temp-file ascii file-contents
+    "test-foo.txt" temp-file ascii get-file-contents
 ] unit-test
 
 [ "Hello appender.\n" ] [
-    "test-bar.txt" temp-file ascii file-contents
+    "test-bar.txt" temp-file ascii get-file-contents
 ] unit-test
 
 [ ] [ "test-foo.txt" temp-file delete-file ] unit-test
@@ -158,7 +158,7 @@ IN: io.directories.tests
 ] unit-test
 
 [ "Foobar" ] [
-    "copy-destination/a/b/c/d" temp-file ascii file-contents
+    "copy-destination/a/b/c/d" temp-file ascii get-file-contents
 ] unit-test
 
 [ ] [
@@ -171,7 +171,7 @@ IN: io.directories.tests
 ] unit-test
 
 [ "Foobar" ] [
-    "copy-destination/copy-tree-test/a/b/c/d" temp-file ascii file-contents
+    "copy-destination/copy-tree-test/a/b/c/d" temp-file ascii get-file-contents
 ] unit-test
 
 [ ] [
@@ -179,7 +179,7 @@ IN: io.directories.tests
 ] unit-test
 
 [ "Foobar" ] [
-    "d" temp-file ascii file-contents
+    "d" temp-file ascii get-file-contents
 ] unit-test
 
 [ ] [ "d" temp-file delete-file ] unit-test

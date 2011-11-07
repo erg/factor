@@ -26,7 +26,7 @@ HOOK: (file-appender) io-backend ( path -- stream )
 : with-file-reader ( path encoding quot -- )
     [ <file-reader> ] dip with-input-stream ; inline
 
-: file-contents ( path encoding -- seq )
+: get-file-contents ( path encoding -- seq )
     <file-reader> stream-contents ;
 
 : with-file-writer ( path encoding quot -- )

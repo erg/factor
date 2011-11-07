@@ -38,7 +38,7 @@ M: f topic>filename* drop \ f topic>filename* ;
 M: topic url-of topic>filename ;
 
 : help-stylesheet ( -- xml )
-    "vocab:help/html/stylesheet.css" ascii file-contents
+    "vocab:help/html/stylesheet.css" ascii get-file-contents
     [XML <style><-></style> XML] ;
 
 : help-navbar ( -- xml )
@@ -114,7 +114,7 @@ M: topic url-of topic>filename ;
     ] bi ;
 
 MEMO: load-index ( name -- index )
-    binary file-contents bytes>object ;
+    binary get-file-contents bytes>object ;
 
 TUPLE: result title href ;
 
