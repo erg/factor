@@ -63,11 +63,11 @@ TUPLE: run-loop fds sources timers ;
 : <run-loop> ( -- run-loop )
     V{ } clone V{ } clone V{ } clone \ run-loop boa ;
 
-: run-loop ( -- run-loop )
+: get-run-loop ( -- run-loop )
     \ run-loop [ <run-loop> ] initialize-alien ;
 
 : add-source-to-run-loop ( source -- )
-    [ run-loop sources>> push ]
+    [ get-run-loop sources>> push ]
     [
         CFRunLoopGetMain
         swap CFRunLoopDefaultMode
@@ -80,13 +80,13 @@ TUPLE: run-loop fds sources timers ;
 : add-fd-to-run-loop ( fd callback -- )
     [
         <CFFileDescriptor> |CFRelease
-        [ run-loop fds>> push ]
+        [ get-run-loop fds>> push ]
         [ create-fd-source |CFRelease add-source-to-run-loop ]
         bi
     ] with-destructors ;
 
 : add-timer-to-run-loop ( timer -- )
-    [ run-loop timers>> push ]
+    [ get-run-loop timers>> push ]
     [
         CFRunLoopGetMain
         swap CFRunLoopDefaultMode
@@ -94,7 +94,7 @@ TUPLE: run-loop fds sources timers ;
     ] bi ;
 
 : invalidate-run-loop-timers ( -- )
-    run-loop [
+    get-run-loop [
         [ [ CFRunLoopTimerInvalidate ] [ CFRelease ] bi ] each
         V{ } clone
     ] change-timers drop ;
@@ -112,7 +112,7 @@ TUPLE: run-loop fds sources timers ;
 PRIVATE>
 
 : reset-run-loop ( -- )
-    run-loop
+    get-run-loop
     [ timers>> [ reset-timer ] each ]
     [ fds>> [ enable-all-callbacks ] each ] bi ;
 
