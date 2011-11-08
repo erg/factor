@@ -65,7 +65,7 @@ M:: same-length-zip-iterator iterator-peek-front1 ( zip-iterator -- zip-iterator
 
 M:: shortest-zip-iterator iterator-peek-front1 ( zip-iterator -- zip-iterator' value ? )
     zip-iterator >zip-iterator-peek< :> ( iterator0 value0 0? iterator1 value1 1? )
-    iterator0 iterator1 <same-length-zip-iterator>
+    iterator0 iterator1 <shortest-zip-iterator>
     0? 1? and [
         value0 value1 2array t
     ] [

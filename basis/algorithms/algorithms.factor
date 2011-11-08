@@ -1,7 +1,7 @@
 ! Copyright (C) 2011 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: iterators iterators.input iterators.output kernel locals
-fry math generalizations ;
+USING: fry generalizations iterators iterators.input
+iterators.output iterators.zip kernel locals math sequences ;
 IN: algorithms
 
 ! if you have lazy map and copy (from input iterator to output iterator) to start with
@@ -52,10 +52,12 @@ IN: algorithms
 : reduce ( obj identity quot -- obj' )
     swapd each ; inline
 
+
+
 ! : map-reduce ( ..a seq map-quot: ( ..a x -- ..b elt ) reduce-quot: ( ..b prev elt -- ..a next ) -- ..a result )
     ! [ [ unclip-slice ] dip [ call ] keep ] dip compose reduce ; inline
 
-:: copy-pred ( input0 output map-quot continue-pred take-pred -- input output )
+:: copy-pred ( input0 output map-quot: ( ..a x -- ..b elt ) continue-pred: ( ..a x -- ..b ? ) take-pred: ( ..a x -- ..b ? ) -- input output )
     input0 iterator-peek-front1 :> ( input1 elt1 present? )
     present? [
         elt1 continue-pred call [
@@ -68,10 +70,14 @@ IN: algorithms
         ] if
     ] [
         input1 output
-    ] if ; inline
+    ] if ; inline recursive
 
-! : head-as ( obj n exemplar -- obj' ) swap [ ] [ ] predicate-true ;
-! : head ( obj n -- obj' ) over head-as ; inline
+: head-as ( obj n exemplar -- obj' )
+    [ [ [ <iterator> ] [ iota <iterator> ] bi* <shortest-zip-iterator> ] keep ] dip <output-iterator>
+    [ first ] predicate-true predicate-true copy-pred nip iterator>object ;
+
+: head ( obj n -- obj' ) over head-as ;
+
 ! : reduce
 ! : accumulate
 ! : map-reduce
