@@ -5,6 +5,10 @@ kernel.private byte-arrays byte-vectors arrays init
 continuations.private ;
 IN: alien
 
+PRIMITIVE: <callback> ( return-rewind word -- alien ) "primitive_callback"
+PRIMITIVE: <displaced-alien> ( displacement c-ptr -- alien ) "primitive_displaced_alien"
+PRIMITIVE: alien-address ( c-ptr -- addr ) "primitive_alien_address"
+
 PREDICATE: pinned-alien < alien underlying>> not ;
 
 UNION: pinned-c-ptr pinned-alien POSTPONE: f ;

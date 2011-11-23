@@ -46,6 +46,7 @@ IN: bootstrap.syntax
         "SBUF\""
         "SINGLETON:"
         "SINGLETONS:"
+        "SUB-PRIMITIVE:"
         "SYMBOL:"
         "SYMBOLS:"
         "CONSTANT:"

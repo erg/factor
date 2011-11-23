@@ -9,7 +9,7 @@ io.pathnames vocabs vocabs.parser classes.parser classes.union
 classes.intersection classes.mixin classes.predicate
 classes.singleton classes.tuple.parser compiler.units classes.maybe
 combinators effects.parser slots hash-sets source-files
-classes.algebra.private ;
+classes.algebra.private primitives ;
 IN: bootstrap.syntax
 
 ! These words are defined as a top-level form, instead of with
@@ -31,7 +31,11 @@ IN: bootstrap.syntax
     { "]" "}" ";" ">>" } [ define-delimiter ] each
 
     "PRIMITIVE:" [
-        "Primitive definition is not supported" throw
+        scan-token current-vocab scan-object scan-object swap make-primitive
+    ] define-core-syntax
+
+    "SUB-PRIMITIVE:" [
+        scan-token current-vocab scan-object make-sub-primitive
     ] define-core-syntax
 
     "CS{" [

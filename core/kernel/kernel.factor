@@ -3,6 +3,8 @@
 USING: kernel.private slots.private math.private ;
 IN: kernel
 
+SUB-PRIMITIVE: dup ( x -- x x )
+
 DEFER: dip
 DEFER: 2dip
 DEFER: 3dip

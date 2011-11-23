@@ -397,9 +397,9 @@ tuple
     ] dip define-declared ;
 
 {
-    { "<callback>" "alien" "primitive_callback" ( return-rewind word -- alien ) }
-    { "<displaced-alien>" "alien" "primitive_displaced_alien" ( displacement c-ptr -- alien ) }
-    { "alien-address" "alien" "primitive_alien_address" ( c-ptr -- addr ) }
+    ! { "<callback>" "alien" "primitive_callback" ( return-rewind word -- alien ) }
+    ! { "<displaced-alien>" "alien" "primitive_displaced_alien" ( displacement c-ptr -- alien ) }
+    ! { "alien-address" "alien" "primitive_alien_address" ( c-ptr -- addr ) }
     { "alien-cell" "alien.accessors" "primitive_alien_cell" ( c-ptr n -- value ) }
     { "alien-double" "alien.accessors" "primitive_alien_double" ( c-ptr n -- value ) }
     { "alien-float" "alien.accessors" "primitive_alien_float" ( c-ptr n -- value ) }
