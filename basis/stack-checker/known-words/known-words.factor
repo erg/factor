@@ -280,7 +280,7 @@ M: object infer-call* \ call bad-macro-input ;
 ! Stack effects for all primitives
 \ (byte-array) { integer } { byte-array } define-primitive \ (byte-array) make-flushable
 \ (clone) { object } { object } define-primitive \ (clone) make-flushable
-\ (code-blocks) { } { array } define-primitive \ (code-blocks)  make-flushable
+\ (code-blocks) { } { array } define-primitive \ (code-blocks) make-flushable
 \ (dlopen) { byte-array } { dll } define-primitive
 \ (dlsym) { byte-array object } { c-ptr } define-primitive
 \ (dlsym-raw) { byte-array object } { c-ptr } define-primitive
@@ -348,7 +348,7 @@ M: object infer-call* \ call bad-macro-input ;
 \ callstack-for { c-ptr } { callstack } define-primitive \ callstack make-flushable
 \ callstack>array { callstack } { array } define-primitive \ callstack>array make-flushable
 \ check-datastack { array integer integer } { object } define-primitive \ check-datastack make-flushable
-\ (code-room) { } { byte-array } define-primitive \ (code-room)  make-flushable
+\ (code-room) { } { byte-array } define-primitive \ (code-room) make-flushable
 \ compact-gc { } { } define-primitive
 \ compute-identity-hashcode { object } { } define-primitive
 \ context-object { fixnum } { object } define-primitive \ context-object make-flushable
