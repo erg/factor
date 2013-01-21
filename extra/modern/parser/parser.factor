@@ -69,7 +69,6 @@ CONSTRUCTOR: comment ( text -- comment ) ;
         _ get-string 2dup = [ 2drop f ] [ nip ] if
     ] loop>array ;
 
-
 ERROR: no-more-tokens ;
 : parse ( -- object/f )
     token parse-action ;
@@ -79,6 +78,12 @@ ERROR: no-more-tokens ;
         [ parse ] loop>array
         comments get
     ] with-variable ;
+
+: parse-file ( path -- seq comments )
+    utf8 [ parse-input ] with-file-reader ; inline
+
+: parse-stream ( stream -- seq comments )
+    [ parse-input ] with-input-stream ; inline
 
 ERROR: token-expected token ;
 : parse-until ( string -- strings/f )
@@ -97,6 +102,8 @@ ERROR: expected expected got ;
 : expect-one ( strings -- )
     token 2dup swap member? [ 2drop ] [ expected ] if ;
 
+: body ( -- strings ) ";" parse-until ;
+
 TUPLE: signature in out ;
 CONSTRUCTOR: signature ( in out -- signature ) ;
 
@@ -111,7 +118,7 @@ CONSTRUCTOR: function ( name signature body -- function ) ;
 : parse-function ( -- function )
     token
     parse-signature(--)
-    ";" parse-until <function> ;
+    body <function> ;
 
 TUPLE: use strings ;
 CONSTRUCTOR: use ( strings -- use ) ;
@@ -172,20 +179,20 @@ CONSTRUCTOR: call( ( signature -- call ) ;
 : parse-call( ( -- call( )
     parse-signature--) <call(> ;
 
-TUPLE: generic name signature ;
-CONSTRUCTOR: generic ( name signature -- generic ) ;
-: parse-generic ( -- generic )
-    token parse-signature(--) <generic> ;
+TUPLE: mgeneric name signature ;
+CONSTRUCTOR: mgeneric ( name signature -- generic ) ;
+: parse-mgeneric ( -- generic )
+    token parse-signature(--) <mgeneric> ;
 
-TUPLE: method class name body ;
-CONSTRUCTOR: method ( class name body -- method ) ;
-: parse-method ( -- method )
-    token token ";" parse-until <method> ;
+TUPLE: mmethod class name body ;
+CONSTRUCTOR: mmethod ( class name body -- method ) ;
+: parse-mmethod ( -- method )
+    token token body <mmethod> ;
 
-TUPLE: private body ;
-CONSTRUCTOR: private ( body -- private ) ;
-: parse-private ( -- private )
-    "PRIVATE>" parse-until <private> ;
+! TUPLE: private body ;
+! CONSTRUCTOR: private ( body -- private ) ;
+! : parse-private ( -- private )
+    ! "PRIVATE>" parse-until <private> ;
 
 TUPLE: from module functions ;
 CONSTRUCTOR: from ( module functions -- from ) ;
@@ -197,15 +204,20 @@ CONSTRUCTOR: constant ( name object -- constant ) ;
 : parse-constant ( -- constant )
     token parse <constant> ;
 
-TUPLE: tuple name body ;
-CONSTRUCTOR: tuple ( name body -- tuple ) ;
-: parse-tuple ( -- tuple )
-    token ";" parse-until <tuple> ;
+TUPLE: mtuple name body ;
+CONSTRUCTOR: mtuple ( name body -- tuple ) ;
+: parse-mtuple ( -- mtuple )
+    token body <mtuple> ;
 
-TUPLE: error name body ;
-CONSTRUCTOR: error ( name body -- error ) ;
-: parse-error ( -- error )
-    token ";" parse-until <error> ;
+TUPLE: merror name body ;
+CONSTRUCTOR: merror ( name body -- error ) ;
+: parse-merror ( -- merror )
+    token body <merror> ;
+
+TUPLE: mparser name start slots body ;
+CONSTRUCTOR: mparser ( name start slots body -- package ) ;
+: parse-mparser ( -- parser )
+    get-string parse parse body <mparser> ;
 
 TUPLE: package name ;
 CONSTRUCTOR: package ( name -- package ) ;
@@ -222,6 +234,7 @@ CONSTRUCTOR: imports ( names -- package ) ;
 : parse-imports ( -- import )
     ";" strings-until <imports> ;
 
+\ parse-mparser "PARSER:" parsers get set-at
 \ parse-package "PACKAGE:" parsers get set-at
 \ parse-import "IMPORT:" parsers get set-at
 \ parse-imports "IMPORTS:" parsers get set-at
@@ -234,24 +247,18 @@ CONSTRUCTOR: imports ( names -- package ) ;
 \ parse-char "CHAR:" parsers get set-at
 \ parse-escaped "\\" parsers get set-at
 \ parse-execute( "execute(" parsers get set-at
-\ parse-call( "-call(" parsers get set-at
-\ parse-private "<PRIVATE" parsers get set-at
+\ parse-call( "call(" parsers get set-at
+! \ parse-private "<PRIVATE" parsers get set-at
 
 \ parse-constant "CONSTANT:" parsers get set-at
-\ parse-tuple "TUPLE:" parsers get set-at
-\ parse-error "ERROR:" parsers get set-at
+\ parse-mtuple "TUPLE:" parsers get set-at
+\ parse-merror "ERROR:" parsers get set-at
 
 \ parse-block "[" parsers get set-at
 \ parse-marray "{" parsers get set-at
 \ parse-mvector "V{" parsers get set-at
 \ parse-mhashtable "H{" parsers get set-at
 
-\ parse-generic "GENERIC:" parsers get set-at
-\ parse-method "M:" parsers get set-at
+\ parse-mgeneric "GENERIC:" parsers get set-at
+\ parse-mmethod "M:" parsers get set-at
 \ parse-function ":" parsers get set-at
-
-: parse-file ( path -- seq comments )
-    utf8 [ parse-input ] with-file-reader ; inline
-
-: parse-stream ( stream -- seq comments )
-    [ parse-input ] with-input-stream ; inline
