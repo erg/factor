@@ -262,3 +262,31 @@ CONSTRUCTOR: imports ( names -- package ) ;
 \ parse-mgeneric "GENERIC:" parsers get set-at
 \ parse-mmethod "M:" parsers get set-at
 \ parse-function ":" parsers get set-at
+
+
+! FUNCTOR: define-box ( T -- )
+
+! ALIAS: B ${T}-box
+! ALIAS: <B> <${T}>
+
+! TUPLE: B { value T } ;
+! C: <B> B ( T -- B )
+
+! ;
+
+! \ float define-box
+ 
+! FUNCTOR: define-box ( T -- )
+! H{ { T float } }
+
+! ALIAS: B ${T}-box
+! H{ { T float } { B float-box } }
+! ALIAS: <B> <${T}>
+! H{ { T float } { B float-box } { <B> <float-box>}
+
+! TUPLE: B { value T } ;
+! ! TUPLE: float-box { value float } ;
+! C: <B> B ( T -- B )
+! ! C: <float-box> float-box ( float -- float-box )
+
+! ;
