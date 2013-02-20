@@ -187,7 +187,7 @@ CONSTRUCTOR: mgeneric ( name signature -- generic ) ;
 TUPLE: mmethod class name body ;
 CONSTRUCTOR: mmethod ( class name body -- method ) ;
 : parse-mmethod ( -- method )
-    token token body <mmethod> ;
+    parse token body <mmethod> ;
 
 ! TUPLE: private body ;
 ! CONSTRUCTOR: private ( body -- private ) ;
@@ -216,8 +216,13 @@ CONSTRUCTOR: merror ( name body -- error ) ;
 
 TUPLE: mparser name start slots body ;
 CONSTRUCTOR: mparser ( name start slots body -- package ) ;
-: parse-mparser ( -- parser )
+: parse-mparser ( -- mparser )
     get-string parse parse body <mparser> ;
+
+TUPLE: mprimitive name signature ;
+CONSTRUCTOR: mprimitive ( name signature -- package ) ;
+: parse-mprimitive ( -- mprimitive )
+    parse parse-signature(--) <mprimitive> ;
 
 TUPLE: package name ;
 CONSTRUCTOR: package ( name -- package ) ;
@@ -233,6 +238,14 @@ TUPLE: imports names ;
 CONSTRUCTOR: imports ( names -- package ) ;
 : parse-imports ( -- import )
     ";" strings-until <imports> ;
+
+TUPLE: foldable ;
+CONSTRUCTOR: foldable ( -- obj ) ;
+: parse-foldable ( -- foldable ) <foldable> ;
+
+TUPLE: flushable ;
+CONSTRUCTOR: flushable ( -- obj ) ;
+: parse-flushable ( -- flushable ) <flushable> ;
 
 \ parse-mparser "PARSER:" parsers get set-at
 \ parse-package "PACKAGE:" parsers get set-at
@@ -253,6 +266,9 @@ CONSTRUCTOR: imports ( names -- package ) ;
 \ parse-constant "CONSTANT:" parsers get set-at
 \ parse-mtuple "TUPLE:" parsers get set-at
 \ parse-merror "ERROR:" parsers get set-at
+\ parse-mprimitive "PRIMITIVE:" parsers get set-at
+\ parse-foldable "foldable" parsers get set-at
+\ parse-flushable "flushable" parsers get set-at
 
 \ parse-block "[" parsers get set-at
 \ parse-marray "{" parsers get set-at
