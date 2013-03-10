@@ -48,7 +48,7 @@ CONSTRUCTOR: comment ( text -- comment ) ;
 : execute-comment-parser ( word -- object/f )
     \ comment-parsers get ?at [ execute( -- parsed ) ] when ;
 
-: parse-comment-action ( string -- object/f )
+: comment-parse-action ( string -- object/f )
     dup string? [
         [ f ] [ execute-comment-parser ] if-empty
     ] when ;
@@ -112,10 +112,10 @@ ERROR: token-expected token ;
     ] loop>array ;
 
 ERROR: raw-expected raw ;
-: parse-raw-until ( string -- strings/f )
+: parse-comment-until ( string -- strings/f )
     '[
         _ raw [ raw-expected ] unless*
-        2dup = [ 2drop f ] [ nip ] if
+        2dup = [ 2drop f ] [ nip comment-parse-action ] if
     ] loop>array ;
 
 : string-until-eol ( -- string )
@@ -133,7 +133,7 @@ ERROR: expected expected got ;
 TUPLE: nested-comment comment ;
 CONSTRUCTOR: nested-comment ( comment -- nested-comment ) ;
 : parse-nested-comment ( -- nested-comment )
-    "*)" parse-raw-until <nested-comment> ;
+    "*)" parse-comment-until <nested-comment> ;
 
 TUPLE: signature in out ;
 CONSTRUCTOR: signature ( in out -- signature ) ;
@@ -552,6 +552,7 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-singletons "SINGLETONS:" parsers get set-at
 \ parse-comment "!" parsers get set-at
 \ parse-comment "#!" parsers get set-at
+\ parse-nested-comment "(*" parsers get set-at
 \ parse-nested-comment "(*" comment-parsers get set-at
 \ parse-postpone "POSTPONE:" parsers get set-at
 \ parse-hints "HINTS:" parsers get set-at
