@@ -43,11 +43,13 @@ CONSTRUCTOR: comment ( text -- comment ) ;
     ] when ;
 
 : token' ( -- string/f )
-    "\n\s\"#" read-until {
-        { [ dup "\n\s" member? ] [ drop [ token' ] when-empty ] }
+    "\r\n\s\"" read-until {
+        { [ dup "\r\n\s" member? ] [ drop [ token' ] when-empty ] }
         { [ dup CHAR: " = ] [ drop [ f ] when-empty parse-string ] }
-        { [ dup CHAR: # = ] [
-            drop parse-comment save-comment [ token' ] when-empty ] }
+        ! { [ dup CHAR: # = ] [
+            ! drop parse-comment save-comment [ token' ] when-empty ] }
+        ! { [ dup CHAR: ! = ] [
+            ! drop parse-comment save-comment [ token' ] when-empty ] }
         [ drop ]
     } cond ;
 
@@ -57,8 +59,8 @@ CONSTRUCTOR: comment ( text -- comment ) ;
     ] when ;
 
 : get-string ( -- string/f )
-    "\n\s#" read-until {
-        { [ dup "\n\s" member? ] [ drop [ get-string ] when-empty ] }
+    "\r\n\s#" read-until {
+        { [ dup "\r\n\s" member? ] [ drop [ get-string ] when-empty ] }
         { [ dup CHAR: # = ] [
             drop parse-comment save-comment [ get-string ] when-empty ] }
         [ drop ]
@@ -93,7 +95,7 @@ ERROR: token-expected token ;
     ] loop>array ;
 
 : string-until-eol ( -- string )
-    "\n" read-until drop ;
+    "\r\n" read-until drop ;
 
 ERROR: expected expected got ;
 : expect ( string -- )
@@ -107,11 +109,51 @@ ERROR: expected expected got ;
 TUPLE: signature in out ;
 CONSTRUCTOR: signature ( in out -- signature ) ;
 
-: parse-signature--) ( -- signature )
-    "--" strings-until ")" strings-until <signature> ;
+TUPLE: typed-argument name signature ;
+CONSTRUCTOR: typed-argument ( name signature -- typed ) ;
+
+DEFER: parse-signature(--)
+DEFER: parse-signature-in
+DEFER: parse-signature-in'
+
+: parse-signature-in'' ( -- )
+    token dup ":" tail? [
+        parse-signature(--) <typed-argument> ,
+        parse-signature-in''
+    ] [
+        dup "--" = [
+            drop
+        ] [
+            , parse-signature-in''
+        ] if
+    ] if ;
+
+: parse-signature-in' ( -- out )
+    [ parse-signature-in'' ] { } make ;
+
+: parse-signature-in ( -- in )
+    "(" expect parse-signature-in' ;
+
+: parse-signature-out' ( -- )
+    token dup ":" tail? [
+        parse-signature(--) <typed-argument> ,
+        parse-signature-out'
+    ] [
+        dup ")" = [
+            drop
+        ] [
+            , parse-signature-out'
+        ] if
+    ] if ;
+
+: parse-signature-out ( -- out )
+    [ parse-signature-out' ] { } make ;
 
 : parse-signature(--) ( -- signature )
-    "(" expect parse-signature--) ;
+    parse-signature-in parse-signature-out <signature> ;
+
+: parse-signature--) ( -- signature )
+    parse-signature-in' parse-signature-out <signature> ;
 
 TUPLE: function name signature body ;
 CONSTRUCTOR: function ( name signature body -- function ) ;
@@ -120,9 +162,46 @@ CONSTRUCTOR: function ( name signature body -- function ) ;
     parse-signature(--)
     body <function> ;
 
+TUPLE: predicate name superclass body ;
+CONSTRUCTOR: predicate ( name superclass body -- predicate ) ;
+: parse-predicate ( -- predicate )
+    token
+    "<" expect
+    token
+    body <predicate> ;
+
+TUPLE: slot name ;
+CONSTRUCTOR: slot ( name -- slot ) ;
+: parse-slot ( -- slot )
+    token <slot> ;
+
+TUPLE: mixin name ;
+CONSTRUCTOR: mixin ( name -- mixin ) ;
+: parse-mixin ( -- mixin )
+    token <mixin> ;
+
+TUPLE: singleton name ;
+CONSTRUCTOR: singleton ( name -- singleton ) ;
+: parse-singleton ( -- singleton )
+    token <singleton> ;
+
+TUPLE: singletons names ;
+CONSTRUCTOR: singletons ( names -- singletons ) ;
+: parse-singletons ( -- singletons )
+    body <singletons> ;
+
+TUPLE: instance class mixin ;
+CONSTRUCTOR: instance ( class mixin -- instance ) ;
+: parse-instance ( -- instance )
+    token token <instance> ;
+
 TUPLE: use strings ;
 CONSTRUCTOR: use ( strings -- use ) ;
-: parse-use ( -- use ) ";" strings-until <use> ;
+: parse-use ( -- use ) token <use> ;
+
+TUPLE: using strings ;
+CONSTRUCTOR: using ( strings -- use ) ;
+: parse-using ( -- using ) ";" strings-until <using> ;
 
 TUPLE: author name ;
 CONSTRUCTOR: author ( name -- author ) ;
@@ -184,20 +263,40 @@ CONSTRUCTOR: mgeneric ( name signature -- generic ) ;
 : parse-mgeneric ( -- generic )
     token parse-signature(--) <mgeneric> ;
 
+TUPLE: mgeneric# name n signature ;
+CONSTRUCTOR: mgeneric# ( name n signature -- generic ) ;
+: parse-mgeneric# ( -- generic )
+    token token parse-signature(--) <mgeneric#> ;
+
 TUPLE: mmethod class name body ;
 CONSTRUCTOR: mmethod ( class name body -- method ) ;
 : parse-mmethod ( -- method )
     parse token body <mmethod> ;
 
-! TUPLE: private body ;
-! CONSTRUCTOR: private ( body -- private ) ;
-! : parse-private ( -- private )
-    ! "PRIVATE>" parse-until <private> ;
+TUPLE: constructor name class ;
+CONSTRUCTOR: constructor ( name class -- method ) ;
+: parse-constructor ( -- constructor )
+    token token <constructor> ;
+
+TUPLE: private body ;
+CONSTRUCTOR: private ( body -- private ) ;
+: parse-private ( -- private )
+    "PRIVATE>" parse-until <private> ;
 
 TUPLE: from module functions ;
 CONSTRUCTOR: from ( module functions -- from ) ;
 : parse-from ( -- from )
     token ";" strings-until <from> ;
+
+TUPLE: qualified name ;
+CONSTRUCTOR: qualified ( name -- qualified ) ;
+: parse-qualified ( -- qualified )
+    token <qualified> ;
+
+TUPLE: qualified-with name prefix ;
+CONSTRUCTOR: qualified-with ( name prefix -- qualified-with ) ;
+: parse-qualified-with ( -- qualified-with )
+    token token <qualified-with> ;
 
 TUPLE: constant name object ;
 CONSTRUCTOR: constant ( name object -- constant ) ;
@@ -243,9 +342,32 @@ TUPLE: foldable ;
 CONSTRUCTOR: foldable ( -- obj ) ;
 : parse-foldable ( -- foldable ) <foldable> ;
 
+TUPLE: inline ;
+CONSTRUCTOR: inline ( -- obj ) ;
+: parse-inline ( -- inline ) <inline> ;
+
+TUPLE: recursive ;
+CONSTRUCTOR: recursive ( -- obj ) ;
+: parse-recursive ( -- recursive ) <recursive> ;
+
+TUPLE: union name strings ;
+CONSTRUCTOR: union ( name strings -- obj ) ;
+: parse-union ( -- recursive )
+    token body <union> ;
+
 TUPLE: flushable ;
 CONSTRUCTOR: flushable ( -- obj ) ;
 : parse-flushable ( -- flushable ) <flushable> ;
+
+TUPLE: mbuiltin name body ;
+CONSTRUCTOR: mbuiltin ( name body -- obj ) ;
+: parse-mbuiltin ( -- builtin )
+    token body <mbuiltin> ;
+
+TUPLE: math name body ;
+CONSTRUCTOR: math ( name body -- obj ) ;
+: parse-math ( -- builtin )
+    token parse-signature(--) <math> ;
 
 \ parse-mparser "PARSER:" parsers get set-at
 \ parse-package "PACKAGE:" parsers get set-at
@@ -253,15 +375,21 @@ CONSTRUCTOR: flushable ( -- obj ) ;
 \ parse-imports "IMPORTS:" parsers get set-at
 \ parse-author "AUTHOR:" parsers get set-at
 \ parse-from "FROM:" parsers get set-at
+\ parse-qualified "QUALIFIED:" parsers get set-at
+\ parse-qualified-with "QUALIFIED-WITH:" parsers get set-at
 \ parse-use "USE:" parsers get set-at
+\ parse-using "USING:" parsers get set-at
 \ parse-in "IN:" parsers get set-at
 \ parse-main "MAIN:" parsers get set-at
+\ parse-mbuiltin "BUILTIN:" parsers get set-at
+\ parse-math "MATH:" parsers get set-at
+\ parse-union "UNION:" parsers get set-at
 
 \ parse-char "CHAR:" parsers get set-at
 \ parse-escaped "\\" parsers get set-at
 \ parse-execute( "execute(" parsers get set-at
 \ parse-call( "call(" parsers get set-at
-! \ parse-private "<PRIVATE" parsers get set-at
+\ parse-private "<PRIVATE" parsers get set-at
 
 \ parse-constant "CONSTANT:" parsers get set-at
 \ parse-mtuple "TUPLE:" parsers get set-at
@@ -269,6 +397,8 @@ CONSTRUCTOR: flushable ( -- obj ) ;
 \ parse-mprimitive "PRIMITIVE:" parsers get set-at
 \ parse-foldable "foldable" parsers get set-at
 \ parse-flushable "flushable" parsers get set-at
+\ parse-inline "inline" parsers get set-at
+\ parse-recursive "recursive" parsers get set-at
 
 \ parse-block "[" parsers get set-at
 \ parse-marray "{" parsers get set-at
@@ -276,8 +406,18 @@ CONSTRUCTOR: flushable ( -- obj ) ;
 \ parse-mhashtable "H{" parsers get set-at
 
 \ parse-mgeneric "GENERIC:" parsers get set-at
+\ parse-mgeneric# "GENERIC#" parsers get set-at
 \ parse-mmethod "M:" parsers get set-at
+\ parse-constructor "C:" parsers get set-at
 \ parse-function ":" parsers get set-at
+\ parse-instance "INSTANCE:" parsers get set-at
+\ parse-predicate "PREDICATE:" parsers get set-at
+\ parse-slot "SLOT:" parsers get set-at
+\ parse-mixin "MIXIN:" parsers get set-at
+\ parse-singleton "SINGLETON:" parsers get set-at
+\ parse-singletons "SINGLETONS:" parsers get set-at
+\ parse-comment "!" parsers get set-at
+\ parse-comment "#!" parsers get set-at
 
 
 ! FUNCTOR: define-box ( T -- )
