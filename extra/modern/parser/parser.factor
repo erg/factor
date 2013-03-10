@@ -8,6 +8,9 @@ IN: modern.parser
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
 
+SYMBOL: comment-parsers
+comment-parsers [ H{ } clone ] initialize
+
 SYMBOL: comments
 : save-comment ( comment -- )
     [ comments get push ] when* ;
@@ -40,6 +43,14 @@ CONSTRUCTOR: comment ( text -- comment ) ;
 : parse-action ( string -- object/f )
     dup string? [
         [ f ] [ execute-parser ] if-empty
+    ] when ;
+
+: execute-comment-parser ( word -- object/f )
+    \ comment-parsers get ?at [ execute( -- parsed ) ] when ;
+
+: parse-comment-action ( string -- object/f )
+    dup string? [
+        [ f ] [ execute-comment-parser ] if-empty
     ] when ;
 
 : token' ( -- string/f )
@@ -100,6 +111,13 @@ ERROR: token-expected token ;
         2dup = [ 2drop f ] [ nip parse-action ] if
     ] loop>array ;
 
+ERROR: raw-expected raw ;
+: parse-raw-until ( string -- strings/f )
+    '[
+        _ raw [ raw-expected ] unless*
+        2dup = [ 2drop f ] [ nip ] if
+    ] loop>array ;
+
 : string-until-eol ( -- string )
     "\r\n" read-until drop ;
 
@@ -112,6 +130,11 @@ ERROR: expected expected got ;
 
 : body ( -- strings ) ";" parse-until ;
 
+TUPLE: nested-comment comment ;
+CONSTRUCTOR: nested-comment ( comment -- nested-comment ) ;
+: parse-nested-comment ( -- nested-comment )
+    "*)" parse-raw-until <nested-comment> ;
+
 TUPLE: signature in out ;
 CONSTRUCTOR: signature ( in out -- signature ) ;
 
@@ -119,12 +142,13 @@ TUPLE: typed-argument name signature ;
 CONSTRUCTOR: typed-argument ( name signature -- typed ) ;
 
 DEFER: parse-signature(--)
+DEFER: parse-nested-signature(--)
 DEFER: parse-signature-in
 DEFER: parse-signature-in'
 
 : parse-signature-in'' ( -- )
-    token dup ":" tail? [
-        parse-signature(--) <typed-argument> ,
+    raw dup ":" tail? [
+        parse-nested-signature(--) <typed-argument> ,
         parse-signature-in''
     ] [
         dup "--" = [
@@ -141,8 +165,8 @@ DEFER: parse-signature-in'
     "(" expect parse-signature-in' ;
 
 : parse-signature-out' ( -- )
-    token dup ":" tail? [
-        parse-signature(--) <typed-argument> ,
+    raw dup ":" tail? [
+        parse-nested-signature(--) <typed-argument> ,
         parse-signature-out'
     ] [
         dup ")" = [
@@ -154,6 +178,12 @@ DEFER: parse-signature-in'
 
 : parse-signature-out ( -- out )
     [ parse-signature-out' ] { } make ;
+
+: parse-nested-signature(--) ( -- signature )
+    raw dup "(" = [
+        drop
+        parse-signature-in' parse-signature-out <signature>
+    ] when ;
 
 : parse-signature(--) ( -- signature )
     parse-signature-in parse-signature-out <signature> ;
@@ -168,6 +198,43 @@ CONSTRUCTOR: function ( name signature body -- function ) ;
     parse-signature(--)
     body <function> ;
 
+TUPLE: locals-function name signature body ;
+CONSTRUCTOR: locals-function ( name signature body -- function ) ;
+: parse-locals-function ( -- function )
+    token
+    parse-signature(--)
+    body <locals-function> ;
+
+TUPLE: typed name signature body ;
+CONSTRUCTOR: typed ( name signature body -- typed ) ;
+: parse-typed ( -- function )
+    token
+    parse-signature(--)
+    body <typed> ;
+
+TUPLE: locals-typed name signature body ;
+CONSTRUCTOR: locals-typed ( name signature body -- typed ) ;
+: parse-locals-typed ( -- function )
+    token
+    parse-signature(--)
+    body <locals-typed> ;
+
+
+TUPLE: memo name signature body ;
+CONSTRUCTOR: memo ( name signature body -- memo ) ;
+: parse-memo ( -- function )
+    token
+    parse-signature(--)
+    body <memo> ;
+
+TUPLE: locals-memo name signature body ;
+CONSTRUCTOR: locals-memo ( name signature body -- memo ) ;
+: parse-locals-memo ( -- function )
+    token
+    parse-signature(--)
+    body <locals-memo> ;
+
+
 TUPLE: predicate name superclass body ;
 CONSTRUCTOR: predicate ( name superclass body -- predicate ) ;
 : parse-predicate ( -- predicate )
@@ -180,6 +247,16 @@ TUPLE: slot name ;
 CONSTRUCTOR: slot ( name -- slot ) ;
 : parse-slot ( -- slot )
     token <slot> ;
+
+TUPLE: specialized-array class ;
+CONSTRUCTOR: specialized-array ( class -- speicialized-array ) ;
+: parse-specialized-array ( -- slot )
+    token <specialized-array> ;
+
+TUPLE: specialized-arrays classes ;
+CONSTRUCTOR: specialized-arrays ( classes -- speicialized-arrays ) ;
+: parse-specialized-arrays ( -- slot )
+    ";" strings-until <specialized-arrays> ;
 
 TUPLE: postpone name ;
 CONSTRUCTOR: postpone ( name -- postpone ) ;
@@ -223,6 +300,27 @@ TUPLE: block body ;
 CONSTRUCTOR: block ( body -- block ) ;
 : parse-block ( -- block )
     "]" parse-until <block> ;
+
+TUPLE: locals-block body ;
+CONSTRUCTOR: locals-block ( body -- block ) ;
+: parse-locals-block ( -- block )
+    "]" parse-until <locals-block> ;
+
+TUPLE: single-bind target ;
+TUPLE: multi-bind targets ;
+CONSTRUCTOR: single-bind ( target -- bind ) ;
+CONSTRUCTOR: multi-bind ( targets -- bind ) ;
+: parse-bind ( -- bind )
+    raw dup "(" = [
+        drop ")" strings-until <multi-bind>
+    ] [
+        <single-bind>
+    ] if ;
+
+TUPLE: fry body ;
+CONSTRUCTOR: fry ( body -- block ) ;
+: parse-fry ( -- block )
+    "]" parse-until <fry> ;
 
 TUPLE: marray elements ;
 CONSTRUCTOR: marray ( elements -- block ) ;
@@ -268,6 +366,21 @@ TUPLE: call( signature ;
 CONSTRUCTOR: call( ( signature -- call ) ;
 : parse-call( ( -- call( )
     parse-signature--) <call(> ;
+
+TUPLE: data-map( signature ;
+CONSTRUCTOR: data-map( ( signature -- data-map ) ;
+: parse-data-map( ( -- call( )
+    parse-signature--) <data-map(> ;
+
+TUPLE: data-map!( signature ;
+CONSTRUCTOR: data-map!( ( signature -- data-map! ) ;
+: parse-data-map!( ( -- call( )
+    parse-signature--) <data-map!(> ;
+
+TUPLE: hints name sequence ;
+CONSTRUCTOR: hints ( name sequence -- hints ) ;
+: parse-hints ( -- generic )
+    token body <hints> ;
 
 TUPLE: mgeneric name signature ;
 CONSTRUCTOR: mgeneric ( name signature -- generic ) ;
@@ -400,6 +513,8 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-escaped "\\" parsers get set-at
 \ parse-execute( "execute(" parsers get set-at
 \ parse-call( "call(" parsers get set-at
+\ parse-data-map( "data-map(" parsers get set-at
+\ parse-data-map!( "data-map!(" parsers get set-at
 \ parse-private "<PRIVATE" parsers get set-at
 
 \ parse-constant "CONSTANT:" parsers get set-at
@@ -412,6 +527,9 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-recursive "recursive" parsers get set-at
 
 \ parse-block "[" parsers get set-at
+\ parse-locals-block "[|" parsers get set-at
+\ parse-bind ":>" parsers get set-at
+\ parse-fry "'[" parsers get set-at
 \ parse-marray "{" parsers get set-at
 \ parse-mvector "V{" parsers get set-at
 \ parse-mhashtable "H{" parsers get set-at
@@ -421,6 +539,11 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-mmethod "M:" parsers get set-at
 \ parse-constructor "C:" parsers get set-at
 \ parse-function ":" parsers get set-at
+\ parse-locals-function "::" parsers get set-at
+\ parse-typed "TYPED:" parsers get set-at
+\ parse-locals-typed "TYPED::" parsers get set-at
+\ parse-memo "MEMO:" parsers get set-at
+\ parse-locals-memo "MEMO::" parsers get set-at
 \ parse-instance "INSTANCE:" parsers get set-at
 \ parse-predicate "PREDICATE:" parsers get set-at
 \ parse-slot "SLOT:" parsers get set-at
@@ -429,7 +552,11 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-singletons "SINGLETONS:" parsers get set-at
 \ parse-comment "!" parsers get set-at
 \ parse-comment "#!" parsers get set-at
+\ parse-nested-comment "(*" comment-parsers get set-at
 \ parse-postpone "POSTPONE:" parsers get set-at
+\ parse-hints "HINTS:" parsers get set-at
+\ parse-specialized-array "SPECIALIZED-ARRAY:" parsers get set-at
+\ parse-specialized-arrays "SPECIALIZED-ARRAYS:" parsers get set-at
 
 
 ! FUNCTOR: define-box ( T -- )
