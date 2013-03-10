@@ -58,6 +58,12 @@ CONSTRUCTOR: comment ( text -- comment ) ;
         dup string>number [ <mnumber> ] when
     ] when ;
 
+: raw ( -- object )
+    "\r\n\s" read-until {
+        { [ dup "\r\n\s" member? ] [ drop [ raw ] when-empty ] }
+        [ drop ]
+    } cond ;
+
 : get-string ( -- string/f )
     "\r\n\s#" read-until {
         { [ dup "\r\n\s" member? ] [ drop [ get-string ] when-empty ] }
@@ -175,6 +181,11 @@ CONSTRUCTOR: slot ( name -- slot ) ;
 : parse-slot ( -- slot )
     token <slot> ;
 
+TUPLE: postpone name ;
+CONSTRUCTOR: postpone ( name -- postpone ) ;
+: parse-postpone ( -- postpone )
+    raw <postpone> ;
+
 TUPLE: mixin name ;
 CONSTRUCTOR: mixin ( name -- mixin ) ;
 : parse-mixin ( -- mixin )
@@ -231,7 +242,7 @@ CONSTRUCTOR: mhashtable ( elements -- block ) ;
 TUPLE: char n ;
 CONSTRUCTOR: char ( n -- char ) ;
 : parse-char ( -- char )
-    token <char> ;
+    raw <char> ;
 
 TUPLE: in name ;
 CONSTRUCTOR: in ( name -- in ) ;
@@ -246,7 +257,7 @@ CONSTRUCTOR: main ( name -- main ) ;
 TUPLE: escaped name ;
 CONSTRUCTOR: escaped ( name -- escaped ) ;
 : parse-escaped ( -- escaped )
-    token <escaped> ;
+    raw <escaped> ;
 
 TUPLE: execute( signature ;
 CONSTRUCTOR: execute( ( signature -- execute ) ;
@@ -418,6 +429,7 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-singletons "SINGLETONS:" parsers get set-at
 \ parse-comment "!" parsers get set-at
 \ parse-comment "#!" parsers get set-at
+\ parse-postpone "POSTPONE:" parsers get set-at
 
 
 ! FUNCTOR: define-box ( T -- )
