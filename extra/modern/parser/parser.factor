@@ -54,7 +54,7 @@ CONSTRUCTOR: comment ( text -- comment ) ;
     ] when ;
 
 : token' ( -- string/f )
-    "\r\n\s\"" read-until {
+    "\r\n\s" read-until {
         { [ dup "\r\n\s" member? ] [ drop [ token' ] when-empty ] }
         { [ dup CHAR: " = ] [ drop [ f ] when-empty parse-string ] }
         ! { [ dup CHAR: # = ] [
@@ -190,6 +190,11 @@ DEFER: parse-signature-in'
 
 : parse-signature--) ( -- signature )
     parse-signature-in' parse-signature-out <signature> ;
+
+TUPLE: syntax name body ;
+CONSTRUCTOR: syntax ( name body -- syntax ) ;
+: parse-syntax ( -- syntax )
+    token body <syntax> ;
 
 TUPLE: function name signature body ;
 CONSTRUCTOR: function ( name signature body -- function ) ;
@@ -336,6 +341,22 @@ TUPLE: mhashtable elements ;
 CONSTRUCTOR: mhashtable ( elements -- block ) ;
 : parse-mhashtable ( -- block )
     "}" parse-until <mhashtable> ;
+
+TUPLE: tuple-literal-assoc name slots ;
+TUPLE: tuple-literal-boa name slots ;
+CONSTRUCTOR: tuple-literal-assoc ( name slots -- tuple-literal ) ;
+CONSTRUCTOR: tuple-literal-boa ( name slots -- tuple-literal ) ;
+: parse-tuple-literal ( -- block )
+    token
+    token dup {
+        { "f" [ drop "}" parse-until <tuple-literal-boa> ] }
+        { "{" [
+                  drop parse-marray
+                  "}" parse-until swap prefix <tuple-literal-assoc>
+              ]
+        }
+        { "}" [ drop f <tuple-literal-boa> ] }
+    } case ;
 
 TUPLE: char n ;
 CONSTRUCTOR: char ( n -- char ) ;
@@ -533,6 +554,7 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-marray "{" parsers get set-at
 \ parse-mvector "V{" parsers get set-at
 \ parse-mhashtable "H{" parsers get set-at
+\ parse-tuple-literal "T{" parsers get set-at
 
 \ parse-mgeneric "GENERIC:" parsers get set-at
 \ parse-mgeneric# "GENERIC#" parsers get set-at
@@ -558,6 +580,7 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-hints "HINTS:" parsers get set-at
 \ parse-specialized-array "SPECIALIZED-ARRAY:" parsers get set-at
 \ parse-specialized-arrays "SPECIALIZED-ARRAYS:" parsers get set-at
+\ parse-syntax "SYNTAX:" parsers get set-at
 
 
 ! FUNCTOR: define-box ( T -- )
