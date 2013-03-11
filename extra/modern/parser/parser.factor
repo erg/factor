@@ -54,9 +54,9 @@ CONSTRUCTOR: comment ( text -- comment ) ;
     ] when ;
 
 : token' ( -- string/f )
-    "\r\n\s" read-until {
+    "\r\n\s\"" read-until {
         { [ dup "\r\n\s" member? ] [ drop [ token' ] when-empty ] }
-        { [ dup CHAR: " = ] [ drop [ f ] when-empty parse-string ] }
+        { [ 2dup [ empty? ] [ CHAR: " = ] bi* and ] [ drop [ f ] when-empty parse-string ] }
         ! { [ dup CHAR: # = ] [
             ! drop parse-comment save-comment [ token' ] when-empty ] }
         ! { [ dup CHAR: ! = ] [
