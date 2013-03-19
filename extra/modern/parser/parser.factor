@@ -195,7 +195,7 @@ DEFER: parse-signature-in'
 TUPLE: syntax name body ;
 CONSTRUCTOR: syntax ( name body -- syntax ) ;
 : parse-syntax ( -- syntax )
-    token body <syntax> ;
+    raw body <syntax> ;
 
 TUPLE: function name signature body ;
 CONSTRUCTOR: function ( name signature body -- function ) ;
@@ -306,6 +306,11 @@ TUPLE: block body ;
 CONSTRUCTOR: block ( body -- block ) ;
 : parse-block ( -- block )
     "]" parse-until <block> ;
+
+TUPLE: parsetime-block body ;
+CONSTRUCTOR: parsetime-block ( body -- parsetime-block ) ;
+: parse-parsetime-block ( -- block )
+    "]" parse-until <parsetime-block> ;
 
 TUPLE: locals-block body ;
 CONSTRUCTOR: locals-block ( body -- block ) ;
@@ -424,8 +429,13 @@ CONSTRUCTOR: mmethod ( class name body -- method ) ;
 : parse-mmethod ( -- method )
     parse token body <mmethod> ;
 
+TUPLE: locals-mmethod class name body ;
+CONSTRUCTOR: locals-mmethod ( class name body -- locals-method ) ;
+: parse-locals-mmethod ( -- method )
+    parse token body <locals-mmethod> ;
+
 TUPLE: constructor name class ;
-CONSTRUCTOR: constructor ( name class -- method ) ;
+CONSTRUCTOR: constructor ( name class -- constructor ) ;
 : parse-constructor ( -- constructor )
     token token <constructor> ;
 
@@ -465,7 +475,7 @@ CONSTRUCTOR: merror ( name body -- error ) ;
     token body <merror> ;
 
 TUPLE: mparser name start slots body ;
-CONSTRUCTOR: mparser ( name start slots body -- package ) ;
+CONSTRUCTOR: mparser ( name start slots body -- mparser ) ;
 : parse-mparser ( -- mparser )
     get-string parse parse body <mparser> ;
 
@@ -537,7 +547,7 @@ CONSTRUCTOR: name ( name target -- object ) ;
 TUPLE: ebnf text ;
 CONSTRUCTOR: ebnf ( text -- ebnf ) ;
 : parse-ebnf ( -- ebnf )
-    ";EBNF" parse-until <ebnf> ;
+    ";EBNF" strings-until <ebnf> ;
 
 TUPLE: defer name ;
 CONSTRUCTOR: defer ( name -- defer ) ;
@@ -563,6 +573,171 @@ TUPLE: rename function module name ;
 CONSTRUCTOR: rename ( function module name -- rename ) ;
 : parse-rename ( -- renamed )
     token token "=>" expect token <rename> ;
+
+TUPLE: typedef old new ;
+CONSTRUCTOR: typedef ( old new -- typedef ) ;
+: parse-typedef ( -- typedef )
+    token token <typedef> ;
+
+TUPLE: library name ;
+CONSTRUCTOR: library ( name -- library ) ;
+: parse-library ( -- library )
+    token <library> ;
+
+TUPLE: c-function return-value name arguments ;
+CONSTRUCTOR: c-function ( return-value name arguments -- c-function ) ;
+: parse-c-function ( -- c-function )
+    token token ";" parse-until <c-function> ;
+
+TUPLE: x-function return-value name arguments ;
+CONSTRUCTOR: x-function ( return-value name arguments -- c-function ) ;
+: parse-x-function ( -- c-function )
+    token token ";" parse-until <x-function> ;
+
+TUPLE: c-function-alias aliased-name return-value name arguments ;
+CONSTRUCTOR: c-function-alias ( aliased-name return-value name arguments -- c-function ) ;
+: parse-c-function-alias ( -- c-function )
+    token token token ";" parse-until <c-function-alias> ;
+
+TUPLE: gl-function return-value name arguments ;
+CONSTRUCTOR: gl-function ( return-value name arguments -- gl-function ) ;
+: parse-gl-function ( -- gl-function )
+    token token ";" parse-until <gl-function> ;
+
+TUPLE: c-type name ;
+CONSTRUCTOR: c-type ( name -- c-type ) ;
+: parse-c-type ( -- c-type )
+    token <c-type> ;
+
+TUPLE: macro name signature body ;
+CONSTRUCTOR: macro ( name signature body -- macro ) ;
+: parse-macro ( -- macro )
+    token parse-signature(--) ";" parse-until <macro> ;
+
+TUPLE: locals-macro name signature body ;
+CONSTRUCTOR: locals-macro ( name signature body -- macro ) ;
+: parse-locals-macro ( -- macro )
+    token parse-signature(--) ";" parse-until <locals-macro> ;
+
+TUPLE: struct name slots ;
+CONSTRUCTOR: struct ( name slots -- struct ) ;
+: parse-struct ( -- struct )
+    token ";" parse-until <struct> ;
+
+TUPLE: packed-struct name slots ;
+CONSTRUCTOR: packed-struct ( name slots -- struct ) ;
+: parse-packed-struct ( -- struct )
+    token ";" parse-until <packed-struct> ;
+
+TUPLE: alias name target ;
+CONSTRUCTOR: alias ( name target -- alias ) ;
+: parse-alias ( -- alias )
+    token token <alias> ;
+
+TUPLE: registers names ;
+CONSTRUCTOR: registers ( names -- obj ) ;
+: parse-registers ( -- obj )
+    ";" parse-until <registers> ;
+
+TUPLE: hi-registers names ;
+CONSTRUCTOR: hi-registers ( names -- obj ) ;
+: parse-hi-registers ( -- obj )
+    ";" parse-until <hi-registers> ;
+
+TUPLE: about name ;
+CONSTRUCTOR: about ( name -- obj ) ;
+: parse-about ( -- obj )
+    token <about> ;
+
+TUPLE: article name body ;
+CONSTRUCTOR: article ( name body -- obj ) ;
+: parse-article ( -- obj )
+    token ";" parse-until <article> ;
+
+TUPLE: c-global name ;
+CONSTRUCTOR: c-global ( name -- obj ) ;
+: parse-c-global ( -- obj )
+    token <c-global> ;
+
+TUPLE: protocol name functions ;
+CONSTRUCTOR: protocol ( name functions -- obj ) ;
+: parse-protocol ( -- obj )
+    token ";" parse-until <protocol> ;
+
+TUPLE: tr name body ;
+CONSTRUCTOR: tr ( name body -- obj ) ;
+: parse-tr ( -- obj )
+    token ";" parse-until <tr> ;
+
+TUPLE: exclude name body ;
+CONSTRUCTOR: exclude ( name body -- obj ) ;
+: parse-exclude ( -- obj )
+    token "=>" expect ";" parse-until <exclude> ;
+
+TUPLE: foldable-insn name body ;
+CONSTRUCTOR: foldable-insn ( name body -- obj ) ;
+: parse-foldable-insn ( -- obj )
+    token ";" parse-until <foldable-insn> ;
+
+TUPLE: flushable-insn name body ;
+CONSTRUCTOR: flushable-insn ( name body -- obj ) ;
+: parse-flushable-insn ( -- obj )
+    token ";" parse-until <flushable-insn> ;
+
+TUPLE: vreg-insn name body ;
+CONSTRUCTOR: vreg-insn ( name body -- obj ) ;
+: parse-vreg-insn ( -- obj )
+    token ";" parse-until <vreg-insn> ;
+
+TUPLE: insn name body ;
+CONSTRUCTOR: insn ( name body -- obj ) ;
+: parse-insn ( -- obj )
+    token ";" parse-until <insn> ;
+
+TUPLE: codegen name1 name2 ;
+CONSTRUCTOR: codegen ( name1 name2 -- obj ) ;
+: parse-codegen ( -- obj )
+    token token <codegen> ;
+
+TUPLE: conditional name1 name2 ;
+CONSTRUCTOR: conditional ( name1 name2 -- obj ) ;
+: parse-conditional ( -- obj )
+    token token <conditional> ;
+
+TUPLE: simd-128 name ;
+CONSTRUCTOR: simd-128 ( name -- obj ) ;
+: parse-simd-128 ( -- obj )
+    token <simd-128> ;
+
+TUPLE: simd-128-cord name1 name2 ;
+CONSTRUCTOR: simd-128-cord ( name1 name2 -- obj ) ;
+: parse-simd-128-cord ( -- obj )
+    token token <simd-128-cord> ;
+
+TUPLE: simd-intrinsic name body ;
+CONSTRUCTOR: simd-intrinsic ( name body -- obj ) ;
+: parse-simd-intrinsic ( -- obj )
+    token ";" parse-until <simd-intrinsic> ;
+
+TUPLE: locals-simd-intrinsic name body ;
+CONSTRUCTOR: locals-simd-intrinsic ( name body -- obj ) ;
+: parse-locals-simd-intrinsic ( -- obj )
+    token ";" parse-until <locals-simd-intrinsic> ;
+
+TUPLE: enum name slots ;
+CONSTRUCTOR: enum ( name slots -- obj ) ;
+: parse-enum ( -- obj )
+    token ";" parse-until <enum> ;
+
+TUPLE: forget name ;
+CONSTRUCTOR: forget ( name -- obj ) ;
+: parse-forget ( -- obj )
+    token <forget> ;
+
+TUPLE: pointer to ;
+CONSTRUCTOR: pointer ( to -- obj ) ;
+: parse-pointer ( -- obj )
+    token <pointer> ;
 
 \ parse-mparser "PARSER:" parsers get set-at
 \ parse-package "PACKAGE:" parsers get set-at
@@ -596,6 +771,7 @@ CONSTRUCTOR: rename ( function module name -- rename ) ;
 \ parse-final "final" parsers get set-at
 \ parse-recursive "recursive" parsers get set-at
 \ parse-block "[" parsers get set-at
+\ parse-parsetime-block "$[" parsers get set-at
 \ parse-locals-block "[|" parsers get set-at
 \ parse-bind ":>" parsers get set-at
 \ parse-fry "'[" parsers get set-at
@@ -606,6 +782,7 @@ CONSTRUCTOR: rename ( function module name -- rename ) ;
 \ parse-mgeneric "GENERIC:" parsers get set-at
 \ parse-mgeneric# "GENERIC#" parsers get set-at
 \ parse-mmethod "M:" parsers get set-at
+\ parse-locals-mmethod "M::" parsers get set-at
 \ parse-constructor "C:" parsers get set-at
 \ parse-function ":" parsers get set-at
 \ parse-locals-function "::" parsers get set-at
@@ -637,8 +814,68 @@ CONSTRUCTOR: rename ( function module name -- rename ) ;
 \ parse-hook "HOOK:" parsers get set-at
 \ parse-compilation-unit "<<" parsers get set-at
 \ parse-rename "RENAME:" parsers get set-at
+\ parse-typedef "TYPEDEF:" parsers get set-at
+\ parse-c-function "FUNCTION:" parsers get set-at
+\ parse-x-function "X-FUNCTION:" parsers get set-at
+\ parse-c-function-alias "FUNCTION-ALIAS:" parsers get set-at
+\ parse-gl-function "GL-FUNCTION:" parsers get set-at
+\ parse-library "LIBRARY:" parsers get set-at
+\ parse-c-type "C-TYPE:" parsers get set-at
+\ parse-macro "MACRO:" parsers get set-at
+\ parse-locals-macro "MACRO::" parsers get set-at
+\ parse-struct "STRUCT:" parsers get set-at
+\ parse-packed-struct "PACKED-STRUCT:" parsers get set-at
+\ parse-alias "ALIAS:" parsers get set-at
+\ parse-registers "REGISTERS:" parsers get set-at
+\ parse-hi-registers "HI-REGISTERS:" parsers get set-at
+\ parse-about "ABOUT:" parsers get set-at
+\ parse-c-global "C-GLOBAL:" parsers get set-at
+\ parse-article "ARTICLE:" parsers get set-at
+\ parse-protocol "PROTOCOL:" parsers get set-at
+\ parse-exclude "EXCLUDE:" parsers get set-at
+\ parse-foldable-insn "FOLDABLE-INSN:" parsers get set-at
+\ parse-flushable-insn "FLUSHABLE-INSN:" parsers get set-at
+\ parse-insn "INSN:" parsers get set-at
+\ parse-vreg-insn "VREG-INSN:" parsers get set-at
+\ parse-codegen "CODEGEN:" parsers get set-at
+\ parse-conditional "CONDITIONAL:" parsers get set-at
+\ parse-simd-128 "SIMD-128:" parsers get set-at
+\ parse-simd-128-cord "SIMD-128-CORD:" parsers get set-at
+\ parse-simd-intrinsic "SIMD-INTRINSIC:" parsers get set-at
+\ parse-locals-simd-intrinsic "SIMD-INTRINSIC::" parsers get set-at
+\ parse-enum "ENUM:" parsers get set-at
+\ parse-forget "FORGET:" parsers get set-at
+\ parse-pointer "pointer:" parsers get set-at
+! \ parse-string "STRING:" parsers get set-at
+
+! qw{ CODEGEN: CATEGORY: ENUM: SIMD-INTRINSIC:
+! CLASS: FUNCTION-ALIAS: M\\ TAGS: COM-INTERFACE:
+
+! "EUC:" "GIR:" "8-BIT:" "CLASS:" "ENUM:" "RENAMING:" "TEST:" "CHLOE:" "FORGET:" "XML-NS:"
+! "BEFORE:" "AFTER:" "IMPLEMENT-STRUCTS:" "DESTRUCTOR:" "FOREIGN-RECORD-TYPE:" "FOREIGN-ENUM-TYPE:" "FORWARD-ANALYSIS:"
+! "COM-INTERFACE:" "INTERSECTION:" "LOG:" "CFSTRING:" "CONSULT:" "PEG:" "BACKWARD-ANALYSIS:" "MACRO::"
+! "UNION-STRUCT:" "PACKED-STRUCT:" "SLOT-PROTOCOL:" "ICON:" "TAGS:" "TAG:" "ROMAN-OP:"
+! "STRING:" "SIMD-128:" "MATCH-VARS:" "CALLBACK:" "CATEGORY:" "PIXEL-FORMAT-ATTRIBUTE-TABLE:" "pointer:"
+! "CATEGORY-NOT:" "FUNCTOR-SYNTAX:" "IDENTITY-MEMO:" "XML-ERROR:" "RULE:" "COMPONENT:" "X509_V_:"
+! "X-FUNCTION:" "SIMD-INTRINSIC:" "SIMD-INTRINSIC::"
+
+! "MAIN-WINDOW:" "GIR:" "TUPLE-ARRAY:" "VARIANT:" "SPECIALIZED-VECTOR:" "FOREIGN-RECORD-TYPE:" "FOREIGN-ATOMIC-TYPE:"
+! "SOLUTION:" "CUDA-LIBRARY:" "CUDA-FUNCTION:" "HOLIDAY:" "HOLIDAY-NAME:" "FRAMEWORK:" "GAME:"
+! "INTERSECTION:" "DESTRUCTOR:" "FORWARD-ANALYSIS:" "RENAMING:" "MACRO::" "XML-NS:" "CALLBACK:" "GLSL-SHADER:"
+! "UNIFORM-TUPLE:" "GLSL-PROGRAM:" "LITERAL-PARSER:" "CONSTRUCTOR:" "STRING:" "ENUM:" "GLSL-SHADER-FILE:"
+! "AFTER:" "system-attachment:" "initial:" "color-attachment:" "CFSTRING:" "DERIVATIVE:" "FUNCTOR-SYNTAX:"
+! "VERTEX-FORMAT:" "SELECTOR:" "REGISTER:" "METHOD:" "TODO:" "LAZY:"
+! "ROLE:" "UNION-STRUCT:" "INSTRUCTION:" "SUBROUTINE:"
 
 ! "resource:core" vocabs-in-root [ vocab? ] filter [ vocab-files ] map concat
 ! "resource:core" vocabs-in-root [ vocab? ] filter [ vocab-files ] map concat
 ! [ "-docs.factor" tail? not ] filter
 ! [ "-tests.factor" tail? not ] filter [ parse-file ] map
+
+! "resource:basis" vocabs-in-root [ vocab? ] filter [ vocab-files ] map concat
+! [ "-docs.factor" tail? not ] filter
+! [ "-tests.factor" tail? not ] filter
+! { "resource:basis/tools/completion/completion.factor"
+! "resource:basis/functors/functors.factor" "resource:basis/ui/tools/listener/completion/completion.factor"
+! "resource:basis/simple-tokenizer/simple-tokenizer.factor" } diff
+! [ dup . flush parse-file drop ] map
