@@ -57,6 +57,7 @@ CONSTRUCTOR: comment ( text -- comment ) ;
     "\r\n\s\"" read-until {
         { [ dup "\r\n\s" member? ] [ drop [ token' ] when-empty ] }
         { [ 2dup [ empty? ] [ CHAR: " = ] bi* and ] [ drop [ f ] when-empty parse-string ] }
+        { [ dup CHAR: " = ] [ drop [ f ] when-empty parse-string ] }
         ! { [ dup CHAR: # = ] [
             ! drop parse-comment save-comment [ token' ] when-empty ] }
         ! { [ dup CHAR: ! = ] [
@@ -408,6 +409,11 @@ CONSTRUCTOR: mgeneric ( name signature -- generic ) ;
 : parse-mgeneric ( -- generic )
     token parse-signature(--) <mgeneric> ;
 
+TUPLE: hook name symbol signature ;
+CONSTRUCTOR: hook ( name symbol signature -- hook ) ;
+: parse-hook ( -- hook )
+    token token parse-signature(--) <hook> ;
+
 TUPLE: mgeneric# name n signature ;
 CONSTRUCTOR: mgeneric# ( name n signature -- generic ) ;
 : parse-mgeneric# ( -- generic )
@@ -528,6 +534,36 @@ CONSTRUCTOR: name ( name target -- object ) ;
 : parse-name ( -- name )
     token token <name> ;
 
+TUPLE: ebnf text ;
+CONSTRUCTOR: ebnf ( text -- ebnf ) ;
+: parse-ebnf ( -- ebnf )
+    ";EBNF" parse-until <ebnf> ;
+
+TUPLE: defer name ;
+CONSTRUCTOR: defer ( name -- defer ) ;
+: parse-defer ( -- defer )
+    token <defer> ;
+
+TUPLE: symbol name ;
+CONSTRUCTOR: symbol ( name -- symbol ) ;
+: parse-symbol ( -- symbol )
+    token <symbol> ;
+
+TUPLE: symbols names ;
+CONSTRUCTOR: symbols ( names -- symbols ) ;
+: parse-symbols ( -- symbols )
+    ";" parse-until <symbols> ;
+
+TUPLE: compilation-unit code ;
+CONSTRUCTOR: compilation-unit ( code -- compilation-unit ) ;
+: parse-compilation-unit ( -- compilation-unit )
+    ">>" parse-until <compilation-unit> ;
+
+TUPLE: rename function module name ;
+CONSTRUCTOR: rename ( function module name -- rename ) ;
+: parse-rename ( -- renamed )
+    token token "=>" expect token <rename> ;
+
 \ parse-mparser "PARSER:" parsers get set-at
 \ parse-package "PACKAGE:" parsers get set-at
 \ parse-import "IMPORT:" parsers get set-at
@@ -594,3 +630,15 @@ CONSTRUCTOR: name ( name target -- object ) ;
 \ parse-syntax "SYNTAX:" parsers get set-at
 \ parse-functor "FUNCTOR:" parsers get set-at
 \ parse-name "NAME:" parsers get set-at
+\ parse-ebnf "EBNF:" parsers get set-at
+\ parse-symbol "SYMBOL:" parsers get set-at
+\ parse-symbols "SYMBOLS:" parsers get set-at
+\ parse-defer "DEFER:" parsers get set-at
+\ parse-hook "HOOK:" parsers get set-at
+\ parse-compilation-unit "<<" parsers get set-at
+\ parse-rename "RENAME:" parsers get set-at
+
+! "resource:core" vocabs-in-root [ vocab? ] filter [ vocab-files ] map concat
+! "resource:core" vocabs-in-root [ vocab? ] filter [ vocab-files ] map concat
+! [ "-docs.factor" tail? not ] filter
+! [ "-tests.factor" tail? not ] filter [ parse-file ] map
