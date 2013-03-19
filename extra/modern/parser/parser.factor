@@ -491,6 +491,10 @@ TUPLE: inline ;
 CONSTRUCTOR: inline ( -- obj ) ;
 : parse-inline ( -- inline ) <inline> ;
 
+TUPLE: final ;
+CONSTRUCTOR: final ( -- obj ) ;
+: parse-final ( -- final ) <final> ;
+
 TUPLE: recursive ;
 CONSTRUCTOR: recursive ( -- obj ) ;
 : parse-recursive ( -- recursive ) <recursive> ;
@@ -514,6 +518,16 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 : parse-math ( -- builtin )
     token parse-signature(--) <math> ;
 
+TUPLE: functor name signature definitions ;
+CONSTRUCTOR: functor ( name signature definitions -- functor ) ;
+: parse-functor ( -- functor )
+    token parse-signature(--) ";FUNCTOR" parse-until <functor> ;
+
+TUPLE: name name target ;
+CONSTRUCTOR: name ( name target -- object ) ;
+: parse-name ( -- name )
+    token token <name> ;
+
 \ parse-mparser "PARSER:" parsers get set-at
 \ parse-package "PACKAGE:" parsers get set-at
 \ parse-import "IMPORT:" parsers get set-at
@@ -529,7 +543,6 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-mbuiltin "BUILTIN:" parsers get set-at
 \ parse-math "MATH:" parsers get set-at
 \ parse-union "UNION:" parsers get set-at
-
 \ parse-char "CHAR:" parsers get set-at
 \ parse-escaped "\\" parsers get set-at
 \ parse-execute( "execute(" parsers get set-at
@@ -537,7 +550,6 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-data-map( "data-map(" parsers get set-at
 \ parse-data-map!( "data-map!(" parsers get set-at
 \ parse-private "<PRIVATE" parsers get set-at
-
 \ parse-constant "CONSTANT:" parsers get set-at
 \ parse-mtuple "TUPLE:" parsers get set-at
 \ parse-merror "ERROR:" parsers get set-at
@@ -545,8 +557,8 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-foldable "foldable" parsers get set-at
 \ parse-flushable "flushable" parsers get set-at
 \ parse-inline "inline" parsers get set-at
+\ parse-final "final" parsers get set-at
 \ parse-recursive "recursive" parsers get set-at
-
 \ parse-block "[" parsers get set-at
 \ parse-locals-block "[|" parsers get set-at
 \ parse-bind ":>" parsers get set-at
@@ -555,7 +567,6 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-mvector "V{" parsers get set-at
 \ parse-mhashtable "H{" parsers get set-at
 \ parse-tuple-literal "T{" parsers get set-at
-
 \ parse-mgeneric "GENERIC:" parsers get set-at
 \ parse-mgeneric# "GENERIC#" parsers get set-at
 \ parse-mmethod "M:" parsers get set-at
@@ -581,31 +592,5 @@ CONSTRUCTOR: math ( name body -- obj ) ;
 \ parse-specialized-array "SPECIALIZED-ARRAY:" parsers get set-at
 \ parse-specialized-arrays "SPECIALIZED-ARRAYS:" parsers get set-at
 \ parse-syntax "SYNTAX:" parsers get set-at
-
-
-! FUNCTOR: define-box ( T -- )
-
-! ALIAS: B ${T}-box
-! ALIAS: <B> <${T}>
-
-! TUPLE: B { value T } ;
-! C: <B> B ( T -- B )
-
-! ;
-
-! \ float define-box
- 
-! FUNCTOR: define-box ( T -- )
-! H{ { T float } }
-
-! ALIAS: B ${T}-box
-! H{ { T float } { B float-box } }
-! ALIAS: <B> <${T}>
-! H{ { T float } { B float-box } { <B> <float-box>}
-
-! TUPLE: B { value T } ;
-! ! TUPLE: float-box { value float } ;
-! C: <B> B ( T -- B )
-! ! C: <float-box> float-box ( float -- float-box )
-
-! ;
+\ parse-functor "FUNCTOR:" parsers get set-at
+\ parse-name "NAME:" parsers get set-at
