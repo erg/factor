@@ -1,8 +1,9 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: assocs combinators constructors formatting io
-io.encodings.utf8 io.files kernel make math.parser namespaces
-sequences strings sequences.extras fry arrays ;
+USING: arrays assocs combinators constructors formatting fry io
+io.encodings.utf8 io.files io.streams.position kernel locals
+make math math.parser namespaces sequences sequences.extras
+strings ;
 IN: modern.parser
 
 SYMBOL: parsers
@@ -21,6 +22,28 @@ CONSTRUCTOR: mnumber ( n -- mnumber ) ;
 ERROR: string-expected got separator ;
 TUPLE: mstring class string ;
 CONSTRUCTOR: mstring ( class string -- mstring ) ;
+
+
+SYMBOL: texts
+
+TUPLE: text string from to ;
+CONSTRUCTOR: text ( string from to -- text ) ;
+
+: next-text ( quot -- text )
+    input-position [ call ] dip input-position <text> ; inline
+
+: save-text ( text -- )
+    texts get push ;
+
+: string-n>token ( string n -- token )
+    2dup [ length ] dip + <text> ;
+
+:: token-read-until ( sep -- string sep )
+    input-position :> start
+    sep read-until :> ( string sep' )
+    string input-position 2 - string-n>token save-text
+    sep' input-position [ 1 - ] keep <text> save-text
+    string sep' ;
 
 : parse-string' ( -- )
     "\\\"" read-until {
@@ -100,7 +123,7 @@ ERROR: no-more-tokens ;
     ] with-variable ;
 
 : parse-file ( path -- seq comments )
-    utf8 [ parse-input ] with-file-reader ; inline
+    utf8 [ input>position-stream parse-input ] with-file-reader ; inline
 
 : parse-stream ( stream -- seq comments )
     [ parse-input ] with-input-stream ; inline
