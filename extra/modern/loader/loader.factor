@@ -2,7 +2,7 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors assocs constructors io.directories io.files
 io.files.types io.pathnames kernel modern.parser namespaces
-sequences fry continuations ;
+sequences fry continuations modern.parser.factor ;
 IN: modern.loader
 
 SYMBOL: modules
@@ -15,14 +15,13 @@ TUPLE: module name paths dictionary ;
 CONSTRUCTOR: module ( name -- module ) ;
 
 SYMBOL: module-roots
-module-roots [ V{ "resource:core/" "resource:basis/" } clone ] initialize
+module-roots [ V{ "resource:core/" "resource:basis/" "resource:extra/" } clone ] initialize
 
 : replace-dots ( name -- name' )
     { { CHAR: . CHAR: / } }  substitute ;
 
 : append-module ( module-root name -- path )
     replace-dots append-path ;
-
 
 : ?directory-entries ( path -- seq/f )
     '[ _ directory-entries ] [ drop f ] recover ;
@@ -69,9 +68,6 @@ module-roots [ V{ "resource:core/" "resource:basis/" } clone ] initialize
 : root-name>tests-path ( module-root name -- path )
     "tests" root-name-subpath>path ;
 
-! : root-name>tests-path ( module-root name -- path )
-    ! "modern" root-name-subpath>path ;
-
 : name>paths ( name -- paths )
     [ module-roots get ] dip
     '[ _ root-name>paths ] map-find drop ;
@@ -85,16 +81,19 @@ module-roots [ V{ "resource:core/" "resource:basis/" } clone ] initialize
 
 ERROR: module-path-conflict paths ;
 
-: check-module-well-formed ( paths -- paths' )
-    harvest
-    dup length 1 = [ module-path-conflict ] unless ;
+ERROR: module-not-found name ;
 
 : module-main-path ( name -- path )
-    name>all-paths check-module-well-formed ;
+    dup name>all-paths harvest [
+        module-not-found
+    ] [
+        nip
+        dup length 1 = [ module-path-conflict ] unless
+    ] if-empty ;
+
 
 : parse-module ( name -- module )
     module-main-path [ [ parse-file ] map ] map concat ;
-
 
 GENERIC: post-parse-action ( parsed -- quotation )
 
