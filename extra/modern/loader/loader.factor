@@ -2,7 +2,8 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors assocs constructors io.directories io.files
 io.files.types io.pathnames kernel modern.parser namespaces
-sequences fry continuations modern.parser.factor ;
+sequences fry continuations modern.parser.factor
+io.directories.search ;
 IN: modern.loader
 
 SYMBOL: modules
@@ -45,10 +46,22 @@ module-roots [ V{ "resource:core/" "resource:basis/" "resource:extra/" } clone ]
 : root-name>factor-paths ( module-root name -- seq )
     root-name>paths filter-factor ;
 
-: root-name>potential-modules ( module-root name -- seq )
-    append-module
-    dup directory-entries [ type>> +directory+ = ] filter
-    [ name>> append-path ] with map ;
+: path>files ( path -- seq )
+    qualified-directory-entries
+    [ type>> +regular-file+ = ] filter
+    [ name>> ] map ;
+
+: path-is-module? ( path -- ? )
+    directory-entries [ type>> +regular-file+ = ] filter
+    empty? not ;
+
+: root-name>potential-modules ( module-root -- seq )
+    t recursive-directory-entries
+    [ type>> +directory+ = ] filter
+    [ name>> ] map ;
+
+: root-name>modules ( root -- seq )
+    root-name>potential-modules [ path-is-module? ] filter ;
 
 : root-name>module-path? ( module-root name -- ? )
     root-name>files empty? not ;
@@ -91,11 +104,10 @@ ERROR: module-not-found name ;
         dup length 1 = [ module-path-conflict ] unless
     ] if-empty ;
 
-
 : parse-module ( name -- module )
     module-main-path [ [ parse-file ] map ] map concat ;
 
-GENERIC: post-parse-action ( parsed -- quotation )
+GENERIC: parsed ( parsed -- )
+GENERIC: compile ( parsed -- quotation )
 
-M: using post-parse-action
-    strings>> [ parse-module ] map ;
+! M: using parsed strings>> [ parse-module ] map ;
