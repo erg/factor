@@ -1,7 +1,7 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: assocs combinators constructors kernel make
-modern.parser namespaces sequences ;
+modern.parser namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
 TUPLE: mnumber n ;
@@ -625,9 +625,10 @@ CONSTRUCTOR: pointer ( to -- obj ) ;
 : parse-pointer ( -- obj )
     token <pointer> ;
 
-TUPLE: help body ;
-CONSTRUCTOR: help ( body -- obj ) ;
+TUPLE: help name body ;
+CONSTRUCTOR: help ( name body -- obj ) ;
 : parse-help ( -- help )
+    token
     ";" parse-until <help> ;
 
 ! \ parse-mparser "PARSER:" register-parser
@@ -770,3 +771,11 @@ CONSTRUCTOR: help ( body -- obj ) ;
 ! "resource:basis/functors/functors.factor" "resource:basis/ui/tools/listener/completion/completion.factor"
 ! "resource:basis/simple-tokenizer/simple-tokenizer.factor" } diff
 ! [ dup . flush parse-file drop ] map
+
+(*
+"resource:core" root-name>modules [ path>files ] map concat
+{ "/home/erg/factor/core/vocabs/loader/test/a/a.factor"
+ "/home/erg/factor/core/vocabs/loader/test/c/c.factor"
+"/home/erg/factor/core/vocabs/loader/test/b/b.factor" } diff
+[ dup . flush parse-file ] map
+*)
