@@ -3,7 +3,7 @@
 USING: arrays assocs combinators constructors formatting fry io
 io.encodings.utf8 io.files io.streams.position kernel locals
 make math math.parser namespaces sequences sequences.extras
-strings ;
+strings unicode.case ;
 IN: modern.parser
 
 SYMBOL: parsers
@@ -122,8 +122,18 @@ ERROR: no-more-tokens ;
         comments get
     ] with-variable ;
 
-: parse-file ( path -- seq comments )
-    utf8 [ input>position-stream parse-input ] with-file-reader ; inline
+: parse-metadata ( path -- data )
+    utf8 file-contents ;
+
+: parse-source-file ( path -- data )
+    utf8 [ input>position-stream parse-input ] with-file-reader drop ; inline
+
+! TODO: Save comments here
+: parse-file ( path -- seq )
+    dup >lower {
+        { [ dup ".txt" tail? ] [ drop dup parse-metadata 2array ] }
+        [ drop dup parse-source-file 2array ]
+    } cond ;
 
 : parse-stream ( stream -- seq comments )
     [ parse-input ] with-input-stream ; inline
