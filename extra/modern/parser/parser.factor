@@ -772,6 +772,11 @@ CONSTRUCTOR: pointer ( to -- obj ) ;
 : parse-pointer ( -- obj )
     token <pointer> ;
 
+TUPLE: help body ;
+CONSTRUCTOR: help ( body -- obj ) ;
+: parse-help ( -- help )
+    ";" parse-until <help> ;
+
 \ parse-mparser "PARSER:" parsers get set-at
 \ parse-package "PACKAGE:" parsers get set-at
 \ parse-import "IMPORT:" parsers get set-at
@@ -880,6 +885,7 @@ CONSTRUCTOR: pointer ( to -- obj ) ;
 \ parse-forget "FORGET:" parsers get set-at
 \ parse-pointer "pointer:" parsers get set-at
 ! \ parse-string "STRING:" parsers get set-at
+\ parse-help "HELP:" parsers get set-at
 
 ! qw{ CODEGEN: CATEGORY: ENUM: SIMD-INTRINSIC:
 ! CLASS: FUNCTION-ALIAS: M\\ TAGS: COM-INTERFACE:
