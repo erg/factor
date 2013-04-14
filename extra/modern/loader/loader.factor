@@ -3,7 +3,7 @@
 USING: accessors assocs constructors io.directories io.files
 io.files.types io.pathnames kernel modern.parser namespaces
 sequences fry continuations modern.parser.factor
-io.directories.search ;
+io.directories.search sets splitting ;
 IN: modern.loader
 
 SYMBOL: modules
@@ -89,8 +89,30 @@ module-roots [ V{ "resource:core/" "resource:basis/" "resource:extra/" } clone ]
     [ module-roots get ] dip
     '[ _ root-name>paths ] map ;
 
+: prune-non-modern-files ( paths -- paths' )
+    dup [ "-modern.factor" tail? ] filter
+    [ "-modern.factor" ?tail drop ".factor" append ] map diff ;
+
 : name>factor-paths ( name -- paths )
-    name>paths filter-factor ;
+    name>paths filter-factor prune-non-modern-files ;
+
+: root>loadable-files ( root -- paths )
+    root-name>modules
+    [ path>files ] map concat prune-non-modern-files ;
+
+: loadable-core-files ( -- paths )
+    "resource:core" root>loadable-files
+    {
+        "/home/erg/factor/core/vocabs/loader/test/a/a.factor"
+        "/home/erg/factor/core/vocabs/loader/test/b/b.factor"
+        "/home/erg/factor/core/vocabs/loader/test/c/c.factor"
+    } diff ;
+
+: loadable-basis-files ( -- paths )
+    "resource:basis" root>loadable-files ;
+
+: loadable-extra-files ( -- paths )
+    "resource:extra" root>loadable-files ;
 
 ERROR: module-path-conflict paths ;
 
