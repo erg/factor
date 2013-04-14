@@ -518,7 +518,7 @@ CONSTRUCTOR: packed-struct ( name slots -- struct ) ;
 TUPLE: alias name target ;
 CONSTRUCTOR: alias ( name target -- alias ) ;
 : parse-alias ( -- alias )
-    token token <alias> ;
+    token parse <alias> ;
 
 TUPLE: registers names ;
 CONSTRUCTOR: registers ( names -- obj ) ;
