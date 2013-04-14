@@ -631,6 +631,11 @@ CONSTRUCTOR: help ( name body -- obj ) ;
     token
     ";" parse-until <help> ;
 
+TUPLE: long-string name text ;
+CONSTRUCTOR: long-string ( name text -- long-string ) ;
+: parse-long-string ( -- long-string )
+    token ";" parse-comment-until <long-string> ;
+
 ! \ parse-mparser "PARSER:" register-parser
 \ parse-package "PACKAGE:" register-parser
 \ parse-import "IMPORT:" register-parser
@@ -737,7 +742,7 @@ CONSTRUCTOR: help ( name body -- obj ) ;
 \ parse-enum "ENUM:" register-parser
 \ parse-forget "FORGET:" register-parser
 \ parse-pointer "pointer:" register-parser
-! \ parse-string "STRING:" register-parser
+\ parse-long-string "STRING:" register-parser
 \ parse-help "HELP:" register-parser
 
 ! qw{ CODEGEN: CATEGORY: ENUM: SIMD-INTRINSIC:
