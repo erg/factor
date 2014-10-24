@@ -16,9 +16,9 @@ CONSTRUCTOR: position-stream ( stream -- position-stream ) ;
     [ call ] 2keep drop over
     '[ _ dup sequence? [ length ] when + ] change-n drop ; inline
 
-: with-advance' ( stream quot -- seq )
-    [ call ] 2keep drop pick
-    '[ _ dup sequence? [ length ] when + ] change-n drop ; inline
+: with-advance-sep ( stream quot -- seq )
+    [ call ] 2keep drop pick length pick [ 1 + ] when
+    '[ _ + ] change-n drop ; inline
 
 M: position-stream stream-readln
     [ stream>> stream-readln ] with-advance ;
@@ -29,14 +29,20 @@ M: position-stream stream-read1
 M: position-stream stream-read-unsafe
     [ stream>> stream-read-unsafe ] with-advance ;
 
+! M: position-stream stream-read-until
+    ! [ stream>> stream-read-until ] with-advance' ;
+
 M: position-stream stream-read-until
-    [ stream>> stream-read-until ] with-advance' ;
+    [ stream>> stream-read-until ] with-advance-sep ;
+
 
 M: position-stream stream-element-type
     stream>> stream-element-type ;
 
 M: position-stream dispose*
     stream>> dispose ;
+
+M: position-stream stream-tell stream>> stream-tell ;
 
 
 : input>position-stream ( -- )
