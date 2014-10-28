@@ -131,7 +131,9 @@ SYMBOL: error-stream
 
 PRIVATE>
 
-: stream-read ( n stream -- seq/f )
+GENERIC: stream-read ( n stream -- seq/f )
+
+M: object stream-read ( n stream -- seq/f )
     [ stream-read-unsafe ] (read-into-new) ; inline
 
 : stream-read-partial ( n stream -- seq/f )
