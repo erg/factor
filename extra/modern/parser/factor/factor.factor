@@ -4,28 +4,28 @@ USING: assocs combinators constructors kernel make
 modern.parser namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
-TUPLE: mnumber n ;
+TUPLE: mnumber < parsed n ;
 CONSTRUCTOR: mnumber ( n -- mnumber ) ;
 
 ERROR: string-expected got separator ;
-TUPLE: mstring class string ;
+TUPLE: mstring < parsed class string ;
 CONSTRUCTOR: mstring ( class string -- mstring ) ;
 
-TUPLE: text string from to ;
+TUPLE: text < parsed string from to ;
 CONSTRUCTOR: text ( string from to -- text ) ;
 
-TUPLE: comment text ;
+TUPLE: comment < parsed text ;
 CONSTRUCTOR: comment ( text -- comment ) ;
 
-TUPLE: nested-comment comment ;
+TUPLE: nested-comment < parsed comment ;
 CONSTRUCTOR: nested-comment ( comment -- nested-comment ) ;
 : parse-nested-comment ( -- nested-comment )
     "*)" parse-comment-until <nested-comment> ;
 
-TUPLE: signature in out ;
+TUPLE: signature < parsed in out ;
 CONSTRUCTOR: signature ( in out -- signature ) ;
 
-TUPLE: typed-argument name signature ;
+TUPLE: typed-argument < parsed name signature ;
 CONSTRUCTOR: typed-argument ( name signature -- typed ) ;
 
 DEFER: parse-signature(--)
@@ -78,33 +78,33 @@ DEFER: parse-signature-in'
 : parse-signature--) ( -- signature )
     parse-signature-in' parse-signature-out <signature> ;
 
-TUPLE: syntax name body ;
+TUPLE: syntax < parsed name body ;
 CONSTRUCTOR: syntax ( name body -- syntax ) ;
 : parse-syntax ( -- syntax )
     raw body <syntax> ;
 
-TUPLE: function name signature body ;
+TUPLE: function < parsed name signature body ;
 CONSTRUCTOR: function ( name signature body -- function ) ;
 : parse-function ( -- function )
     token
     parse-signature(--)
     body <function> ;
 
-TUPLE: locals-function name signature body ;
+TUPLE: locals-function < parsed name signature body ;
 CONSTRUCTOR: locals-function ( name signature body -- function ) ;
 : parse-locals-function ( -- function )
     token
     parse-signature(--)
     body <locals-function> ;
 
-TUPLE: typed name signature body ;
+TUPLE: typed < parsed name signature body ;
 CONSTRUCTOR: typed ( name signature body -- typed ) ;
 : parse-typed ( -- function )
     token
     parse-signature(--)
     body <typed> ;
 
-TUPLE: locals-typed name signature body ;
+TUPLE: locals-typed < parsed name signature body ;
 CONSTRUCTOR: locals-typed ( name signature body -- typed ) ;
 : parse-locals-typed ( -- function )
     token
@@ -112,14 +112,14 @@ CONSTRUCTOR: locals-typed ( name signature body -- typed ) ;
     body <locals-typed> ;
 
 
-TUPLE: memo name signature body ;
+TUPLE: memo < parsed name signature body ;
 CONSTRUCTOR: memo ( name signature body -- memo ) ;
 : parse-memo ( -- function )
     token
     parse-signature(--)
     body <memo> ;
 
-TUPLE: locals-memo name signature body ;
+TUPLE: locals-memo < parsed name signature body ;
 CONSTRUCTOR: locals-memo ( name signature body -- memo ) ;
 : parse-locals-memo ( -- function )
     token
@@ -127,7 +127,7 @@ CONSTRUCTOR: locals-memo ( name signature body -- memo ) ;
     body <locals-memo> ;
 
 
-TUPLE: predicate name superclass body ;
+TUPLE: predicate < parsed name superclass body ;
 CONSTRUCTOR: predicate ( name superclass body -- predicate ) ;
 : parse-predicate ( -- predicate )
     token
@@ -135,76 +135,76 @@ CONSTRUCTOR: predicate ( name superclass body -- predicate ) ;
     token
     body <predicate> ;
 
-TUPLE: slot name ;
+TUPLE: slot < parsed name ;
 CONSTRUCTOR: slot ( name -- slot ) ;
 : parse-slot ( -- slot )
     token <slot> ;
 
-TUPLE: specialized-array class ;
+TUPLE: specialized-array < parsed class ;
 CONSTRUCTOR: specialized-array ( class -- speicialized-array ) ;
 : parse-specialized-array ( -- slot )
     token <specialized-array> ;
 
-TUPLE: specialized-arrays classes ;
+TUPLE: specialized-arrays < parsed classes ;
 CONSTRUCTOR: specialized-arrays ( classes -- speicialized-arrays ) ;
 : parse-specialized-arrays ( -- slot )
     ";" strings-until <specialized-arrays> ;
 
-TUPLE: postpone name ;
+TUPLE: postpone < parsed  name ;
 CONSTRUCTOR: postpone ( name -- postpone ) ;
 : parse-postpone ( -- postpone )
     raw <postpone> ;
 
-TUPLE: mixin name ;
+TUPLE: mixin < parsed  name ;
 CONSTRUCTOR: mixin ( name -- mixin ) ;
 : parse-mixin ( -- mixin )
     token <mixin> ;
 
-TUPLE: singleton name ;
+TUPLE: singleton < parsed name ;
 CONSTRUCTOR: singleton ( name -- singleton ) ;
 : parse-singleton ( -- singleton )
     token <singleton> ;
 
-TUPLE: singletons names ;
+TUPLE: singletons < parsed names ;
 CONSTRUCTOR: singletons ( names -- singletons ) ;
 : parse-singletons ( -- singletons )
     body <singletons> ;
 
-TUPLE: instance class mixin ;
+TUPLE: instance < parsed class mixin ;
 CONSTRUCTOR: instance ( class mixin -- instance ) ;
 : parse-instance ( -- instance )
     token token <instance> ;
 
-TUPLE: use strings ;
+TUPLE: use < parsed strings ;
 CONSTRUCTOR: use ( strings -- use ) ;
 : parse-use ( -- use ) token <use> ;
 
-TUPLE: using strings ;
+TUPLE: using < parsed strings ;
 CONSTRUCTOR: using ( strings -- use ) ;
 : parse-using ( -- using ) ";" strings-until <using> ;
 
-TUPLE: author name ;
+TUPLE: author < parsed name ;
 CONSTRUCTOR: author ( name -- author ) ;
 : parse-author ( -- author )
     string-until-eol [ " " member? ] trim <author> ;
 
-TUPLE: block body ;
+TUPLE: block < parsed body ;
 CONSTRUCTOR: block ( body -- block ) ;
 : parse-block ( -- block )
     "]" parse-until <block> ;
 
-TUPLE: parsetime-block body ;
+TUPLE: parsetime-block < parsed body ;
 CONSTRUCTOR: parsetime-block ( body -- parsetime-block ) ;
 : parse-parsetime-block ( -- block )
     "]" parse-until <parsetime-block> ;
 
-TUPLE: locals-block body ;
+TUPLE: locals-block < parsed body ;
 CONSTRUCTOR: locals-block ( body -- block ) ;
 : parse-locals-block ( -- block )
     "]" parse-until <locals-block> ;
 
-TUPLE: single-bind target ;
-TUPLE: multi-bind targets ;
+TUPLE: single-bind < parsed target ;
+TUPLE: multi-bind < parsed targets ;
 CONSTRUCTOR: single-bind ( target -- bind ) ;
 CONSTRUCTOR: multi-bind ( targets -- bind ) ;
 : parse-bind ( -- bind )
@@ -214,28 +214,28 @@ CONSTRUCTOR: multi-bind ( targets -- bind ) ;
         <single-bind>
     ] if ;
 
-TUPLE: fry body ;
+TUPLE: fry < parsed body ;
 CONSTRUCTOR: fry ( body -- block ) ;
 : parse-fry ( -- block )
     "]" parse-until <fry> ;
 
-TUPLE: marray elements ;
+TUPLE: marray < parsed elements ;
 CONSTRUCTOR: marray ( elements -- block ) ;
 : parse-marray ( -- block )
     "}" parse-until <marray> ;
 
-TUPLE: mvector elements ;
+TUPLE: mvector < parsed elements ;
 CONSTRUCTOR: mvector ( elements -- block ) ;
 : parse-mvector ( -- block )
     "}" parse-until <mvector> ;
 
-TUPLE: mhashtable elements ;
+TUPLE: mhashtable < parsed elements ;
 CONSTRUCTOR: mhashtable ( elements -- block ) ;
 : parse-mhashtable ( -- block )
     "}" parse-until <mhashtable> ;
 
-TUPLE: tuple-literal-assoc name slots ;
-TUPLE: tuple-literal-boa name slots ;
+TUPLE: tuple-literal-assoc < parsed name slots ;
+TUPLE: tuple-literal-boa < parsed name slots ;
 CONSTRUCTOR: tuple-literal-assoc ( name slots -- tuple-literal ) ;
 CONSTRUCTOR: tuple-literal-boa ( name slots -- tuple-literal ) ;
 : parse-tuple-literal ( -- block )
@@ -250,388 +250,388 @@ CONSTRUCTOR: tuple-literal-boa ( name slots -- tuple-literal ) ;
         { "}" [ drop f <tuple-literal-boa> ] }
     } case ;
 
-TUPLE: char n ;
+TUPLE: char < parsed n ;
 CONSTRUCTOR: char ( n -- char ) ;
 : parse-char ( -- char )
     raw <char> ;
 
-TUPLE: in name ;
+TUPLE: in < parsed name ;
 CONSTRUCTOR: in ( name -- in ) ;
 : parse-in ( -- in )
     token <in> ;
 
-TUPLE: main name ;
+TUPLE: main < parsed name ;
 CONSTRUCTOR: main ( name -- main ) ;
 : parse-main ( -- main )
     token <main> ;
 
-TUPLE: escaped name ;
+TUPLE: escaped < parsed name ;
 CONSTRUCTOR: escaped ( name -- escaped ) ;
 : parse-escaped ( -- escaped )
     raw <escaped> ;
 
-TUPLE: execute( signature ;
+TUPLE: execute( < parsed signature ;
 CONSTRUCTOR: execute( ( signature -- execute ) ;
 : parse-execute( ( -- execute( )
     parse-signature--) <execute(> ;
 
-TUPLE: call( signature ;
+TUPLE: call( < parsed signature ;
 CONSTRUCTOR: call( ( signature -- call ) ;
 : parse-call( ( -- call( )
     parse-signature--) <call(> ;
 
-TUPLE: data-map( signature ;
+TUPLE: data-map( < parsed signature ;
 CONSTRUCTOR: data-map( ( signature -- data-map ) ;
 : parse-data-map( ( -- call( )
     parse-signature--) <data-map(> ;
 
-TUPLE: data-map!( signature ;
+TUPLE: data-map!( < parsed signature ;
 CONSTRUCTOR: data-map!( ( signature -- data-map! ) ;
 : parse-data-map!( ( -- call( )
     parse-signature--) <data-map!(> ;
 
-TUPLE: hints name sequence ;
+TUPLE: hints < parsed name sequence ;
 CONSTRUCTOR: hints ( name sequence -- hints ) ;
 : parse-hints ( -- generic )
     token body <hints> ;
 
-TUPLE: mgeneric name signature ;
+TUPLE: mgeneric < parsed name signature ;
 CONSTRUCTOR: mgeneric ( name signature -- generic ) ;
 : parse-mgeneric ( -- generic )
     token parse-signature(--) <mgeneric> ;
 
-TUPLE: hook name symbol signature ;
+TUPLE: hook < parsed name symbol signature ;
 CONSTRUCTOR: hook ( name symbol signature -- hook ) ;
 : parse-hook ( -- hook )
     token token parse-signature(--) <hook> ;
 
-TUPLE: mgeneric# name n signature ;
+TUPLE: mgeneric# < parsed name n signature ;
 CONSTRUCTOR: mgeneric# ( name n signature -- generic ) ;
 : parse-mgeneric# ( -- generic )
     token token parse-signature(--) <mgeneric#> ;
 
-TUPLE: mmethod class name body ;
+TUPLE: mmethod < parsed class name body ;
 CONSTRUCTOR: mmethod ( class name body -- method ) ;
 : parse-mmethod ( -- method )
     parse token body <mmethod> ;
 
-TUPLE: locals-mmethod class name body ;
+TUPLE: locals-mmethod < parsed class name body ;
 CONSTRUCTOR: locals-mmethod ( class name body -- locals-method ) ;
 : parse-locals-mmethod ( -- method )
     parse token body <locals-mmethod> ;
 
-TUPLE: constructor name class ;
+TUPLE: constructor < parsed name class ;
 CONSTRUCTOR: constructor ( name class -- constructor ) ;
 : parse-constructor ( -- constructor )
     token token <constructor> ;
 
-TUPLE: private body ;
+TUPLE: private < parsed body ;
 CONSTRUCTOR: private ( body -- private ) ;
 : parse-private ( -- private )
     "PRIVATE>" parse-until <private> ;
 
-TUPLE: from module functions ;
+TUPLE: from < parsed module functions ;
 CONSTRUCTOR: from ( module functions -- from ) ;
 : parse-from ( -- from )
     token ";" strings-until <from> ;
 
-TUPLE: qualified name ;
+TUPLE: qualified < parsed name ;
 CONSTRUCTOR: qualified ( name -- qualified ) ;
 : parse-qualified ( -- qualified )
     token <qualified> ;
 
-TUPLE: qualified-with name prefix ;
+TUPLE: qualified-with < parsed name prefix ;
 CONSTRUCTOR: qualified-with ( name prefix -- qualified-with ) ;
 : parse-qualified-with ( -- qualified-with )
     token token <qualified-with> ;
 
-TUPLE: constant name object ;
+TUPLE: constant < parsed name object ;
 CONSTRUCTOR: constant ( name object -- constant ) ;
 : parse-constant ( -- constant )
     token parse <constant> ;
 
-TUPLE: mtuple name body ;
+TUPLE: mtuple < parsed name body ;
 CONSTRUCTOR: mtuple ( name body -- tuple ) ;
 : parse-mtuple ( -- mtuple )
     token body <mtuple> ;
 
-TUPLE: merror name body ;
+TUPLE: merror < parsed name body ;
 CONSTRUCTOR: merror ( name body -- error ) ;
 : parse-merror ( -- merror )
     token body <merror> ;
 
-! TUPLE: mparser name start slots body ;
+! TUPLE: mparser < parsed name start slots body ;
 ! CONSTRUCTOR: mparser ( name start slots body -- mparser ) ;
 ! : parse-mparser ( -- mparser )
     ! get-string parse parse body <mparser> ;
 
-TUPLE: mprimitive name signature ;
+TUPLE: mprimitive < parsed name signature ;
 CONSTRUCTOR: mprimitive ( name signature -- package ) ;
 : parse-mprimitive ( -- mprimitive )
     parse parse-signature(--) <mprimitive> ;
 
-TUPLE: package name ;
+TUPLE: package < parsed name ;
 CONSTRUCTOR: package ( name -- package ) ;
 : parse-package ( -- package )
     get-string <package> ;
 
-TUPLE: import name ;
+TUPLE: import < parsed name ;
 CONSTRUCTOR: import ( name -- package ) ;
 : parse-import ( -- import )
     get-string <import> ;
 
-TUPLE: imports names ;
+TUPLE: imports < parsed names ;
 CONSTRUCTOR: imports ( names -- package ) ;
 : parse-imports ( -- import )
     ";" strings-until <imports> ;
 
-TUPLE: foldable ;
+TUPLE: foldable < parsed ;
 CONSTRUCTOR: foldable ( -- obj ) ;
 : parse-foldable ( -- foldable ) <foldable> ;
 
-TUPLE: inline ;
+TUPLE: inline < parsed ;
 CONSTRUCTOR: inline ( -- obj ) ;
 : parse-inline ( -- inline ) <inline> ;
 
-TUPLE: final ;
+TUPLE: final < parsed ;
 CONSTRUCTOR: final ( -- obj ) ;
 : parse-final ( -- final ) <final> ;
 
-TUPLE: recursive ;
+TUPLE: recursive < parsed ;
 CONSTRUCTOR: recursive ( -- obj ) ;
 : parse-recursive ( -- recursive ) <recursive> ;
 
-TUPLE: union name strings ;
+TUPLE: union < parsed name strings ;
 CONSTRUCTOR: union ( name strings -- obj ) ;
 : parse-union ( -- recursive )
     token body <union> ;
 
-TUPLE: flushable ;
+TUPLE: flushable < parsed ;
 CONSTRUCTOR: flushable ( -- obj ) ;
 : parse-flushable ( -- flushable ) <flushable> ;
 
-TUPLE: mbuiltin name body ;
+TUPLE: mbuiltin < parsed name body ;
 CONSTRUCTOR: mbuiltin ( name body -- obj ) ;
 : parse-mbuiltin ( -- builtin )
     token body <mbuiltin> ;
 
-TUPLE: math name body ;
+TUPLE: math < parsed name body ;
 CONSTRUCTOR: math ( name body -- obj ) ;
 : parse-math ( -- builtin )
     token parse-signature(--) <math> ;
 
-TUPLE: functor name signature definitions ;
+TUPLE: functor < parsed name signature definitions ;
 CONSTRUCTOR: functor ( name signature definitions -- functor ) ;
 : parse-functor ( -- functor )
     token parse-signature(--) ";FUNCTOR" parse-until <functor> ;
 
-TUPLE: name name target ;
+TUPLE: name < parsed name target ;
 CONSTRUCTOR: name ( name target -- object ) ;
 : parse-name ( -- name )
     token token <name> ;
 
-TUPLE: ebnf text ;
+TUPLE: ebnf < parsed text ;
 CONSTRUCTOR: ebnf ( text -- ebnf ) ;
 : parse-ebnf ( -- ebnf )
     ";EBNF" strings-until <ebnf> ;
 
-TUPLE: defer name ;
+TUPLE: defer < parsed name ;
 CONSTRUCTOR: defer ( name -- defer ) ;
 : parse-defer ( -- defer )
     token <defer> ;
 
-TUPLE: symbol name ;
+TUPLE: symbol < parsed name ;
 CONSTRUCTOR: symbol ( name -- symbol ) ;
 : parse-symbol ( -- symbol )
     token <symbol> ;
 
-TUPLE: symbols names ;
+TUPLE: symbols < parsed names ;
 CONSTRUCTOR: symbols ( names -- symbols ) ;
 : parse-symbols ( -- symbols )
     ";" parse-until <symbols> ;
 
-TUPLE: compilation-unit code ;
+TUPLE: compilation-unit < parsed code ;
 CONSTRUCTOR: compilation-unit ( code -- compilation-unit ) ;
 : parse-compilation-unit ( -- compilation-unit )
     ">>" parse-until <compilation-unit> ;
 
-TUPLE: rename function module name ;
+TUPLE: rename < parsed function module name ;
 CONSTRUCTOR: rename ( function module name -- rename ) ;
 : parse-rename ( -- renamed )
     token token "=>" expect token <rename> ;
 
-TUPLE: typedef old new ;
+TUPLE: typedef < parsed old new ;
 CONSTRUCTOR: typedef ( old new -- typedef ) ;
 : parse-typedef ( -- typedef )
     token token <typedef> ;
 
-TUPLE: library name ;
+TUPLE: library < parsed name ;
 CONSTRUCTOR: library ( name -- library ) ;
 : parse-library ( -- library )
     token <library> ;
 
-TUPLE: c-function return-value name arguments ;
+TUPLE: c-function < parsed return-value name arguments ;
 CONSTRUCTOR: c-function ( return-value name arguments -- c-function ) ;
 : parse-c-function ( -- c-function )
     token token ";" parse-until <c-function> ;
 
-TUPLE: x-function return-value name arguments ;
+TUPLE: x-function < parsed return-value name arguments ;
 CONSTRUCTOR: x-function ( return-value name arguments -- c-function ) ;
 : parse-x-function ( -- c-function )
     token token ";" parse-until <x-function> ;
 
-TUPLE: c-function-alias aliased-name return-value name arguments ;
+TUPLE: c-function-alias < parsed aliased-name return-value name arguments ;
 CONSTRUCTOR: c-function-alias ( aliased-name return-value name arguments -- c-function ) ;
 : parse-c-function-alias ( -- c-function )
     token token token ";" parse-until <c-function-alias> ;
 
-TUPLE: gl-function return-value name arguments ;
+TUPLE: gl-function < parsed return-value name arguments ;
 CONSTRUCTOR: gl-function ( return-value name arguments -- gl-function ) ;
 : parse-gl-function ( -- gl-function )
     token token ";" parse-until <gl-function> ;
 
-TUPLE: c-type name ;
+TUPLE: c-type < parsed name ;
 CONSTRUCTOR: c-type ( name -- c-type ) ;
 : parse-c-type ( -- c-type )
     token <c-type> ;
 
-TUPLE: macro name signature body ;
+TUPLE: macro < parsed name signature body ;
 CONSTRUCTOR: macro ( name signature body -- macro ) ;
 : parse-macro ( -- macro )
     token parse-signature(--) ";" parse-until <macro> ;
 
-TUPLE: locals-macro name signature body ;
+TUPLE: locals-macro < parsed name signature body ;
 CONSTRUCTOR: locals-macro ( name signature body -- macro ) ;
 : parse-locals-macro ( -- macro )
     token parse-signature(--) ";" parse-until <locals-macro> ;
 
-TUPLE: struct name slots ;
+TUPLE: struct < parsed name slots ;
 CONSTRUCTOR: struct ( name slots -- struct ) ;
 : parse-struct ( -- struct )
     token ";" parse-until <struct> ;
 
-TUPLE: packed-struct name slots ;
+TUPLE: packed-struct < parsed name slots ;
 CONSTRUCTOR: packed-struct ( name slots -- struct ) ;
 : parse-packed-struct ( -- struct )
     token ";" parse-until <packed-struct> ;
 
-TUPLE: alias name target ;
+TUPLE: alias < parsed name target ;
 CONSTRUCTOR: alias ( name target -- alias ) ;
 : parse-alias ( -- alias )
     token parse <alias> ;
 
-TUPLE: registers names ;
+TUPLE: registers < parsed names ;
 CONSTRUCTOR: registers ( names -- obj ) ;
 : parse-registers ( -- obj )
     ";" parse-until <registers> ;
 
-TUPLE: hi-registers names ;
+TUPLE: hi-registers < parsed names ;
 CONSTRUCTOR: hi-registers ( names -- obj ) ;
 : parse-hi-registers ( -- obj )
     ";" parse-until <hi-registers> ;
 
-TUPLE: about name ;
+TUPLE: about < parsed name ;
 CONSTRUCTOR: about ( name -- obj ) ;
 : parse-about ( -- obj )
     token <about> ;
 
-TUPLE: article name body ;
+TUPLE: article < parsed name body ;
 CONSTRUCTOR: article ( name body -- obj ) ;
 : parse-article ( -- obj )
     token ";" parse-until <article> ;
 
-TUPLE: c-global name ;
+TUPLE: c-global < parsed name ;
 CONSTRUCTOR: c-global ( name -- obj ) ;
 : parse-c-global ( -- obj )
     token <c-global> ;
 
-TUPLE: protocol name functions ;
+TUPLE: protocol < parsed name functions ;
 CONSTRUCTOR: protocol ( name functions -- obj ) ;
 : parse-protocol ( -- obj )
     token ";" parse-until <protocol> ;
 
-TUPLE: tr name body ;
+TUPLE: tr < parsed name body ;
 CONSTRUCTOR: tr ( name body -- obj ) ;
 : parse-tr ( -- obj )
     token ";" parse-until <tr> ;
 
-TUPLE: exclude name body ;
+TUPLE: exclude < parsed name body ;
 CONSTRUCTOR: exclude ( name body -- obj ) ;
 : parse-exclude ( -- obj )
     token "=>" expect ";" parse-until <exclude> ;
 
-TUPLE: foldable-insn name body ;
+TUPLE: foldable-insn < parsed name body ;
 CONSTRUCTOR: foldable-insn ( name body -- obj ) ;
 : parse-foldable-insn ( -- obj )
     token ";" parse-until <foldable-insn> ;
 
-TUPLE: flushable-insn name body ;
+TUPLE: flushable-insn < parsed name body ;
 CONSTRUCTOR: flushable-insn ( name body -- obj ) ;
 : parse-flushable-insn ( -- obj )
     token ";" parse-until <flushable-insn> ;
 
-TUPLE: vreg-insn name body ;
+TUPLE: vreg-insn < parsed name body ;
 CONSTRUCTOR: vreg-insn ( name body -- obj ) ;
 : parse-vreg-insn ( -- obj )
     token ";" parse-until <vreg-insn> ;
 
-TUPLE: insn name body ;
+TUPLE: insn < parsed name body ;
 CONSTRUCTOR: insn ( name body -- obj ) ;
 : parse-insn ( -- obj )
     token ";" parse-until <insn> ;
 
-TUPLE: codegen name1 name2 ;
+TUPLE: codegen < parsed name1 name2 ;
 CONSTRUCTOR: codegen ( name1 name2 -- obj ) ;
 : parse-codegen ( -- obj )
     token token <codegen> ;
 
-TUPLE: conditional name1 name2 ;
+TUPLE: conditional < parsed name1 name2 ;
 CONSTRUCTOR: conditional ( name1 name2 -- obj ) ;
 : parse-conditional ( -- obj )
     token token <conditional> ;
 
-TUPLE: simd-128 name ;
+TUPLE: simd-128 < parsed name ;
 CONSTRUCTOR: simd-128 ( name -- obj ) ;
 : parse-simd-128 ( -- obj )
     token <simd-128> ;
 
-TUPLE: simd-128-cord name1 name2 ;
+TUPLE: simd-128-cord < parsed name1 name2 ;
 CONSTRUCTOR: simd-128-cord ( name1 name2 -- obj ) ;
 : parse-simd-128-cord ( -- obj )
     token token <simd-128-cord> ;
 
-TUPLE: simd-intrinsic name body ;
+TUPLE: simd-intrinsic < parsed name body ;
 CONSTRUCTOR: simd-intrinsic ( name body -- obj ) ;
 : parse-simd-intrinsic ( -- obj )
     token ";" parse-until <simd-intrinsic> ;
 
-TUPLE: locals-simd-intrinsic name body ;
+TUPLE: locals-simd-intrinsic < parsed name body ;
 CONSTRUCTOR: locals-simd-intrinsic ( name body -- obj ) ;
 : parse-locals-simd-intrinsic ( -- obj )
     token ";" parse-until <locals-simd-intrinsic> ;
 
-TUPLE: enum name slots ;
+TUPLE: enum < parsed name slots ;
 CONSTRUCTOR: enum ( name slots -- obj ) ;
 : parse-enum ( -- obj )
     token ";" parse-until <enum> ;
 
-TUPLE: forget name ;
+TUPLE: forget < parsed name ;
 CONSTRUCTOR: forget ( name -- obj ) ;
 : parse-forget ( -- obj )
     token <forget> ;
 
-TUPLE: pointer to ;
+TUPLE: pointer < parsed to ;
 CONSTRUCTOR: pointer ( to -- obj ) ;
 : parse-pointer ( -- obj )
     token <pointer> ;
 
-TUPLE: help name body ;
+TUPLE: help < parsed name body ;
 CONSTRUCTOR: help ( name body -- obj ) ;
 : parse-help ( -- help )
     token
     ";" parse-until <help> ;
 
-TUPLE: long-string name text ;
+TUPLE: long-string < parsed name text ;
 CONSTRUCTOR: long-string ( name text -- long-string ) ;
 : parse-long-string ( -- long-string )
     token ";" parse-comment-until <long-string> ;
