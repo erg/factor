@@ -6,6 +6,8 @@ io.streams.string kernel locals make math math.parser namespaces
 sequences sequences.extras strings ;
 IN: modern.parser
 
+! "TUPLE: foo a b c ;" parse-source-string
+
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
 
@@ -30,9 +32,6 @@ CONSTRUCTOR: comment ( text -- comment ) ;
 TUPLE: nested-comment < parsed comment ;
 CONSTRUCTOR: nested-comment ( comment -- nested-comment ) ;
 
-TUPLE: signature < parsed in out ;
-CONSTRUCTOR: signature ( in out -- signature ) ;
-
 TUPLE: typed-argument < parsed name signature ;
 CONSTRUCTOR: typed-argument ( name signature -- typed ) ;
 
@@ -42,13 +41,24 @@ CONSTRUCTOR: parser ( name slots syntax-name body -- obj ) ;
 TUPLE: literal-parser < parsed name ;
 CONSTRUCTOR: literal-parser ( name -- obj ) ;
 
-SYMBOL: current-parsed
-: save-current-parsed ( text -- )
-    current-parsed get push ;
+SYMBOL: current-texts
+: save-current-texts ( text -- )
+    current-texts get push ;
+
+: with-texts ( quot -- )
+    [ V{ } clone current-texts ] dip with-variable ; inline
+
+: transfer-texts ( obj -- obj )
+    current-texts get >>texts
+    V{ } clone current-texts set ;
+
+: texts-read-until ( seps -- seq sep )
+    read-until
+    [ [ save-current-texts ] [ object>> ] bi ] dip ;
 
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
-    "\\\"" read-until {
+    "\\\"" texts-read-until {
         { CHAR: " [ % ] }
         { CHAR: \ [ % read1 , parse-string' ] }
         { f [ f string-expected ] }
@@ -77,8 +87,7 @@ ERROR: string-expected got separator ;
     ] when ;
 
 : token-loop ( -- string/f )
-    "\r\n\s\"" read-until
-    [ [ save-current-parsed ] [ object>> ] bi ] dip {
+    "\r\n\s\"" texts-read-until {
         { [ dup "\r\n\s" member? ] [ drop [ token-loop ] when-empty ] }
         { [ 2dup [ empty? ] [ CHAR: " = ] bi* and ] [ drop [ f ] when-empty parse-string ] }
         { [ dup CHAR: " = ] [ drop [ f ] when-empty parse-string ] }
@@ -95,13 +104,13 @@ ERROR: string-expected got separator ;
     ] when ;
 
 : raw ( -- object )
-    "\r\n\s" read-until {
+    "\r\n\s" texts-read-until {
         { [ dup "\r\n\s" member? ] [ drop [ raw ] when-empty ] }
         [ drop ]
     } cond ;
 
 : get-string ( -- string/f )
-    "\r\n\s#" read-until {
+    "\r\n\s#" texts-read-until {
         { [ dup "\r\n\s" member? ] [ drop [ get-string ] when-empty ] }
         { [ dup CHAR: # = ] [
             drop parse-comment save-comment [ get-string ] when-empty ] }
@@ -115,7 +124,9 @@ ERROR: string-expected got separator ;
 
 ERROR: no-more-tokens ;
 : parse ( -- object/f )
-    token parse-action ;
+    [
+        token parse-action dup { [ string? not ] [ ] } 1&& [ transfer-texts ] when
+    ] with-texts ;
 
 : parse-input ( -- seq comments )
     V{ } clone comments [
@@ -138,7 +149,7 @@ ERROR: raw-expected raw ;
     ] loop>array ;
 
 : string-until-eol ( -- string )
-    "\r\n" read-until drop ;
+    "\r\n" texts-read-until drop ;
 
 ERROR: expected expected got ;
 : expect ( string -- )
@@ -152,55 +163,6 @@ ERROR: expected expected got ;
 : parse-nested-comment ( -- nested-comment )
     "*)" parse-comment-until <nested-comment> ;
 
-DEFER: parse-signature(--)
-DEFER: parse-nested-signature(--)
-DEFER: parse-signature-in
-DEFER: parse-signature-in'
-
-: parse-signature-in'' ( -- )
-    raw dup ":" tail? [
-        parse-nested-signature(--) <typed-argument> ,
-        parse-signature-in''
-    ] [
-        dup "--" = [
-            drop
-        ] [
-            , parse-signature-in''
-        ] if
-    ] if ;
-
-: parse-signature-in' ( -- out )
-    [ parse-signature-in'' ] { } make ;
-
-: parse-signature-in ( -- in )
-    "(" expect parse-signature-in' ;
-
-: parse-signature-out' ( -- )
-    raw dup ":" tail? [
-        parse-nested-signature(--) <typed-argument> ,
-        parse-signature-out'
-    ] [
-        dup ")" = [
-            drop
-        ] [
-            , parse-signature-out'
-        ] if
-    ] if ;
-
-: parse-signature-out ( -- out )
-    [ parse-signature-out' ] { } make ;
-
-: parse-nested-signature(--) ( -- signature )
-    raw dup "(" = [
-        drop
-        parse-signature-in' parse-signature-out <signature>
-    ] when ;
-
-: parse-signature(--) ( -- signature )
-    parse-signature-in parse-signature-out <signature> ;
-
-: parse-signature--) ( -- signature )
-    parse-signature-in' parse-signature-out <signature> ;
 
 : parse-parser ( -- obj )
     token parse token ";" parse-until <parser> ;
