@@ -65,6 +65,10 @@ SYMBOL: current-texts
         ] if
     ] if ;
 
+: texts-readln ( -- string )
+    readln
+    [ save-current-texts ] [ object>> ] bi  ;
+
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
     "\\\"" texts-read-until {
@@ -77,7 +81,7 @@ ERROR: string-expected got separator ;
 : parse-string ( class -- mstring )
     [ parse-string' ] "" make <mstring> ;
 
-: parse-comment ( -- comment ) readln <comment> ;
+: parse-comment ( -- comment ) texts-readln <comment> ;
 
 : execute-parser ( word -- object/f )
     \ parsers get ?at [ execute( -- parsed ) ] when ;
