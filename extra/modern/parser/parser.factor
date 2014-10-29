@@ -1,9 +1,9 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: arrays ascii assocs combinators constructors fry io
-io.encodings.utf8 io.files io.streams.document io.streams.string
-kernel locals make math math.parser namespaces sequences
-sequences.extras strings ;
+USING: accessors arrays ascii assocs combinators constructors
+fry io io.encodings.utf8 io.files io.streams.document
+io.streams.string kernel locals make math math.parser namespaces
+sequences sequences.extras strings ;
 IN: modern.parser
 
 SYMBOL: parsers
@@ -16,36 +16,37 @@ SYMBOL: comments
 : save-comment ( comment -- )
     [ comments get push ] when* ;
 
-TUPLE: mnumber n ;
+TUPLE: parsed texts ;
+
+TUPLE: mnumber < parsed n ;
 CONSTRUCTOR: mnumber ( n -- mnumber ) ;
 
-ERROR: string-expected got separator ;
-TUPLE: mstring class string ;
+TUPLE: mstring < parsed class string ;
 CONSTRUCTOR: mstring ( class string -- mstring ) ;
 
+TUPLE: comment < parsed text ;
+CONSTRUCTOR: comment ( text -- comment ) ;
 
-SYMBOL: texts
+TUPLE: nested-comment < parsed comment ;
+CONSTRUCTOR: nested-comment ( comment -- nested-comment ) ;
 
-TUPLE: text string from to ;
-CONSTRUCTOR: text ( string from to -- text ) ;
+TUPLE: signature < parsed in out ;
+CONSTRUCTOR: signature ( in out -- signature ) ;
 
-: next-text ( quot -- text )
-    input-position [ call ] dip input-position <text> ; inline
+TUPLE: typed-argument < parsed name signature ;
+CONSTRUCTOR: typed-argument ( name signature -- typed ) ;
 
-: save-text ( text -- )
-    texts get push ;
+TUPLE: parser < parsed name slots syntax-name body ;
+CONSTRUCTOR: parser ( name slots syntax-name body -- obj ) ;
 
-: string-n>token ( string n -- token )
-    2dup [ length ] dip + <text> ;
+TUPLE: literal-parser < parsed name ;
+CONSTRUCTOR: literal-parser ( name -- obj ) ;
 
-! :: token-read-until ( sep -- string sep )
-    ! input-position :> start
-    ! sep read-until :> ( string sep' )
-    ! string input-position 2 - string-n>token save-text
-    ! sep' input-position [ 1 - ] keep <text> save-text
-    ! string sep' ;
+SYMBOL: current-parsed
+: save-current-parsed ( text -- )
+    current-parsed get push ;
 
-
+ERROR: string-expected got separator ;
 : parse-string' ( -- )
     "\\\"" read-until {
         { CHAR: " [ % ] }
@@ -57,8 +58,6 @@ CONSTRUCTOR: text ( string from to -- text ) ;
 : parse-string ( class -- mstring )
     [ parse-string' ] "" make <mstring> ;
 
-TUPLE: comment text ;
-CONSTRUCTOR: comment ( text -- comment ) ;
 : parse-comment ( -- comment ) readln <comment> ;
 
 : execute-parser ( word -- object/f )
@@ -77,21 +76,21 @@ CONSTRUCTOR: comment ( text -- comment ) ;
         [ f ] [ execute-comment-parser ] if-empty
     ] when ;
 
-: token' ( -- string/f )
+: token-loop ( -- string/f )
     "\r\n\s\"" read-until
-    [ [ save-text ] [ object>> ] bi ] dip {
-        { [ dup "\r\n\s" member? ] [ drop [ token' ] when-empty ] }
+    [ [ save-current-parsed ] [ object>> ] bi ] dip {
+        { [ dup "\r\n\s" member? ] [ drop [ token-loop ] when-empty ] }
         { [ 2dup [ empty? ] [ CHAR: " = ] bi* and ] [ drop [ f ] when-empty parse-string ] }
         { [ dup CHAR: " = ] [ drop [ f ] when-empty parse-string ] }
         ! { [ dup CHAR: # = ] [
-            ! drop parse-comment save-comment [ token' ] when-empty ] }
+            ! drop parse-comment save-comment [ token-loop ] when-empty ] }
         ! { [ dup CHAR: ! = ] [
-            ! drop parse-comment save-comment [ token' ] when-empty ] }
+            ! drop parse-comment save-comment [ token-loop ] when-empty ] }
         [ drop ]
     } cond ;
 
 : token ( -- object )
-    token' dup string? [
+    token-loop dup string? [
         dup string>number [ <mnumber> ] when
     ] when ;
 
@@ -124,29 +123,6 @@ ERROR: no-more-tokens ;
         comments get
     ] with-variable ;
 
-: parse-metadata ( path -- data )
-    utf8 file-contents ;
-
-: parse-source-file ( path -- data )
-    utf8 [ input>document-stream parse-input ] with-file-reader drop ; inline
-
-: parse-source-string ( string -- data )
-    [ input>document-stream parse-input ] with-string-reader drop ; inline
-
-ERROR: unrecognized-factor-file path ;
-
-! TODO: Save comments here
-: parse-file ( path -- seq )
-    dup >lower {
-        { [ dup ".txt" tail? ] [ drop dup parse-metadata 2array ] }
-        { [ dup ".factor" tail? ] [ drop dup parse-source-file 2array ] }
-        ! [ unrecognized-factor-file ]
-        [ drop f 2array ]
-    } cond ;
-
-: parse-stream ( stream -- seq comments )
-    [ parse-input ] with-input-stream ; inline
-
 ERROR: token-expected token ;
 : parse-until ( string -- strings/f )
     '[
@@ -173,16 +149,8 @@ ERROR: expected expected got ;
 
 : body ( -- strings ) ";" parse-until ;
 
-TUPLE: nested-comment comment ;
-CONSTRUCTOR: nested-comment ( comment -- nested-comment ) ;
 : parse-nested-comment ( -- nested-comment )
     "*)" parse-comment-until <nested-comment> ;
-
-TUPLE: signature in out ;
-CONSTRUCTOR: signature ( in out -- signature ) ;
-
-TUPLE: typed-argument name signature ;
-CONSTRUCTOR: typed-argument ( name signature -- typed ) ;
 
 DEFER: parse-signature(--)
 DEFER: parse-nested-signature(--)
@@ -234,13 +202,9 @@ DEFER: parse-signature-in'
 : parse-signature--) ( -- signature )
     parse-signature-in' parse-signature-out <signature> ;
 
-TUPLE: parser name slots syntax-name body ;
-CONSTRUCTOR: parser ( name slots syntax-name body -- obj ) ;
 : parse-parser ( -- obj )
     token parse token ";" parse-until <parser> ;
 
-TUPLE: literal-parser name ;
-CONSTRUCTOR: literal-parser ( name -- obj ) ;
 : parse-literal-parser ( -- obj )
     token <literal-parser> ;
 
@@ -249,3 +213,24 @@ CONSTRUCTOR: literal-parser ( name -- obj ) ;
 
 \ parse-parser "PARSER:" register-parser
 \ parse-literal-parser "LITERAL-PARSER:" register-parser
+
+: parse-metadata ( path -- data )
+    utf8 file-contents ;
+
+: parse-stream ( stream -- seq comments )
+    [ parse-input ] with-input-stream ; inline
+
+: parse-source-file ( path -- data )
+    utf8 [ input>document-stream parse-input ] with-file-reader drop ; inline
+
+: parse-source-string ( string -- data )
+    [ input>document-stream parse-input ] with-string-reader drop ; inline
+
+ERROR: unrecognized-factor-file path ;
+: parse-modern-file ( path -- seq )
+    dup >lower {
+        { [ dup ".txt" tail? ] [ drop dup parse-metadata 2array ] }
+        { [ dup ".factor" tail? ] [ drop dup parse-source-file 2array ] }
+        ! [ unrecognized-factor-file ]
+        [ drop f 2array ]
+    } cond ;
