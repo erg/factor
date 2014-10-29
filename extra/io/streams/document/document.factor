@@ -46,6 +46,13 @@ CONSTRUCTOR: document-object ( position object -- document-object ) ;
 
 M: document-stream stream-element-type call-next-method ;
 
+! stream-read-unsafe advances
+M: document-stream stream-read
+    [ nip stream-tell ] [ call-next-method ] 2bi <document-object> ;
+
+M: document-stream stream-contents*
+    [ stream-tell ] [ call-next-method ] bi <document-object> ;
+
 M: document-stream stream-readln
     [
         [ stream-tell ] [ call-next-method ] bi <document-object>
@@ -58,7 +65,6 @@ M: document-stream stream-read1
 
 M: document-stream stream-read-unsafe
     [ call-next-method ] 3keep
-    B
     rot drop pick 0 > [ advance-string ] [ 2drop ] if ;
 
 M: document-stream stream-read-until
@@ -70,5 +76,3 @@ M: document-stream stream-read-until
 
 M: document-stream stream-tell
     [ line>> ] [ column>> ] bi <document-position> ;
-
-M: document-stream dispose* call-next-method ;
