@@ -1,12 +1,14 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays ascii assocs combinators constructors
-fry io io.encodings.utf8 io.files io.streams.document
-io.streams.string kernel locals make math math.parser namespaces
-sequences sequences.extras strings ;
+USING: accessors arrays ascii assocs combinators
+combinators.short-circuit constructors fry io io.encodings.utf8
+io.files io.streams.document io.streams.string kernel locals
+make math math.parser namespaces sequences sequences.extras
+strings ;
 IN: modern.parser
 
 ! "TUPLE: foo a b c ;" parse-source-string
+! "resource:core/math/math.factor" parse-modern-file
 
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
@@ -53,8 +55,15 @@ SYMBOL: current-texts
     V{ } clone current-texts set ;
 
 : texts-read-until ( seps -- seq sep )
-    read-until
-    [ [ save-current-texts ] [ object>> ] bi ] dip ;
+    dup read-until over object>> "" = [
+        2drop texts-read-until
+    ] [
+        over object>> [
+            [ nip [ save-current-texts ] [ object>> ] bi ] dip
+        ] [
+            3drop f f
+        ] if
+    ] if ;
 
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
@@ -162,7 +171,6 @@ ERROR: expected expected got ;
 
 : parse-nested-comment ( -- nested-comment )
     "*)" parse-comment-until <nested-comment> ;
-
 
 : parse-parser ( -- obj )
     token parse token ";" parse-until <parser> ;
