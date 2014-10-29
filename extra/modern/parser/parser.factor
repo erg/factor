@@ -1,9 +1,9 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: arrays assocs combinators constructors formatting fry io
-io.encodings.utf8 io.files io.streams.position kernel locals
-make math math.parser namespaces sequences sequences.extras
-strings unicode.case io.streams.string ;
+USING: arrays ascii assocs combinators constructors fry io
+io.encodings.utf8 io.files io.streams.document io.streams.string
+kernel locals make math math.parser namespaces sequences
+sequences.extras strings ;
 IN: modern.parser
 
 SYMBOL: parsers
@@ -38,12 +38,13 @@ CONSTRUCTOR: text ( string from to -- text ) ;
 : string-n>token ( string n -- token )
     2dup [ length ] dip + <text> ;
 
-:: token-read-until ( sep -- string sep )
-    input-position :> start
-    sep read-until :> ( string sep' )
-    string input-position 2 - string-n>token save-text
-    sep' input-position [ 1 - ] keep <text> save-text
-    string sep' ;
+! :: token-read-until ( sep -- string sep )
+    ! input-position :> start
+    ! sep read-until :> ( string sep' )
+    ! string input-position 2 - string-n>token save-text
+    ! sep' input-position [ 1 - ] keep <text> save-text
+    ! string sep' ;
+
 
 : parse-string' ( -- )
     "\\\"" read-until {
@@ -77,7 +78,8 @@ CONSTRUCTOR: comment ( text -- comment ) ;
     ] when ;
 
 : token' ( -- string/f )
-    "\r\n\s\"" read-until {
+    "\r\n\s\"" read-until
+    [ [ save-text ] [ object>> ] bi ] dip {
         { [ dup "\r\n\s" member? ] [ drop [ token' ] when-empty ] }
         { [ 2dup [ empty? ] [ CHAR: " = ] bi* and ] [ drop [ f ] when-empty parse-string ] }
         { [ dup CHAR: " = ] [ drop [ f ] when-empty parse-string ] }
@@ -126,10 +128,10 @@ ERROR: no-more-tokens ;
     utf8 file-contents ;
 
 : parse-source-file ( path -- data )
-    utf8 [ input>position-stream parse-input ] with-file-reader drop ; inline
+    utf8 [ input>document-stream parse-input ] with-file-reader drop ; inline
 
 : parse-source-string ( string -- data )
-    [ input>position-stream parse-input ] with-string-reader drop ; inline
+    [ input>document-stream parse-input ] with-string-reader drop ; inline
 
 ERROR: unrecognized-factor-file path ;
 
