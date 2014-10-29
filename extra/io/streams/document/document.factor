@@ -1,7 +1,7 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays constructors destructors io
-io.streams.position kernel math sequences ;
+USING: accessors arrays combinators constructors destructors io
+io.streams.position kernel math namespaces sequences ;
 IN: io.streams.document
 
 TUPLE: document-stream < position-stream { line integer } { column integer } ;
@@ -68,11 +68,23 @@ M: document-stream stream-read-unsafe
     rot drop pick 0 > [ advance-string ] [ 2drop ] if ;
 
 M: document-stream stream-read-until
-    [ call-next-method 2dup ] 2keep nip [
-        swap [ [ advance-string ] keep ] dip advance-1
-    ] [
-        swap advance-string
-    ] if* ;
+    [ nip stream-tell ] ! pos
+    [ call-next-method [ [ <document-object> ] keep ] dip ]
+    [ nip ] 2tri ! seq sep stream
+    {
+        [ nip advance-string ]
+        [ swap advance-1 drop ]
+        [ drop nip ]
+    } 3cleave ;
 
 M: document-stream stream-tell
     [ line>> ] [ column>> ] bi <document-position> ;
+
+
+: input>document-stream ( -- )
+    input-stream [ <document-stream> ] change ;
+
+: input-position ( -- n ) input-stream get n>> ;
+
+: output>document-stream ( -- )
+    output-stream [ <document-stream> ] change ;
