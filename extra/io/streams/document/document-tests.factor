@@ -84,3 +84,56 @@ IN: io.streams.document.tests
         4 read
     ] with-input-stream
 ] unit-test
+
+[
+    T{ document-object
+        { object "a" }
+        { position T{ document-position { line 0 } { column 0 } } }
+    }
+    CHAR: s
+] [
+    "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
+        "sd" read-until
+    ] with-input-stream
+] unit-test
+
+
+[
+    T{ document-object
+        { object "d" }
+        { position T{ document-position { line 0 } { column 2 } } }
+    }
+    CHAR: f
+] [
+    "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
+        "sd" read-until 2drop
+        "f" read-until
+    ] with-input-stream
+] unit-test
+
+[
+    T{ document-object
+        { object "df" }
+        { position T{ document-position { line 0 } { column 2 } } }
+    }
+    CHAR: \n
+] [
+    "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
+        "sd" read-until 2drop
+        "\n" read-until
+    ] with-input-stream
+] unit-test
+
+[
+    T{ document-object
+        { object "fdsa\n" }
+        { position T{ document-position { line 1 } { column 0 } } }
+    }
+    CHAR: 1
+] [
+    "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
+        "sd" read-until 2drop
+        "\n" read-until 2drop
+        "1" read-until
+    ] with-input-stream
+] unit-test
