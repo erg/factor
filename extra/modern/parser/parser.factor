@@ -204,3 +204,8 @@ ERROR: unrecognized-factor-file path ;
         ! [ unrecognized-factor-file ]
         [ drop f 2array ]
     } cond ;
+
+: write-parsed ( seq -- )
+    [
+        texts>> [ object>> write bl ] each nl
+    ] each ;
