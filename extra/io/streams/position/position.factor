@@ -4,9 +4,14 @@ USING: accessors constructors destructors fry io kernel math
 namespaces sequences ;
 IN: io.streams.position
 
-TUPLE: position-stream stream { n integer } ;
+TUPLE: position-stream < disposable stream { n integer } ;
 
-CONSTRUCTOR: position-stream ( stream -- position-stream ) ;
+: new-position-stream ( stream class -- position-stream )
+    new-disposable
+        swap >>stream ; inline
+
+: <position-stream> ( stream -- position-stream )
+    \ position-stream new-position-stream ; inline
 
 : with-advance-1 ( stream quot -- seq )
     [ call ] 2keep drop
@@ -25,6 +30,9 @@ M: position-stream stream-readln
 
 M: position-stream stream-read1
     [ stream>> stream-read1 ] with-advance-1 ;
+
+M: position-stream stream-contents*
+    [ stream>> stream-contents* ] with-advance ;
 
 M: position-stream stream-read-unsafe
     [ stream>> stream-read-unsafe ] with-advance ;
