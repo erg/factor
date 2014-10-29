@@ -9,6 +9,11 @@ IN: modern.parser
 
 ! "TUPLE: foo a b c ;" parse-source-string
 ! "resource:core/math/math.factor" parse-modern-file
+! ": add-one ( a -- b ) 1 + ;" parse-source-string ...
+! "! omg omg\n!# lol" parse-source-string ...
+! """ "asdf" """ parse-source-string ...
+! """"asdf"""" parse-source-string ...
+! "M: rational neg? 0 < ;" parse-source-string ...
 
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
@@ -137,15 +142,16 @@ ERROR: string-expected got separator ;
 
 ERROR: no-more-tokens ;
 : parse ( -- object/f )
-    [
-        token parse-action dup { [ string? not ] [ ] } 1&& [ transfer-texts ] when
-    ] with-texts ;
+    token parse-action
+    dup { [ string? not ] [ ] } 1&& [ transfer-texts ] when ;
 
 : parse-input ( -- seq comments )
-    V{ } clone comments [
-        [ parse ] loop>array
-        comments get
-    ] with-variable ;
+    [
+        V{ } clone comments [
+            [ parse ] loop>array
+            comments get
+        ] with-variable
+    ] with-texts ;
 
 ERROR: token-expected token ;
 : parse-until ( string -- strings/f )
