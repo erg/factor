@@ -15,6 +15,7 @@ IN: modern.parser
 ! """"asdf"""" parse-source-string ...
 ! "M: rational neg? 0 < ;" parse-source-string ...
 ! ": add-one ( a -- b ) 1 + ;" parse-source-string write-parsed-string print
+! "resource:core/sequences/sequences.factor" parse-modern-file second write-parsed-string print
 
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
@@ -64,13 +65,22 @@ SYMBOL: current-texts
     current-texts get >>texts
     V{ } clone current-texts set ;
 
+! Call first because sep is a string in the saved texts, we want a char
 : texts-read-until ( seps -- seq sep )
-    dup read-until
-    [ nip [ save-current-texts ] [ object>> ] bi ] dip ;
+    read-until
+    dup [
+        [ [ save-current-texts ] [ object>> ] bi ] bi@
+    ] [
+        [
+            dup [
+                [ save-current-texts ] [ object>> ] bi
+            ] when
+        ] dip
+    ] if ;
 
 : texts-readln ( -- string )
     readln
-    [ save-current-texts ] [ object>> ] bi  ;
+    [ save-current-texts ] [ object>> ] bi ;
 
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
