@@ -16,6 +16,7 @@ IN: modern.parser
 ! "M: rational neg? 0 < ;" parse-source-string ...
 ! ": add-one ( a -- b ) 1 + ;" parse-source-string write-parsed-string print
 ! "resource:core/sequences/sequences.factor" parse-modern-file second write-parsed-string print
+! "[ 1 ]" parse-source-string
 
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
@@ -37,6 +38,10 @@ CONSTRUCTOR: mstring ( class string -- mstring ) ;
 
 TUPLE: comment < parsed text ;
 CONSTRUCTOR: comment ( text -- comment ) ;
+
+TUPLE: mtoken < parsed name ;
+CONSTRUCTOR: mtoken ( name -- comment ) ;
+
 
 TUPLE: nested-comment < parsed comment ;
 CONSTRUCTOR: nested-comment ( comment -- nested-comment ) ;
@@ -78,6 +83,9 @@ SYMBOL: current-texts
         ] dip
     ] if ;
 
+: texts-read1 ( -- obj )
+    read1 [ save-current-texts ] [ object>> ] bi ;
+
 : texts-readln ( -- string )
     readln
     [ save-current-texts ] [ object>> ] bi ;
@@ -86,7 +94,7 @@ ERROR: string-expected got separator ;
 : parse-string' ( -- )
     "\\\"" texts-read-until {
         { CHAR: " [ % ] }
-        { CHAR: \ [ % read1 , parse-string' ] }
+        { CHAR: \ [ % texts-read1 , parse-string' ] }
         { f [ f string-expected ] }
         [ string-expected ]
     } case ;
@@ -100,16 +108,18 @@ ERROR: string-expected got separator ;
     \ parsers get ?at [ execute( -- parsed ) ] when ;
 
 : parse-action ( string -- object/f )
-    dup string? [
-        [ f ] [ execute-parser ] if-empty
+    dup mtoken? [
+        dup name>> empty?
+        [ drop f ] [ execute-parser ] if
     ] when ;
 
 : execute-comment-parser ( word -- object/f )
     \ comment-parsers get ?at [ execute( -- parsed ) ] when ;
 
 : comment-parse-action ( string -- object/f )
-    dup string? [
-        [ f ] [ execute-comment-parser ] if-empty
+    dup mtoken? [
+        dup name>> empty?
+        [ drop f ] [ execute-comment-parser ] if
     ] when ;
 
 : token-loop ( -- string/f )
@@ -126,7 +136,8 @@ ERROR: string-expected got separator ;
 
 : token ( -- object )
     token-loop dup string? [
-        dup string>number [ <mnumber> ] when
+        ! dup string>number [ <mnumber> ] when
+        dup string>number [ <mnumber> ] [ <mtoken> ] if
     ] when ;
 
 : raw ( -- object )
@@ -137,15 +148,15 @@ ERROR: string-expected got separator ;
 
 : get-string ( -- string/f )
     "\r\n\s#" texts-read-until {
-        { [ dup "\r\n\s" member? ] [ drop [ get-string ] when-empty ] }
+        { [ dup "\r\n\s" member? ] [ drop [ get-string ] when-empty <mtoken> ] }
         { [ dup CHAR: # = ] [
             drop parse-comment save-comment [ get-string ] when-empty ] }
-        [ drop ]
+        [ drop B <mtoken> ]
     } cond ;
 
 : strings-until ( string -- strings )
     '[
-        _ get-string 2dup = [ 2drop f ] [ nip ] if
+        _ get-string 2dup name>> = [ 2drop f ] [ nip ] if
     ] loop>array ;
 
 ERROR: no-more-tokens ;
@@ -165,7 +176,7 @@ ERROR: token-expected token ;
 : parse-until ( string -- strings/f )
     '[
         _ token [ token-expected ] unless*
-        2dup = [ 2drop f ] [ nip parse-action ] if
+        2dup dup mtoken? [ name>> ] when = [ 2drop f ] [ nip parse-action ] if
     ] loop>array ;
 
 ERROR: raw-expected raw ;
@@ -180,10 +191,11 @@ ERROR: raw-expected raw ;
 
 ERROR: expected expected got ;
 : expect ( string -- )
-    token 2dup = [ 2drop ] [ expected ] if ;
+    token
+    2dup name>> = [ 2drop ] [ expected ] if ;
 
 : expect-one ( strings -- )
-    token 2dup swap member? [ 2drop ] [ expected ] if ;
+    token 2dup name>> swap member? [ 2drop ] [ expected ] if ;
 
 : body ( -- strings ) ";" parse-until ;
 
