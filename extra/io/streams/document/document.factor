@@ -69,13 +69,16 @@ M: document-stream stream-read-unsafe
     rot drop pick 0 > [ advance-string ] [ 2drop ] if ;
 
 M: document-stream stream-read-until
-    [ nip stream-tell ] ! pos
-    [ call-next-method [ [ <document-object> ] keep ] dip ]
-    [ nip ] 2tri ! seq sep stream
+    [ nip stream-tell ]
+    [ call-next-method ]
+    [ nip ] 2tri
+
+    ! pos seq sep stream
     {
+        [ 2drop dup [ <document-object> ] [ 2drop f ] if ]
         [ nip advance-string ]
+        [ over [ stream-tell swap <document-object> nip ] [ 3drop f ] if ]
         [ swap advance-1 drop ]
-        [ drop nip ]
     } 3cleave ;
 
 M: document-stream stream-tell
