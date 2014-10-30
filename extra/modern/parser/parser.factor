@@ -51,7 +51,11 @@ CONSTRUCTOR: literal-parser ( name -- obj ) ;
 
 SYMBOL: current-texts
 : save-current-texts ( text -- )
-    current-texts get push ;
+    dup object>> "" = [
+        drop
+    ] [
+        current-texts get push
+    ] if ;
 
 : with-texts ( quot -- )
     [ V{ } clone current-texts ] dip with-variable ; inline
@@ -61,15 +65,8 @@ SYMBOL: current-texts
     V{ } clone current-texts set ;
 
 : texts-read-until ( seps -- seq sep )
-    dup read-until over object>> "" = [
-        2drop texts-read-until
-    ] [
-        over object>> [
-            [ nip [ save-current-texts ] [ object>> ] bi ] dip
-        ] [
-            3drop f f
-        ] if
-    ] if ;
+    dup read-until
+    [ nip [ save-current-texts ] [ object>> ] bi ] dip ;
 
 : texts-readln ( -- string )
     readln
