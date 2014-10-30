@@ -54,10 +54,20 @@ IN: modern.parser.factor.tests
 
 { t } [ "resource:core/alien/alien.factor" check-parsed-file ] unit-test
 { t } [ "resource:core/alien/strings/strings.factor" check-parsed-file ] unit-test
+{ t } [ "resource:core/arrays/arrays.factor" check-parsed-file ] unit-test
+{ t } [ "resource:core/assocs/assocs.factor" check-parsed-file ] unit-test
+{ t } [ "resource:core/byte-arrays/byte-arrays.factor" check-parsed-file ] unit-test
+{ t } [ "resource:core/combinators/combinators.factor" check-parsed-file ] unit-test
+{ t } [ "resource:core/compiler/units/units.factor" check-parsed-file ] unit-test
+{ t } [ "resource:core/kernel/kernel.factor" check-parsed-file ] unit-test
+{ t } [ "resource:core/layouts/layouts.factor" check-parsed-file ] unit-test
 
+{ t } [ "resource:core/lexer/lexer.factor" check-parsed-file ] unit-test
+{ t } [ "resource:core/make/make.factor" check-parsed-file ] unit-test
 { t } [ "resource:core/math/math.factor" check-parsed-file ] unit-test
+{ t } [ "resource:core/parser/parser.factor" check-parsed-file ] unit-test
+{ t } [ "resource:core/parser/notes/notes.factor" check-parsed-file ] unit-test
 
 { t } [ "resource:core/sequences/sequences.factor" check-parsed-file ] unit-test
-{ t } [ "resource:core/combinators/combinators.factor" check-parsed-file ] unit-test
 
 
