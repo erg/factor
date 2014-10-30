@@ -96,13 +96,13 @@ M: document-stream stream-tell
     [ nip stream>> ] 2tri stream-write ;
 
 : write-object ( document-object stream -- )
-    [ object>> ] [ stream>> ] bi* stream-write ;
+    [ object>> ] [ stream>> ] bi* over integer? [ stream-write1 ] [ stream-write ] if ;
 
 ! Writing
 M: document-stream stream-write ( document-object stream -- )
     [ [ position>> ] dip [ write-newlines ] [ write-spaces ] 2bi ]
     [ write-object ]
-    [ [ object>> ] dip advance-string ] 2tri ;
+    [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ] 2tri ;
 
 : input>document-stream ( -- )
     input-stream [ <document-stream> ] change ;
