@@ -14,6 +14,7 @@ IN: modern.parser
 ! """ "asdf" """ parse-source-string ...
 ! """"asdf"""" parse-source-string ...
 ! "M: rational neg? 0 < ;" parse-source-string ...
+! ": add-one ( a -- b ) 1 + ;" parse-source-string write-parsed-string print
 
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
@@ -215,7 +216,16 @@ ERROR: unrecognized-factor-file path ;
         [ drop f 2array ]
     } cond ;
 
-: write-parsed ( seq -- )
+: write-parsed-flat ( seq -- )
     [
         texts>> [ object>> write bl ] each nl
     ] each ;
+
+
+: write-parsed-string ( seq -- string )
+    [
+        output>document-stream
+        [
+            texts>> [ write ] each
+        ] each
+    ] with-string-writer ;

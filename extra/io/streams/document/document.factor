@@ -1,7 +1,8 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays combinators constructors destructors io
-io.streams.position kernel math namespaces sequences ;
+USING: accessors arrays combinators constructors destructors fry
+io io.streams.position kernel math math.order namespaces
+sequences strings ;
 IN: io.streams.document
 
 TUPLE: document-stream < position-stream { line integer } { column integer } ;
@@ -80,6 +81,25 @@ M: document-stream stream-read-until
 M: document-stream stream-tell
     [ line>> ] [ column>> ] bi <document-position> ;
 
+
+: write-newlines ( document-position stream -- )
+    [ [ line>> ] bi@ [-] CHAR: \n <string> ]
+    [ nip [ dup length ] dip swap dup 0 > [ '[ _ + ] change-line 0 >>column drop ] [ 2drop ] if ]
+    [ nip stream>> ] 2tri stream-write ;
+
+: write-spaces ( document-position stream -- )
+    [ [ column>> ] bi@ [-] CHAR: \s <string> ]
+    [ nip [ dup length ] dip swap dup 0 > [ '[ _ + ] change-column drop ] [ 2drop ] if ]
+    [ nip stream>> ] 2tri stream-write ;
+
+: write-object ( document-object stream -- )
+    [ object>> ] [ stream>> ] bi* stream-write ;
+
+! Writing
+M: document-stream stream-write ( document-object stream -- )
+    [ [ position>> ] dip [ write-newlines ] [ write-spaces ] 2bi ]
+    [ write-object ]
+    [ [ object>> ] dip advance-string ] 2tri ;
 
 : input>document-stream ( -- )
     input-stream [ <document-stream> ] change ;
