@@ -9,6 +9,7 @@ PARSER: imports { names } IMPORTS: ";" strings-until ;
 PARSER: author { name } AUTHOR: get-string ;
 PARSER: from { module functions } FROM: token ";" strings-until ;
 PARSER: use { name } USE: get-string ;
+PARSER: using { names } USING: ";" strings-until ;
 PARSER: in { module } IN: token ;
 PARSER: main { function } MAIN: get-string ;
 PARSER: char { n } CHAR: token ;
