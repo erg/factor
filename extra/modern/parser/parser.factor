@@ -42,7 +42,6 @@ CONSTRUCTOR: comment ( text -- comment ) ;
 TUPLE: mtoken < parsed name ;
 CONSTRUCTOR: mtoken ( name -- comment ) ;
 
-
 TUPLE: nested-comment < parsed comment ;
 CONSTRUCTOR: nested-comment ( comment -- nested-comment ) ;
 
@@ -57,7 +56,7 @@ CONSTRUCTOR: literal-parser ( name -- obj ) ;
 
 SYMBOL: current-texts
 : save-current-texts ( text -- )
-    dup object>> "" = [
+    dup object>> { "" CHAR: \s CHAR: \r CHAR: \n } member? [
         drop
     ] [
         current-texts get push
@@ -105,7 +104,7 @@ ERROR: string-expected got separator ;
 : parse-comment ( -- comment ) texts-readln <comment> ;
 
 : execute-parser ( word -- object/f )
-    \ parsers get ?at [ execute( -- parsed ) ] when ;
+    dup name>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
 
 : parse-action ( string -- object/f )
     dup mtoken? [
@@ -114,7 +113,7 @@ ERROR: string-expected got separator ;
     ] when ;
 
 : execute-comment-parser ( word -- object/f )
-    \ comment-parsers get ?at [ execute( -- parsed ) ] when ;
+    dup name>> \ comment-parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
 
 : comment-parse-action ( string -- object/f )
     dup mtoken? [
@@ -136,7 +135,6 @@ ERROR: string-expected got separator ;
 
 : token ( -- object )
     token-loop dup string? [
-        ! dup string>number [ <mnumber> ] when
         dup string>number [ <mnumber> ] [ <mtoken> ] if
     ] when ;
 
@@ -151,7 +149,7 @@ ERROR: string-expected got separator ;
         { [ dup "\r\n\s" member? ] [ drop [ get-string ] when-empty <mtoken> ] }
         { [ dup CHAR: # = ] [
             drop parse-comment save-comment [ get-string ] when-empty ] }
-        [ drop B <mtoken> ]
+        [ drop <mtoken> ]
     } cond ;
 
 : strings-until ( string -- strings )
@@ -161,13 +159,12 @@ ERROR: string-expected got separator ;
 
 ERROR: no-more-tokens ;
 : parse ( -- object/f )
-    token parse-action
-    dup { [ string? not ] [ ] } 1&& [ transfer-texts ] when ;
+    token parse-action ;
 
 : parse-input ( -- seq comments )
     [
         V{ } clone comments [
-            [ parse ] loop>array
+            [ parse dup [ transfer-texts ] when ] loop>array
             comments get
         ] with-variable
     ] with-texts ;
