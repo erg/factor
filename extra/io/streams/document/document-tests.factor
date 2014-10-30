@@ -90,7 +90,10 @@ IN: io.streams.document.tests
         { object "a" }
         { position T{ document-position { line 0 } { column 0 } } }
     }
-    CHAR: s
+    T{ document-object
+        { position T{ document-position { column 1 } } }
+        { object CHAR: s }
+    }
 ] [
     "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
         "sd" read-until
@@ -103,7 +106,10 @@ IN: io.streams.document.tests
         { object "d" }
         { position T{ document-position { line 0 } { column 2 } } }
     }
-    CHAR: f
+    T{ document-object
+        { object CHAR: f }
+        { position T{ document-position { line 0 } { column 3 } } }
+    }
 ] [
     "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
         "sd" read-until 2drop
@@ -116,7 +122,10 @@ IN: io.streams.document.tests
         { object "df" }
         { position T{ document-position { line 0 } { column 2 } } }
     }
-    CHAR: \n
+    T{ document-object
+        { position T{ document-position { column 4 } } }
+        { object CHAR: \n }
+    }
 ] [
     "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
         "sd" read-until 2drop
@@ -129,11 +138,22 @@ IN: io.streams.document.tests
         { object "fdsa\n" }
         { position T{ document-position { line 1 } { column 0 } } }
     }
-    CHAR: 1
+    T{ document-object
+        { position T{ document-position { line 2 } } }
+        { object CHAR: 1 }
+    }
 ] [
     "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
         "sd" read-until 2drop
         "\n" read-until 2drop
         "1" read-until
     ] with-input-stream
+] unit-test
+
+[ f f ] [
+"" [ input>document-stream "j" read-until ] with-string-reader
+] unit-test
+
+[ T{ document-object { object "asdf" } } f ] [
+"asdf" [ input>document-stream "j" read-until ] with-string-reader
 ] unit-test
