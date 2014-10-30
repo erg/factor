@@ -4,9 +4,6 @@ USING: assocs combinators constructors kernel make
 modern.parser namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
-TUPLE: mnumber < parsed n ;
-CONSTRUCTOR: mnumber ( n -- mnumber ) ;
-
 ERROR: string-expected got separator ;
 TUPLE: mstring < parsed class string ;
 CONSTRUCTOR: mstring ( class string -- mstring ) ;
