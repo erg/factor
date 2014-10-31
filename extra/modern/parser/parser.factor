@@ -24,23 +24,6 @@ IN: modern.parser
 ! "CONSTANT: simple-combination T{ standard-combination f 0 }" parse-source-string
 ! "resource:basis/formatting/formatting.factor" parse-modern-file
 
-/*
-{
-    { "resource:core/byte-vectors/byte-vectors.factor" f }
-    { "resource:core/hashtables/hashtables.factor" f }
-    { "resource:core/slots/slots.factor" f }
-    { "resource:core/classes/algebra/algebra.factor" f }
-    { "resource:core/io/encodings/utf16/utf16.factor" f }
-    { "resource:core/io/encodings/utf8/utf8.factor" f }
-    { "resource:core/math/parser/parser.factor" f }
-}
-
-clear "resource:lol.factor" utf8 [
-    readln
-    "\r\n" read-until
-] with-file-reader
-
-*/
 
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
