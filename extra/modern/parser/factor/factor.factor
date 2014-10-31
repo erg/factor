@@ -1,6 +1,6 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: assocs combinators constructors kernel make
+USING: accessors assocs combinators constructors kernel make
 modern.parser namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
@@ -235,9 +235,11 @@ TUPLE: tuple-literal-assoc < parsed name slots ;
 TUPLE: tuple-literal-boa < parsed name slots ;
 CONSTRUCTOR: tuple-literal-assoc ( name slots -- tuple-literal ) ;
 CONSTRUCTOR: tuple-literal-boa ( name slots -- tuple-literal ) ;
+
+ERROR: malformed-tuple-literal ;
 : parse-tuple-literal ( -- block )
     token
-    token dup {
+    token dup dup [ name>> ] when {
         { "f" [ drop "}" parse-until <tuple-literal-boa> ] }
         { "{" [
                   drop parse-marray
@@ -245,6 +247,7 @@ CONSTRUCTOR: tuple-literal-boa ( name slots -- tuple-literal ) ;
               ]
         }
         { "}" [ drop f <tuple-literal-boa> ] }
+        [ malformed-tuple-literal ]
     } case ;
 
 TUPLE: char < parsed n ;
