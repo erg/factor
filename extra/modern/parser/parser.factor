@@ -17,6 +17,12 @@ IN: modern.parser
 ! ": add-one ( a -- b ) 1 + ;" parse-source-string write-parsed-string print
 ! "resource:core/sequences/sequences.factor" parse-modern-file second write-parsed-string print
 ! "[ 1 ]" parse-source-string
+! "M: standard-generic definer drop \ GENERIC# f ;" parse-source-string
+! "\\ GENERIC#" parse-source-string
+! "GENERIC#" parse-source-string
+! "resource:core/generic/standard/standard.factor" parse-source-file
+! "CONSTANT: simple-combination T{ standard-combination f 0 }" parse-source-string
+! "resource:basis/formatting/formatting.factor" parse-modern-file
 
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
@@ -172,7 +178,7 @@ ERROR: no-more-tokens ;
 ERROR: token-expected token ;
 : parse-until ( string -- strings/f )
     '[
-        _ token [ token-expected ] unless*
+        _ parse [ token-expected ] unless*
         2dup dup mtoken? [ name>> ] when = [ 2drop f ] [ nip parse-action ] if
     ] loop>array ;
 
@@ -189,10 +195,10 @@ ERROR: raw-expected raw ;
 ERROR: expected expected got ;
 : expect ( string -- )
     token
-    2dup name>> = [ 2drop ] [ expected ] if ;
+    2dup dup [ name>> ] when = [ 2drop ] [ expected ] if ;
 
 : expect-one ( strings -- )
-    token 2dup name>> swap member? [ 2drop ] [ expected ] if ;
+    token 2dup dup [ name>> ] when swap member? [ 2drop ] [ expected ] if ;
 
 : body ( -- strings ) ";" parse-until ;
 
