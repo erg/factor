@@ -71,3 +71,23 @@ IN: modern.parser.factor.tests
 { t } [ "resource:core/sequences/sequences.factor" check-parsed-file ] unit-test
 
 
+{ } [
+    "resource:core" vocabs-in-root
+    ! [ vocab? ] filter
+    [ vocab-source-path ] map sift
+    {
+        "resource:core/vocabs/loader/test/a/a.factor"
+        "resource:core/vocabs/loader/test/b/b.factor"
+        "resource:core/vocabs/loader/test/c/c.factor"
+    } diff
+    [ parse-modern-file ] map
+] unit-test
+
+{ } [
+    "resource:basis" vocabs-in-root
+    [ vocab? ] filter
+    [ vocab-source-path ] map sift
+    {
+    } diff
+    [ dup . flush parse-modern-file ] map
+] unit-test
