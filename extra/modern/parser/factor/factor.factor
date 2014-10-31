@@ -425,6 +425,11 @@ CONSTRUCTOR: functor ( name signature definitions -- functor ) ;
 : parse-functor ( -- functor )
     token parse-signature(--) ";FUNCTOR" parse-until <functor> ;
 
+TUPLE: functor-syntax < parsed name body ;
+CONSTRUCTOR: functor-syntax ( name body -- functor ) ;
+: parse-functor-syntax ( -- functor )
+    token body <functor-syntax> ;
+
 TUPLE: name < parsed name target ;
 CONSTRUCTOR: name ( name target -- object ) ;
 : parse-name ( -- name )
@@ -702,6 +707,7 @@ CONSTRUCTOR: long-string ( name text -- long-string ) ;
 \ parse-specialized-arrays "SPECIALIZED-ARRAYS:" register-parser
 \ parse-syntax "SYNTAX:" register-parser
 \ parse-functor "FUNCTOR:" register-parser
+\ parse-functor-syntax "FUNCTOR-SYNTAX:" register-parser
 \ parse-name "NAME:" register-parser
 \ parse-ebnf "EBNF:" register-parser
 \ parse-symbol "SYMBOL:" register-parser
