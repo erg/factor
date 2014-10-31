@@ -37,12 +37,8 @@ M: position-stream stream-contents*
 M: position-stream stream-read-unsafe
     [ stream>> stream-read-unsafe ] with-advance ;
 
-! M: position-stream stream-read-until
-    ! [ stream>> stream-read-until ] with-advance' ;
-
 M: position-stream stream-read-until
     [ stream>> stream-read-until ] with-advance-sep ;
-
 
 M: position-stream stream-element-type
     stream>> stream-element-type ;
