@@ -152,15 +152,15 @@ ERROR: string-expected got separator ;
 
 : get-string ( -- string/f )
     "\r\n\s#" texts-read-until {
-        { [ dup "\r\n\s" member? ] [ drop [ get-string ] when-empty <mtoken> ] }
+        { [ dup "\r\n\s" member? ] [ drop [ get-string ] when-empty ] }
         { [ dup CHAR: # = ] [
             drop parse-comment save-comment [ get-string ] when-empty ] }
-        [ drop <mtoken> ]
+        [ drop ]
     } cond ;
 
 : strings-until ( string -- strings )
     '[
-        _ get-string 2dup name>> = [ 2drop f ] [ nip ] if
+        _ get-string 2dup = [ 2drop f ] [ nip ] if
     ] loop>array ;
 
 ERROR: no-more-tokens ;
