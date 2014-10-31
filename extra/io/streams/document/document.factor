@@ -1,8 +1,8 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays combinators constructors destructors fry
-io io.streams.position kernel math math.order namespaces
-sequences strings ;
+io io.private io.streams.position kernel math math.order
+namespaces sequences strings ;
 IN: io.streams.document
 
 TUPLE: document-stream < position-stream { line integer } { column integer } ;
@@ -16,9 +16,12 @@ CONSTRUCTOR: document-position ( line column -- document-position ) ;
 TUPLE: document-object { position document-position } object ;
 CONSTRUCTOR: document-object ( position object -- document-object ) ;
 
+: add-lines ( stream n -- stream )
+    '[ _ + ] change-line ; inline
+
 : with-advance-line ( stream quot -- seq )
     [ call ] 2keep drop
-    [ 1 + ] change-line 0 >>column drop ; inline
+    1 add-lines 0 >>column drop ; inline
 
 : count-newlines ( string -- n )
     [ CHAR: \n = ] count ;
@@ -27,7 +30,8 @@ CONSTRUCTOR: document-object ( position object -- document-object ) ;
     [ CHAR: \n = ] find-last >boolean ;
 
 : advance-string ( string stream -- )
-    [ [ count-newlines ] dip over 0 > [ [ + ] change-line 0 >>column drop ] [ 2drop ] if ]
+    [ [ count-newlines ] dip over 0 >
+    [ swap add-lines 0 >>column drop ] [ 2drop ] if ]
     [
         swap
         [ length ] [ find-last-newline ] bi [
@@ -39,7 +43,7 @@ CONSTRUCTOR: document-object ( position object -- document-object ) ;
 
 : advance-1 ( stream n -- )
     CHAR: \n =
-    [ 0 >>column [ 1 + ] change-line drop ]
+    [ 0 >>column 1 add-lines drop ]
     [ [ 1 + ] change-column drop ] if ; inline
 
 : with-advance-1 ( n stream quot -- n )
@@ -47,7 +51,6 @@ CONSTRUCTOR: document-object ( position object -- document-object ) ;
 
 M: document-stream stream-element-type call-next-method ;
 
-! stream-read-unsafe advances
 M: document-stream stream-read
     [ nip stream-tell ] [ call-next-method ] 2bi <document-object> ;
 
@@ -87,7 +90,7 @@ M: document-stream stream-tell
 
 : write-newlines ( document-position stream -- )
     [ [ line>> ] bi@ [-] CHAR: \n <string> ]
-    [ nip [ dup length ] dip swap dup 0 > [ '[ _ + ] change-line 0 >>column drop ] [ 2drop ] if ]
+    [ nip [ dup length ] dip swap dup 0 > [ add-lines 0 >>column drop ] [ 2drop ] if ]
     [ nip stream>> ] 2tri stream-write ;
 
 : write-spaces ( document-position stream -- )
