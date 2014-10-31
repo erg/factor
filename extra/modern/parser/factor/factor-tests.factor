@@ -1,7 +1,8 @@
 ! Copyright (C) 2014 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: ascii io.encodings.utf8 io.files io.streams.document
-kernel modern.parser modern.parser.factor sequences tools.test ;
+kernel modern.parser modern.parser.factor multiline sequences
+sets tools.test vocabs.hierarchy vocabs.loader ;
 IN: modern.parser.factor.tests
 
 {
@@ -71,7 +72,7 @@ IN: modern.parser.factor.tests
 { t } [ "resource:core/sequences/sequences.factor" check-parsed-file ] unit-test
 
 
-{ } [
+{ t } [
     "resource:core" vocabs-in-root
     ! [ vocab? ] filter
     [ vocab-source-path ] map sift
@@ -80,14 +81,19 @@ IN: modern.parser.factor.tests
         "resource:core/vocabs/loader/test/b/b.factor"
         "resource:core/vocabs/loader/test/c/c.factor"
     } diff
-    [ parse-modern-file ] map
+    ! [ parse-modern-file ] map
+    [ check-parsed-file ] all?
 ] unit-test
 
+/*
 { } [
     "resource:basis" vocabs-in-root
     [ vocab? ] filter
     [ vocab-source-path ] map sift
     {
+
     } diff
     [ dup . flush parse-modern-file ] map
 ] unit-test
+
+*/
