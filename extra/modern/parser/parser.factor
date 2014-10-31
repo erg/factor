@@ -3,8 +3,8 @@
 USING: accessors arrays ascii assocs combinators
 combinators.short-circuit constructors fry io io.encodings.utf8
 io.files io.streams.document io.streams.string kernel locals
-make math math.parser namespaces sequences sequences.extras
-strings ;
+make math math.parser multiline namespaces sequences
+sequences.extras strings ;
 IN: modern.parser
 
 ! "TUPLE: foo a b c ;" parse-source-string
@@ -34,6 +34,12 @@ IN: modern.parser
     { "resource:core/io/encodings/utf8/utf8.factor" f }
     { "resource:core/math/parser/parser.factor" f }
 }
+
+clear "resource:lol.factor" utf8 [
+    readln
+    "\r\n" read-until
+] with-file-reader
+
 */
 
 SYMBOL: parsers
