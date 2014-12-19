@@ -38,28 +38,28 @@ SYMBOL: comments
 TUPLE: parsed texts ;
 
 TUPLE: mnumber < parsed n ;
-CONSTRUCTOR: mnumber ( n -- mnumber ) ;
+CONSTRUCTOR: <mnumber> mnumber ( n -- mnumber ) ;
 
 TUPLE: mstring < parsed class string ;
-CONSTRUCTOR: mstring ( class string -- mstring ) ;
+CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
 
 TUPLE: comment < parsed text ;
-CONSTRUCTOR: comment ( text -- comment ) ;
+CONSTRUCTOR: <comment> comment ( text -- comment ) ;
 
 TUPLE: mtoken < parsed name ;
-CONSTRUCTOR: mtoken ( name -- comment ) ;
+CONSTRUCTOR: <mtoken> mtoken ( name -- comment ) ;
 
 TUPLE: nested-comment < parsed comment ;
-CONSTRUCTOR: nested-comment ( comment -- nested-comment ) ;
+CONSTRUCTOR: <nested-comment> nested-comment ( comment -- nested-comment ) ;
 
 TUPLE: typed-argument < parsed name signature ;
-CONSTRUCTOR: typed-argument ( name signature -- typed ) ;
+CONSTRUCTOR: <typed-argument> typed-argument ( name signature -- typed ) ;
 
 TUPLE: parser < parsed name slots syntax-name body ;
-CONSTRUCTOR: parser ( name slots syntax-name body -- obj ) ;
+CONSTRUCTOR: <parser> parser ( name slots syntax-name body -- obj ) ;
 
 TUPLE: literal-parser < parsed name ;
-CONSTRUCTOR: literal-parser ( name -- obj ) ;
+CONSTRUCTOR: <literal-parser> literal-parser ( name -- obj ) ;
 
 SYMBOL: current-texts
 : save-current-texts ( text -- )
