@@ -11,10 +11,10 @@ TUPLE: document-stream < position-stream { line integer } { column integer } ;
         swap >>stream ; inline
 
 TUPLE: document-position { line integer } { column integer } ;
-CONSTRUCTOR: document-position ( line column -- document-position ) ;
+CONSTRUCTOR: <document-position> document-position ( line column -- document-position ) ;
 
 TUPLE: document-object { position document-position } object ;
-CONSTRUCTOR: document-object ( position object -- document-object ) ;
+CONSTRUCTOR: <document-object> document-object ( position object -- document-object ) ;
 
 : add-lines ( stream n -- stream )
     '[ _ + ] change-line ; inline
