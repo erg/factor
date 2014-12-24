@@ -5,14 +5,14 @@ modern.parser namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
 ERROR: string-expected got separator ;
-TUPLE: mstring < parsed class string ;
-CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
+! TUPLE: mstring < parsed class string ;
+! CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
 
 TUPLE: text < parsed string from to ;
 CONSTRUCTOR: <text> text ( string from to -- text ) ;
 
-TUPLE: comment < parsed text ;
-CONSTRUCTOR: <comment> comment ( text -- comment ) ;
+! TUPLE: comment < parsed text ;
+! CONSTRUCTOR: <comment> comment ( text -- comment ) ;
 
 TUPLE: nested-comment < parsed comment ;
 CONSTRUCTOR: <nested-comment> nested-comment ( comment -- nested-comment ) ;
@@ -325,10 +325,19 @@ CONSTRUCTOR: <constructor> constructor ( name class -- constructor ) ;
 : parse-constructor ( -- constructor )
     token token <constructor> ;
 
-TUPLE: private < parsed body ;
-CONSTRUCTOR: <private> private ( body -- private ) ;
-: parse-private ( -- private )
-    "PRIVATE>" parse-until <private> ;
+! TUPLE: private < parsed body ;
+! CONSTRUCTOR: <private> private ( body -- private ) ;
+! : parse-private ( -- private )
+!    "PRIVATE>" parse-until <private> ;
+    
+TUPLE: private-begin < parsed ;
+CONSTRUCTOR: <private-begin> private-begin ( -- obj ) ;
+: parse-private-begin ( -- private-begin ) <private-begin> ;
+
+TUPLE: private-end < parsed ;
+CONSTRUCTOR: <private-end> private-end ( -- obj ) ;
+: parse-private-end ( -- private-end ) <private-end> ;
+
 
 TUPLE: from < parsed module functions ;
 CONSTRUCTOR: <from> from ( module functions -- from ) ;
@@ -662,7 +671,8 @@ CONSTRUCTOR: <long-string> long-string ( name text -- long-string ) ;
 \ parse-call( "call(" register-parser
 \ parse-data-map( "data-map(" register-parser
 \ parse-data-map!( "data-map!(" register-parser
-\ parse-private "<PRIVATE" register-parser
+\ parse-private-begin "<PRIVATE" register-parser
+\ parse-private-end "PRIVATE>" register-parser
 \ parse-constant "CONSTANT:" register-parser
 \ parse-mtuple "TUPLE:" register-parser
 \ parse-merror "ERROR:" register-parser

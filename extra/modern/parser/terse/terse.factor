@@ -13,11 +13,11 @@ PARSER: using { names } USING: ";" strings-until ;
 PARSER: in { module } IN: token ;
 PARSER: main { function } MAIN: get-string ;
 PARSER: char { n } CHAR: token ;
-PARSER: escaped { token } \ token ;
+PARSER: escaped { parse } \ parse ;
 PARSER: private { body } <PRIVATE: "PRIVATE>" parse-until ;
-PARSER: constant { name object } CONSTANT: token parse ;
-PARSER: tuple { name body } TUPLE: token body ;
-PARSER: error { name body } ERROR: token body ;
+PARSER: constant { name object } CONSTANT: identifier parse ;
+PARSER: tuple { name body } TUPLE: identifier body ;
+PARSER: error { name body } ERROR: identifier body ;
 PARSER: block { body } [ "]" parse-until ;
 PARSER: array { body } { "}" parse-until ;
 PARSER: vector { body } V{ "}" parse-until ;
@@ -32,7 +32,7 @@ PARSER: signature { in out } ( "--" strings-until ")" strings-until ;
 PARSER: execute-parens { signature } execute( parse-signature ;
 PARSER: call-parens { signature } call( parse-signature ;
 PARSER: function { name signature body }
-    : token parse-signature body ;
+    : identifier parse-signature body ;
 
 LITERAL-PARSER: inline
 LITERAL-PARSER: foldable
