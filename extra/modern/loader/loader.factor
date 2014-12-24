@@ -1,9 +1,9 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors assocs constructors io.directories io.files
-io.files.types io.pathnames kernel modern.parser namespaces
-sequences fry continuations modern.parser.factor
-io.directories.search sets splitting ;
+USING: accessors assocs constructors continuations fry
+io.directories io.directories.search io.files io.files.types
+io.pathnames kernel modern.parser modern.parser.factor
+namespaces parser sequences sets splitting ;
 IN: modern.loader
 
 SYMBOL: modules
@@ -13,7 +13,7 @@ TUPLE: loader ;
 
 TUPLE: module name paths dictionary ;
 
-CONSTRUCTOR: module ( name -- module ) ;
+CONSTRUCTOR: <module> module ( name -- module ) ;
 
 SYMBOL: module-roots
 module-roots [ V{ "resource:core/" "resource:basis/" "resource:extra/" } clone ] initialize
