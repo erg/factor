@@ -2,12 +2,38 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators.short-circuit fry
 hashtables io kernel macros modern.parser modern.parser.factor
-prettyprint sequences sets vocabs.hierarchy vocabs.loader
-vocabs.metadata ;
+nested-comments prettyprint sequences sequences.deep sets
+vocabs.hierarchy vocabs.loader vocabs.metadata ;
 FROM: modern.parser.factor => union in? macro locals-mmethod?
 enum nested-comment? ;
 QUALIFIED: vocabs
 IN: modern.lookup
+
+
+! Exceptions so far: SLOT: foo  foo>> >>foo
+! TUPLE: bar a ;   bar?
+! primitives
+! "io.encodings.utf16n"  unloaded stuff?
+! "system" vocab
+! "syntax"
+! alien: SINGLETONS: stdcall thiscall fastcall cdecl mingw ; SYMBOLS:
+(*
+clear basis-untracked-words
+[
+    first2
+    [
+        [ string? not ] filter
+    ] [
+        [ string? not ] filter
+    ] bi*
+    2array
+] { } assoc-map-as
+[ second second empty? not ] filter
+*)
+
+
+
+
 
 GENERIC: object>identifiers ( object -- string )
 
@@ -234,7 +260,6 @@ MACRO: any-predicate? ( words -- quot )
 : load-extra ( -- seq )
     "resource:extra" vocabs-from
     diff-bad-extra-vocabs
-    
     filter-vocabs ;
     
 : lookup-vocab' ( vocab -- seq )
@@ -248,7 +273,7 @@ MACRO: any-predicate? ( words -- quot )
     [ lookup-vocab' keys ]
     [
         [ vocabs:words ] [ ".private" append vocabs:words ] bi append
-        [ name>> ] map [ diff ] [ swap diff ] 2bi
+        [ name>> ] map [ flatten ] bi@ [ diff ] [ swap diff ] 2bi
     ] bi 2array ;
     
 : vocabs-untracked-words ( seq -- seq' )
