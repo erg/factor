@@ -73,7 +73,7 @@ IN: modern.parser.factor.tests
 
 
 { t } [
-    "resource:core" vocabs-in-root
+    "resource:core" disk-vocabs-in-root
     ! [ vocab? ] filter
     [ vocab-source-path ] map sift
     {
