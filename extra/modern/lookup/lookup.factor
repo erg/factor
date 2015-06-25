@@ -2,11 +2,10 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators.short-circuit fry
 hashtables io kernel macros modern.parser modern.parser.factor
-nested-comments prettyprint sequences sequences.deep sets
+nested-comments prettyprint sequences sequences.deep sets vocabs
 vocabs.hierarchy vocabs.loader vocabs.metadata ;
 FROM: modern.parser.factor => union in? macro locals-mmethod?
 enum nested-comment? ;
-QUALIFIED: vocabs
 IN: modern.lookup
 
 
@@ -232,7 +231,7 @@ MACRO: any-predicate? ( words -- quot )
     ] assoc-filter ;
 
 : vocabs-from ( root -- vocabs )
-    "" vocabs-in-root/prefix
+    "" disk-vocabs-in-root/prefix
     [ don't-load? not ] filter no-prefixes
     [ name>> ] map ;
     
@@ -272,7 +271,7 @@ MACRO: any-predicate? ( words -- quot )
 : untracked-words ( vocab -- seq )
     [ lookup-vocab' keys ]
     [
-        [ vocabs:words ] [ ".private" append vocabs:words ] bi append
+        [ vocab-words ] [ ".private" append vocab-words ] bi append
         [ name>> ] map [ flatten ] bi@ [ diff ] [ swap diff ] 2bi
     ] bi 2array ;
     
