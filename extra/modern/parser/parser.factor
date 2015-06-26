@@ -4,7 +4,7 @@ USING: accessors arrays ascii assocs combinators
 combinators.short-circuit constructors fry io io.encodings.utf8
 io.files io.streams.document io.streams.string kernel locals
 make math math.parser multiline namespaces sequences
-sequences.extras strings ;
+sequences.extras strings io.streams.peek ;
 IN: modern.parser
 
 ! "TUPLE: foo a b c ;" parse-source-string
@@ -108,6 +108,41 @@ ERROR: string-expected got separator ;
 : parse-string ( class -- mstring )
     [ parse-string' ] "" make <mstring> ;
 
+: building-tail? ( string -- ? )
+    [ building get ] dip {
+        [ [ ?last ] bi@ = ]
+        [ [ but-last-slice ] bi@ tail? ]
+    } 2&& ;
+
+ERROR: expected-sequence expected got ;
+: texts-read-until-sequence' ( seq -- )
+    dup ?last 1array texts-read-until [
+        [ % ] [ , ] bi*
+        dup building-tail? [
+            drop
+        ] [
+            texts-read-until-sequence'
+        ] if
+    ] [
+        % dup building-tail? [
+            drop
+        ] [
+            building get >string expected-sequence
+        ] if
+    ] if* ;
+
+: texts-read-until-sequence ( seq -- string )
+    [ [ texts-read-until-sequence' ] "" make ] keep length head* ;
+
+ERROR: multiline-string-expected got ;
+! multi"==[Lol. This string syntax...]=="
+: parse-multiline-string ( class -- mstring )
+    "[" texts-read-until [
+        "]" "\"" surround texts-read-until-sequence <mstring>
+    ] [
+        multiline-string-expected
+    ] if ;
+
 : parse-comment ( -- comment ) texts-readln <comment> ;
 
 : execute-parser ( word -- object/f )
@@ -131,8 +166,10 @@ ERROR: string-expected got separator ;
 : token-loop ( -- string/f )
     "\r\n\s\"" texts-read-until {
         { [ dup "\r\n\s" member? ] [ drop [ token-loop ] when-empty ] }
-        { [ 2dup [ empty? ] [ CHAR: " = ] bi* and ] [ drop [ f ] when-empty parse-string ] }
-        { [ dup CHAR: " = ] [ drop [ f ] when-empty parse-string ] }
+        { [ dup CHAR: " = ] [
+            drop [ f ] when-empty
+            dup "m" = [ parse-multiline-string ] [ parse-string ] if
+        ] }
         ! { [ dup CHAR: # = ] [
             ! drop parse-comment save-comment [ token-loop ] when-empty ] }
         ! { [ dup CHAR: ! = ] [
@@ -235,8 +272,9 @@ ERROR: unrecognized-factor-file path ;
     dup >lower {
         { [ dup ".txt" tail? ] [ drop dup parse-metadata 2array ] }
         { [ dup ".factor" tail? ] [ drop dup parse-source-file 2array ] }
-        ! [ unrecognized-factor-file ]
-        [ drop f 2array ]
+        { [ dup ".modern" tail? ] [ drop dup parse-source-file 2array ] }
+        [ unrecognized-factor-file ]
+        ! [ drop f 2array ]
     } cond ;
 
 : write-parsed-flat ( seq -- )
