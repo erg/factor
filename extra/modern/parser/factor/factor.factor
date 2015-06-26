@@ -364,6 +364,11 @@ CONSTRUCTOR: <mtuple> mtuple ( name body -- tuple ) ;
 : parse-mtuple ( -- mtuple )
     token body <mtuple> ;
 
+TUPLE: mbuiltin < parsed name body ;
+CONSTRUCTOR: <mbuiltin> mbuiltin ( name body -- builtin ) ;
+: parse-mbuiltin ( -- mbuiltin )
+    token body <mbuiltin> ;
+
 TUPLE: merror < parsed name body ;
 CONSTRUCTOR: <merror> merror ( name body -- error ) ;
 : parse-merror ( -- merror )
@@ -418,11 +423,6 @@ CONSTRUCTOR: <union> union ( name strings -- obj ) ;
 TUPLE: flushable < parsed ;
 CONSTRUCTOR: <flushable> flushable ( -- obj ) ;
 : parse-flushable ( -- flushable ) <flushable> ;
-
-TUPLE: mbuiltin < parsed name body ;
-CONSTRUCTOR: <mbuiltin> mbuiltin ( name body -- obj ) ;
-: parse-mbuiltin ( -- builtin )
-    token body <mbuiltin> ;
 
 TUPLE: math < parsed name body ;
 CONSTRUCTOR: <math> math ( name body -- obj ) ;
@@ -662,7 +662,6 @@ CONSTRUCTOR: <long-string> long-string ( name text -- long-string ) ;
 \ parse-using "USING:" register-parser
 \ parse-in "IN:" register-parser
 \ parse-main "MAIN:" register-parser
-\ parse-mbuiltin "BUILTIN:" register-parser
 \ parse-math "MATH:" register-parser
 \ parse-union "UNION:" register-parser
 \ parse-char "CHAR:" register-parser
@@ -675,6 +674,7 @@ CONSTRUCTOR: <long-string> long-string ( name text -- long-string ) ;
 \ parse-private-end "PRIVATE>" register-parser
 \ parse-constant "CONSTANT:" register-parser
 \ parse-mtuple "TUPLE:" register-parser
+\ parse-mbuiltin "BUILTIN:" register-parser
 \ parse-merror "ERROR:" register-parser
 \ parse-mprimitive "PRIMITIVE:" register-parser
 \ parse-foldable "foldable" register-parser
