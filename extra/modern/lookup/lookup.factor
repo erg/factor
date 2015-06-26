@@ -32,12 +32,19 @@ clear basis-untracked-words
 
 
 
+GENERIC: object>generate-symbols ( object -- generated/f )
+
+M: mtuple object>generate-symbols
+    name>> name>> ;
 
 
 GENERIC: object>identifiers ( object -- string )
 
 M: object object>identifiers
     drop f ;
+
+M: mprimitive object>identifiers
+    name>> name>> ;
     
 M: mgeneric object>identifiers
     name>> name>> ;
