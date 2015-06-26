@@ -2,8 +2,8 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators.short-circuit fry
 hashtables io kernel macros modern.parser modern.parser.factor
-nested-comments prettyprint sequences sequences.deep sets vocabs
-vocabs.hierarchy vocabs.loader vocabs.metadata ;
+nested-comments prettyprint sequences sequences.deep sets
+strings vocabs vocabs.hierarchy vocabs.loader vocabs.metadata ;
 FROM: modern.parser.factor => union in? macro locals-mmethod?
 enum nested-comment? ;
 IN: modern.lookup
@@ -28,168 +28,199 @@ clear basis-untracked-words
     2array
 ] { } assoc-map-as
 [ second second empty? not ] filter
+
+clear core-vocabs
+[
+  [ [ vocab-words ] [ ".private" append vocab-words ] bi append [ name>> ] map ]
+  [ lookup-vocab values sift concat ] bi diff natural-sort .
+] each
+
+"syntax", "accessors"
+
+"resource:core/sequences/sequences.factor"
+{ "array-capacity" "array-capacity?" }
+
+"resource:core/alien/alien.factor"
+{ "c-ptr" "c-ptr?" }
+
+"resource:core/layouts/layouts.factor"
+{ "(first-bignum)" "(fixnum-bits)" "cell" }
+
+"resource:core/hashtables/hashtables.factor"
+{ "((empty))" "((tombstone))" "tombstone" "tombstone?" }
+
+"resource:core/kernel/kernel.factor"
+{
+    "build"
+    "compose"
+    "compose?"
+    "curry"
+    "curry?"
+    "null"
+    "object"
+}
 *)
 
 
-
-GENERIC: object>generate-symbols ( object -- generated/f )
-
-M: mtuple object>generate-symbols
-    name>> name>> ;
+: name-and-predicate ( name -- seq )
+    dup "?" append 2array ;
 
 
-GENERIC: object>identifiers ( object -- string )
+GENERIC: object>identifiers* ( object -- string )
 
-M: object object>identifiers
+: object>identifiers ( object -- seq )
+    object>identifiers* dup string? [ 1array ] when ;
+
+M: object object>identifiers*
     drop f ;
 
-M: mprimitive object>identifiers
+M: mprimitive object>identifiers*
     name>> name>> ;
     
-M: mgeneric object>identifiers
+M: mgeneric object>identifiers*
     name>> name>> ;
 
-M: mgeneric# object>identifiers
+M: mgeneric# object>identifiers*
     name>> name>> ;
 
-M: constant object>identifiers
+M: constant object>identifiers*
     name>> name>> ;
     
-M: function object>identifiers
+M: function object>identifiers*
     name>> name>> ;
     
-M: defer object>identifiers
+M: defer object>identifiers*
     name>> name>> ;
     
-M: mtuple object>identifiers
-    name>> name>> ;
+M: mtuple object>identifiers*
+    name>> name>> name-and-predicate ;
 
-M: mbuiltin object>identifiers
-    name>> name>> ;
+M: mbuiltin object>identifiers*
+    name>> name>> name-and-predicate ;
 
-M: merror object>identifiers
+M: merror object>identifiers*
+    name>> name>> name-and-predicate ;
+    
+M: union object>identifiers*
+    name>> name>> name-and-predicate ;
+    
+M: mixin object>identifiers*
+    name>> name>> name-and-predicate ;
+    
+M: predicate object>identifiers*
+    name>> name>> name-and-predicate ;
+    
+M: symbol object>identifiers*
     name>> name>> ;
     
-M: union object>identifiers
-    name>> name>> ;
-    
-M: mixin object>identifiers
-    name>> name>> ;
-    
-M: predicate object>identifiers
-    name>> name>> ;
-    
-M: symbol object>identifiers
-    name>> name>> ;
-    
-M: symbols object>identifiers
+M: symbols object>identifiers*
     names>> [ name>> ] map ;
 
-M: slot object>identifiers
+M: slot object>identifiers*
     name>> name>> ;
 
-M: math object>identifiers
+M: math object>identifiers*
     name>> name>> ;
 
-M: hook object>identifiers
+M: hook object>identifiers*
     name>> name>> ;
 
 
-M: singleton object>identifiers
+M: singleton object>identifiers*
+    name>> name>> name-and-predicate ;
+
+M: singletons object>identifiers*
+    names>> [ name>> name-and-predicate ] map concat ;
+
+M: constructor object>identifiers*
     name>> name>> ;
 
-M: singletons object>identifiers
-    names>> [ name>> ] map ;
-
-M: constructor object>identifiers
+M: main object>identifiers*
     name>> name>> ;
 
-M: main object>identifiers
+M: locals-function object>identifiers*
     name>> name>> ;
-
-M: locals-function object>identifiers
+M: locals-memo object>identifiers*
     name>> name>> ;
-M: locals-memo object>identifiers
+M: locals-macro object>identifiers*
     name>> name>> ;
-M: locals-macro object>identifiers
+M: memo object>identifiers*
     name>> name>> ;
-M: memo object>identifiers
+M: typed object>identifiers*
     name>> name>> ;
-M: typed object>identifiers
-    name>> name>> ;
-M: specialized-array object>identifiers
+M: specialized-array object>identifiers*
     class>> name>> ;
-M: specialized-arrays object>identifiers
+M: specialized-arrays object>identifiers*
     classes>> ;
     
-M: macro object>identifiers
+M: macro object>identifiers*
     name>> name>> ;    
 ! XXX: todo
-M: syntax object>identifiers
+M: syntax object>identifiers*
     name>> ;
-M: c-function object>identifiers
+M: c-function object>identifiers*
     name>> name>> ;
-M: c-function-alias object>identifiers
+M: c-function-alias object>identifiers*
     aliased-name>> name>> ;
-M: x-function object>identifiers
+M: x-function object>identifiers*
     name>> name>> ;
-M: gl-function object>identifiers
+M: gl-function object>identifiers*
     name>> name>> ;    
     
-M: enum object>identifiers
+M: enum object>identifiers*
     name>> name>> ;
     
 
-! M: ebnf object>identifiers
+! M: ebnf object>identifiers*
   !  name>> name>> ;
 
   
   
-M: library object>identifiers
+M: library object>identifiers*
     name>> name>> ;
-M: struct object>identifiers
+M: struct object>identifiers*
     name>> name>> ;
-M: packed-struct object>identifiers
+M: packed-struct object>identifiers*
     name>> name>> ;
-M: typedef object>identifiers
+M: typedef object>identifiers*
     new>> name>> ;
-M: locals-typed object>identifiers
+M: locals-typed object>identifiers*
     name>> name>> ;
     
     
-M: alias object>identifiers
+M: alias object>identifiers*
     name>> name>> ;
-M: hints object>identifiers
+M: hints object>identifiers*
     name>> name>> ;  
-M: functor object>identifiers
+M: functor object>identifiers*
     name>> name>> ;
-M: functor-syntax object>identifiers
+M: functor-syntax object>identifiers*
     name>> name>> ;
 
     
-M: c-type object>identifiers
+M: c-type object>identifiers*
     name>> name>> ;    
-M: protocol object>identifiers
+M: protocol object>identifiers*
     name>> name>> ; 
-M: article object>identifiers
-    name>> ;     
-M: about object>identifiers
-    name>> ; 
-M: single-bind object>identifiers
+M: article object>identifiers*
+    name>> string>> ;     
+M: about object>identifiers*
+    name>> string>> ;
+M: single-bind object>identifiers*
     target>> ;
 
 
-M: long-string object>identifiers
+M: long-string object>identifiers*
     name>> name>> ;  
 
-M: c-global object>identifiers
+M: c-global object>identifiers*
     name>> name>> ;      
 
-M: parser object>identifiers
+M: parser object>identifiers*
     name>> name>> ;
 
 
-M: literal-parser object>identifiers
+M: literal-parser object>identifiers*
     name>> name>> ;
 
     
