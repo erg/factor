@@ -2,7 +2,7 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays combinators constructors destructors fry
 io io.private io.streams.position kernel math math.order
-namespaces sequences strings ;
+namespaces sequences sequences.private strings ;
 IN: io.streams.document
 
 TUPLE: document-stream < position-stream { line integer } { column integer } ;
@@ -15,6 +15,11 @@ CONSTRUCTOR: <document-position> document-position ( line column -- document-pos
 
 TUPLE: document-object { position document-position } object ;
 CONSTRUCTOR: <document-object> document-object ( position object -- document-object ) ;
+
+M: document-object length object>> length ;
+M: document-object nth object>> nth ;
+M: document-object nth-unsafe object>> nth ;
+M: document-object integer>fixnum object>> integer>fixnum ;
 
 : add-lines ( stream n -- stream )
     '[ _ + ] change-line ; inline
