@@ -85,6 +85,16 @@ IN: modern.parser.factor.tests
     [ check-parsed-file ] all?
 ] unit-test
 
+! Test multiline string experimental syntax
+CONSTANT: tools-scaffold-string """m"[${example-indent}"Example:"
+${example-indent}{ $example "USING: ${example-using} ;"
+${example-indent}    ""
+${example-indent}    ""
+${example-indent}}]""""
+
+{ t } [ tools-scaffold-string parse-source-string length 1 = ] unit-test
+{ t } [ tools-scaffold-string parse-source-string ?last mstring? ] unit-test
+
 /*
 { } [
     "resource:basis" vocabs-in-root
