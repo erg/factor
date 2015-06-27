@@ -115,13 +115,13 @@ ERROR: string-expected got separator ;
     } 2&& ;
 
 ERROR: expected-sequence expected got ;
-: texts-read-until-sequence' ( seq -- )
+: multiline-string-until' ( seq -- )
     dup ?last 1array texts-read-until [
         [ % ] [ , ] bi*
         dup building-tail? [
             drop
         ] [
-            texts-read-until-sequence'
+            multiline-string-until'
         ] if
     ] [
         % dup building-tail? [
@@ -131,14 +131,15 @@ ERROR: expected-sequence expected got ;
         ] if
     ] if* ;
 
-: texts-read-until-sequence ( seq -- string )
-    [ [ texts-read-until-sequence' ] "" make ] keep length head* ;
+
+: multiline-string-until ( end -- string )
+    [ [ multiline-string-until' ] "" make ] keep length head* ;
 
 ERROR: multiline-string-expected got ;
 ! multi"==[Lol. This string syntax...]=="
 : parse-multiline-string ( class -- mstring )
     "[" texts-read-until [
-        "]" "\"" surround texts-read-until-sequence <mstring>
+        "]" "\"" surround multiline-string-until <mstring>
     ] [
         multiline-string-expected
     ] if ;
