@@ -1,9 +1,10 @@
 ! Copyright (C) 2014 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators.short-circuit fry
-hashtables io kernel macros modern.parser modern.parser.factor
-nested-comments prettyprint sequences sequences.deep sets
-strings vocabs vocabs.hierarchy vocabs.loader vocabs.metadata ;
+hashtables io io.files kernel macros modern.parser
+modern.parser.factor nested-comments prettyprint sequences
+sequences.deep sets splitting strings vocabs vocabs.hierarchy
+vocabs.loader vocabs.metadata ;
 FROM: modern.parser.factor => union in? macro locals-mmethod?
 enum nested-comment? ;
 IN: modern.lookup
@@ -230,9 +231,24 @@ M: literal-parser object>identifiers*
 MACRO: any-predicate? ( words -- quot )
     [ '[ _ execute ] ] map
     [ [ ] ] [ '[ _ 1|| ] ] if-empty ;
+
+: modern-if-available ( path -- path' )
+    dup ".factor" ?tail [
+        ".modern" append
+        dup exists? [
+            nip
+        ] [
+            drop
+        ] if
+    ] [
+        drop
+    ] if ;
+
+: modern-source-path ( path -- path' )
+    vocab-source-path modern-if-available ;
     
 : lookup-vocab ( vocab -- seq )
-    vocab-source-path dup . flush
+    modern-source-path dup . flush
     parse-modern-file second
     [ dup object>identifiers ] { } map>assoc ;
 
@@ -252,7 +268,7 @@ MACRO: any-predicate? ( words -- quot )
             flushable? inline? recursive? foldable? final?
             
             ! Enclosers
-            compilation-unit? private-begin? private-end?
+            compilation-unit? private?
             
             ! Object literals
             block? locals-block? fry?
@@ -311,7 +327,7 @@ MACRO: any-predicate? ( words -- quot )
     filter-vocabs ;
     
 : lookup-vocab' ( vocab -- seq )
-    vocab-source-path dup . flush
+    modern-source-path dup . flush
     parse-modern-file second
     [ [ object>identifiers ] keep ] { } map>assoc
     [ drop ] assoc-filter >hashtable ;
