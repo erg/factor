@@ -197,6 +197,9 @@ M: functor object>identifiers*
 M: functor-syntax object>identifiers*
     name>> name>> ;
 
+M: ebnf object>identifiers*
+    name>> name>> ;
+
     
 M: c-type object>identifiers*
     name>> name>> ;    
@@ -263,8 +266,16 @@ MACRO: any-predicate? ( words -- quot )
             ! Calls
             execute(? call(? data-map(? data-map!(?
 
-            ! not really
-            ebnf?
+            ! Basis/compiler
+            import?
+            codegen?
+            conditional?
+            foldable-insn? flushable-insn?
+            insn? vreg-insn?
+            registers? hi-registers?
+            simd-128? simd-128-cord? simd-intrinsic?
+            locals-simd-intrinsic?
+
         } any-predicate? not
     ] assoc-filter ;
 
