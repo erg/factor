@@ -444,10 +444,11 @@ CONSTRUCTOR: <name> name ( name target -- object ) ;
 : parse-name ( -- name )
     token token <name> ;
 
-TUPLE: ebnf < parsed text ;
-CONSTRUCTOR: <ebnf> ebnf ( text -- ebnf ) ;
+TUPLE: ebnf < parsed name text ;
+CONSTRUCTOR: <ebnf> ebnf ( name text -- ebnf ) ;
 : parse-ebnf ( -- ebnf )
-    ";EBNF" strings-until <ebnf> ;
+    token
+    ";EBNF" multiline-string-until <ebnf> ;
 
 TUPLE: defer < parsed name ;
 CONSTRUCTOR: <defer> defer ( name -- defer ) ;
