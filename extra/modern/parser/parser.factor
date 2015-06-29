@@ -290,7 +290,8 @@ ERROR: unrecognized-factor-file path ;
 : write-parsed-string ( seq -- string )
     [ write-parsed-objects ] with-string-writer ;
 
+! Add newline at end of file
 : write-modern-file ( seq path -- )
     utf8 [
-        write-parsed-objects
+        write-parsed-objects nl
     ] with-file-writer ;
