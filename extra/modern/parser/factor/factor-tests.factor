@@ -118,6 +118,12 @@ ${example-indent}}]""""
 ] unit-test
 
 
+! check if files are exact on disk
+    "resource:core" disk-vocabs-in-root
+    [ modern-source-path ] map sift
+    [ "loader/test" swap subseq? ] reject
+    [ replace-parsed-file ] each
+
 
     "resource:basis" disk-vocabs-in-root
     [ modern-source-path ] map sift
