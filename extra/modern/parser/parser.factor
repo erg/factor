@@ -283,11 +283,14 @@ ERROR: unrecognized-factor-file path ;
         texts>> [ object>> write bl ] each nl
     ] each ;
 
+: write-parsed-objects ( seq -- )
+    output>document-stream
+    [ texts>> [ write ] each ] each ;
 
 : write-parsed-string ( seq -- string )
-    [
-        output>document-stream
-        [
-            texts>> [ write ] each
-        ] each
-    ] with-string-writer ;
+    [ write-parsed-objects ] with-string-writer ;
+
+: write-modern-file ( seq path -- )
+    utf8 [
+        write-parsed-objects
+    ] with-file-writer ;
