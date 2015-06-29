@@ -46,7 +46,7 @@ IN: modern.parser.factor.tests
             }
         }
     }
-} [ "{ 1 2 3 }" parse-source-string ] unit-test
+} [ "{ 1 2 3 }" parse-modern-string ] unit-test
 
 
 : check-parsed-file ( path -- ? )
@@ -92,8 +92,15 @@ ${example-indent}    ""
 ${example-indent}    ""
 ${example-indent}}]""""
 
-{ t } [ tools-scaffold-string parse-source-string length 1 = ] unit-test
-{ t } [ tools-scaffold-string parse-source-string ?last mstring? ] unit-test
+{ t } [ tools-scaffold-string parse-modern-string length 1 = ] unit-test
+{ t } [ tools-scaffold-string parse-modern-string ?last mstring? ] unit-test
+
+
+: check-parser-exact ( string -- ? )
+    [ parse-modern-string write-parsed-string ] keep = ;
+
+: check-parsed-exact ( string -- ? )
+    parse-modern-string [ write-parsed-string parse-modern-string ] keep = ;
 
 /*
 { } [

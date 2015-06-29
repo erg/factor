@@ -4,6 +4,17 @@ USING: accessors assocs combinators constructors kernel make
 modern.parser namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
+(*
+! words we define that aren't parsing words
+parsers get-global keys
+all-words [ parsing-word? ] filter natural-sort [ name>> ] map diff
+
+! words we don't define
+parsers get-global keys
+all-words [ parsing-word? ] filter natural-sort [ name>> ] map swap diff
+*)
+
+
 ERROR: string-expected got separator ;
 ! TUPLE: mstring < parsed class string ;
 ! CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
@@ -14,10 +25,10 @@ CONSTRUCTOR: <text> text ( string from to -- text ) ;
 ! TUPLE: comment < parsed text ;
 ! CONSTRUCTOR: <comment> comment ( text -- comment ) ;
 
-TUPLE: nested-comment < parsed comment ;
-CONSTRUCTOR: <nested-comment> nested-comment ( comment -- nested-comment ) ;
+TUPLE: mnested-comment < parsed comment ;
+CONSTRUCTOR: <mnested-comment> mnested-comment ( comment -- nested-comment ) ;
 : parse-nested-comment ( -- nested-comment )
-    "*)" parse-comment-until <nested-comment> ;
+    "*)" parse-comment-until <mnested-comment> ;
 
 TUPLE: signature < parsed in out ;
 CONSTRUCTOR: <signature> signature ( in out -- signature ) ;
@@ -211,10 +222,10 @@ CONSTRUCTOR: <multi-bind> multi-bind ( targets -- bind ) ;
         <single-bind>
     ] if ;
 
-TUPLE: fry < parsed body ;
-CONSTRUCTOR: <fry> fry ( body -- block ) ;
+TUPLE: mfry < parsed body ;
+CONSTRUCTOR: <mfry> mfry ( body -- block ) ;
 : parse-fry ( -- block )
-    "]" parse-until <fry> ;
+    "]" parse-until <mfry> ;
 
 TUPLE: marray < parsed elements ;
 CONSTRUCTOR: <marray> marray ( elements -- block ) ;
@@ -270,25 +281,25 @@ CONSTRUCTOR: <escaped> escaped ( name -- escaped ) ;
 : parse-escaped ( -- escaped )
     raw <escaped> ;
 
-TUPLE: execute( < parsed signature ;
-CONSTRUCTOR: <execute(> execute( ( signature -- execute ) ;
+TUPLE: mexecute( < parsed signature ;
+CONSTRUCTOR: <mexecute(> mexecute( ( signature -- execute ) ;
 : parse-execute( ( -- execute( )
-    parse-signature--) <execute(> ;
+    parse-signature--) <mexecute(> ;
 
-TUPLE: call( < parsed signature ;
-CONSTRUCTOR: <call(> call( ( signature -- call ) ;
+TUPLE: mcall( < parsed signature ;
+CONSTRUCTOR: <mcall(> mcall( ( signature -- call ) ;
 : parse-call( ( -- call( )
-    parse-signature--) <call(> ;
+    parse-signature--) <mcall(> ;
 
-TUPLE: data-map( < parsed signature ;
-CONSTRUCTOR: <data-map(> data-map( ( signature -- data-map ) ;
-: parse-data-map( ( -- call( )
-    parse-signature--) <data-map(> ;
+TUPLE: mdata-map( < parsed signature ;
+CONSTRUCTOR: <mdata-map(> mdata-map( ( signature -- data-map ) ;
+: parse-data-map( ( -- obj )
+    parse-signature--) <mdata-map(> ;
 
-TUPLE: data-map!( < parsed signature ;
-CONSTRUCTOR: <data-map!(> data-map!( ( signature -- data-map! ) ;
-: parse-data-map!( ( -- call( )
-    parse-signature--) <data-map!(> ;
+TUPLE: mdata-map!( < parsed signature ;
+CONSTRUCTOR: <mdata-map!(> mdata-map!( ( signature -- data-map! ) ;
+: parse-data-map!( ( -- obj )
+    parse-signature--) <mdata-map!(> ;
 
 TUPLE: hints < parsed name sequence ;
 CONSTRUCTOR: <hints> hints ( name sequence -- hints ) ;
@@ -383,37 +394,37 @@ CONSTRUCTOR: <package> package ( name -- package ) ;
 TUPLE: import < parsed name ;
 CONSTRUCTOR: <import> import ( name -- package ) ;
 : parse-import ( -- import )
-    get-string <import> ;
+    token <import> ;
 
 TUPLE: imports < parsed names ;
 CONSTRUCTOR: <imports> imports ( names -- package ) ;
 : parse-imports ( -- import )
     ";" strings-until <imports> ;
 
-TUPLE: foldable < parsed ;
-CONSTRUCTOR: <foldable> foldable ( -- obj ) ;
-: parse-foldable ( -- foldable ) <foldable> ;
+TUPLE: mfoldable < parsed ;
+CONSTRUCTOR: <mfoldable> mfoldable ( -- obj ) ;
+: parse-foldable ( -- mfoldable ) <mfoldable> ;
 
-TUPLE: inline < parsed ;
-CONSTRUCTOR: <inline> inline ( -- obj ) ;
-: parse-inline ( -- inline ) <inline> ;
+TUPLE: minline < parsed ;
+CONSTRUCTOR: <minline> minline ( -- obj ) ;
+: parse-inline ( -- minline ) <minline> ;
 
-TUPLE: final < parsed ;
-CONSTRUCTOR: <final> final ( -- obj ) ;
-: parse-final ( -- final ) <final> ;
+TUPLE: mfinal < parsed ;
+CONSTRUCTOR: <mfinal> mfinal ( -- obj ) ;
+: parse-final ( -- mfinal ) <mfinal> ;
 
-TUPLE: recursive < parsed ;
-CONSTRUCTOR: <recursive> recursive ( -- obj ) ;
-: parse-recursive ( -- recursive ) <recursive> ;
+TUPLE: mrecursive < parsed ;
+CONSTRUCTOR: <mrecursive> mrecursive ( -- obj ) ;
+: parse-recursive ( -- mrecursive ) <mrecursive> ;
 
-TUPLE: union < parsed name strings ;
-CONSTRUCTOR: <union> union ( name strings -- obj ) ;
+TUPLE: munion < parsed name strings ;
+CONSTRUCTOR: <munion> munion ( name strings -- obj ) ;
 : parse-union ( -- recursive )
-    token body <union> ;
+    token body <munion> ;
 
-TUPLE: flushable < parsed ;
-CONSTRUCTOR: <flushable> flushable ( -- obj ) ;
-: parse-flushable ( -- flushable ) <flushable> ;
+TUPLE: mflushable < parsed ;
+CONSTRUCTOR: <mflushable> mflushable ( -- obj ) ;
+: parse-flushable ( -- mflushable ) <mflushable> ;
 
 TUPLE: math < parsed name body ;
 CONSTRUCTOR: <math> math ( name body -- obj ) ;
@@ -526,15 +537,15 @@ CONSTRUCTOR: <alias> alias ( name target -- alias ) ;
 : parse-alias ( -- alias )
     token parse <alias> ;
 
-TUPLE: registers < parsed names ;
-CONSTRUCTOR: <registers> registers ( names -- obj ) ;
+TUPLE: mregisters < parsed names ;
+CONSTRUCTOR: <mregisters> mregisters ( names -- obj ) ;
 : parse-registers ( -- obj )
-    ";" parse-until <registers> ;
+    ";" parse-until <mregisters> ;
 
-TUPLE: hi-registers < parsed names ;
-CONSTRUCTOR: <hi-registers> hi-registers ( names -- obj ) ;
+TUPLE: mhi-registers < parsed names ;
+CONSTRUCTOR: <mhi-registers> mhi-registers ( names -- obj ) ;
 : parse-hi-registers ( -- obj )
-    ";" parse-until <hi-registers> ;
+    ";" parse-until <mhi-registers> ;
 
 TUPLE: about < parsed name ;
 CONSTRUCTOR: <about> about ( name -- obj ) ;
@@ -566,25 +577,25 @@ CONSTRUCTOR: <exclude> exclude ( name body -- obj ) ;
 : parse-exclude ( -- obj )
     token "=>" expect ";" parse-until <exclude> ;
 
-TUPLE: foldable-insn < parsed name body ;
-CONSTRUCTOR: <foldable-insn> foldable-insn ( name body -- obj ) ;
+TUPLE: mfoldable-insn < parsed name body ;
+CONSTRUCTOR: <mfoldable-insn> mfoldable-insn ( name body -- obj ) ;
 : parse-foldable-insn ( -- obj )
-    token ";" parse-until <foldable-insn> ;
+    token ";" parse-until <mfoldable-insn> ;
 
-TUPLE: flushable-insn < parsed name body ;
-CONSTRUCTOR: <flushable-insn> flushable-insn ( name body -- obj ) ;
+TUPLE: mflushable-insn < parsed name body ;
+CONSTRUCTOR: <mflushable-insn> mflushable-insn ( name body -- obj ) ;
 : parse-flushable-insn ( -- obj )
-    token ";" parse-until <flushable-insn> ;
+    token ";" parse-until <mflushable-insn> ;
 
-TUPLE: vreg-insn < parsed name body ;
-CONSTRUCTOR: <vreg-insn> vreg-insn ( name body -- obj ) ;
+TUPLE: mvreg-insn < parsed name body ;
+CONSTRUCTOR: <mvreg-insn> mvreg-insn ( name body -- obj ) ;
 : parse-vreg-insn ( -- obj )
-    token ";" parse-until <vreg-insn> ;
+    token ";" parse-until <mvreg-insn> ;
 
-TUPLE: insn < parsed name body ;
-CONSTRUCTOR: <insn> insn ( name body -- obj ) ;
+TUPLE: minsn < parsed name body ;
+CONSTRUCTOR: <minsn> minsn ( name body -- obj ) ;
 : parse-insn ( -- obj )
-    token ";" parse-until <insn> ;
+    token ";" parse-until <minsn> ;
 
 TUPLE: codegen < parsed name1 name2 ;
 CONSTRUCTOR: <codegen> codegen ( name1 name2 -- obj ) ;
@@ -626,10 +637,10 @@ CONSTRUCTOR: <forget> forget ( name -- obj ) ;
 : parse-forget ( -- obj )
     token <forget> ;
 
-TUPLE: pointer < parsed to ;
-CONSTRUCTOR: <pointer> pointer ( to -- obj ) ;
+TUPLE: mpointer < parsed to ;
+CONSTRUCTOR: <mpointer> mpointer ( to -- obj ) ;
 : parse-pointer ( -- obj )
-    token <pointer> ;
+    token <mpointer> ;
 
 TUPLE: help < parsed name body ;
 CONSTRUCTOR: <help> help ( name body -- obj ) ;
@@ -641,6 +652,11 @@ TUPLE: long-string < parsed name text ;
 CONSTRUCTOR: <long-string> long-string ( name text -- long-string ) ;
 : parse-long-string ( -- long-string )
     token ";" parse-comment-until <long-string> ;
+
+TUPLE: mirc < parsed name command body ;
+CONSTRUCTOR: <mirc> mirc ( name command body -- mirc ) ;
+: parse-irc ( -- irc )
+    token parse ";" strings-until <mirc> ;
 
 ! \ parse-mparser "PARSER:" register-parser
 \ parse-package "PACKAGE:" register-parser
@@ -751,6 +767,7 @@ CONSTRUCTOR: <long-string> long-string ( name text -- long-string ) ;
 \ parse-pointer "pointer:" register-parser
 \ parse-long-string "STRING:" register-parser
 \ parse-help "HELP:" register-parser
+\ parse-irc "IRC:" register-parser
 
 ! qw{ CODEGEN: CATEGORY: ENUM: SIMD-INTRINSIC:
 ! CLASS: FUNCTION-ALIAS: M\\ TAGS: COM-INTERFACE:
