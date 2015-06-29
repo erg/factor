@@ -7,21 +7,21 @@ make math math.parser multiline namespaces sequences
 sequences.extras strings io.streams.peek ;
 IN: modern.parser
 
-! "TUPLE: foo a b c ;" parse-source-string
+! "TUPLE: foo a b c ;" parse-modern-string
 ! "resource:core/math/math.factor" parse-modern-file
-! ": add-one ( a -- b ) 1 + ;" parse-source-string ...
-! "! omg omg\n!# lol" parse-source-string ...
-! """ "asdf" """ parse-source-string ...
-! """"asdf"""" parse-source-string ...
-! "M: rational neg? 0 < ;" parse-source-string ...
-! ": add-one ( a -- b ) 1 + ;" parse-source-string write-parsed-string print
+! ": add-one ( a -- b ) 1 + ;" parse-modern-string ...
+! "! omg omg\n!# lol" parse-modern-string ...
+! """ "asdf" """ parse-modern-string ...
+! """"asdf"""" parse-modern-string ...
+! "M: rational neg? 0 < ;" parse-modern-string ...
+! ": add-one ( a -- b ) 1 + ;" parse-modern-string write-parsed-string print
 ! "resource:core/sequences/sequences.factor" parse-modern-file second write-parsed-string print
-! "[ 1 ]" parse-source-string
-! "M: standard-generic definer drop \ GENERIC# f ;" parse-source-string
-! "\\ GENERIC#" parse-source-string
-! "GENERIC#" parse-source-string
+! "[ 1 ]" parse-modern-string
+! "M: standard-generic definer drop \ GENERIC# f ;" parse-modern-string
+! "\\ GENERIC#" parse-modern-string
+! "GENERIC#" parse-modern-string
 ! "resource:core/generic/standard/standard.factor" parse-source-file
-! "CONSTANT: simple-combination T{ standard-combination f 0 }" parse-source-string
+! "CONSTANT: simple-combination T{ standard-combination f 0 }" parse-modern-string
 ! "resource:basis/formatting/formatting.factor" parse-modern-file
 
 
@@ -265,7 +265,7 @@ ERROR: expected expected got ;
 : parse-source-file ( path -- data )
     utf8 [ input>document-stream parse-input ] with-file-reader drop ; inline
 
-: parse-source-string ( string -- data )
+: parse-modern-string ( string -- data )
     [ input>document-stream parse-input ] with-string-reader drop ; inline
 
 ERROR: unrecognized-factor-file path ;
