@@ -112,6 +112,9 @@ M: document-stream stream-write ( document-object stream -- )
     [ write-object ]
     [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ] 2tri ;
 
+M: document-stream stream-nl ( stream -- )
+    stream>> stream-nl ;
+
 : input>document-stream ( -- )
     input-stream [ <document-stream> ] change ;
 
