@@ -5,8 +5,8 @@ hashtables io io.files kernel macros modern.parser
 modern.parser.factor nested-comments prettyprint sequences
 sequences.deep sets splitting strings vocabs vocabs.hierarchy
 vocabs.loader vocabs.metadata ;
-FROM: modern.parser.factor => union in? macro locals-mmethod?
-enum nested-comment? ;
+FROM: modern.parser.factor => in? macro locals-mmethod?
+enum ;
 IN: modern.lookup
 
 
@@ -67,167 +67,162 @@ clear core-vocabs
     dup "?" append 2array ;
 
 
-GENERIC: object>identifiers* ( object -- string )
+GENERIC: object>identifiers ( object -- string )
 
-: object>identifiers ( object -- seq )
-    object>identifiers* dup string? [ 1array ] when ;
+M: sequence object>identifiers
+    [ object>identifiers ] { } map-as sift ;
 
-M: object object>identifiers*
-    drop f ;
+! Any
+! M: object object>identifiers drop f ;
 
-M: mprimitive object>identifiers*
-    name>> name>> ;
-    
-M: mgeneric object>identifiers*
-    name>> name>> ;
+! namespace
+M: comment object>identifiers drop f ;
+M: using object>identifiers drop f ;
+M: use object>identifiers drop f ;
+M: in object>identifiers drop f ;
+M: from object>identifiers drop f ;
+M: exclude object>identifiers drop f ;
+M: qualified object>identifiers drop f ;
+M: qualified-with object>identifiers drop f ;
+M: rename object>identifiers drop f ;
+M: forget object>identifiers drop f ;
+M: mnested-comment object>identifiers drop f ;
 
-M: mgeneric# object>identifiers*
-    name>> name>> ;
+! word props
+M: mflushable object>identifiers drop f ;
+M: mfoldable object>identifiers drop f ;
+M: minline object>identifiers drop f ;
+M: mfinal object>identifiers drop f ;
+M: mrecursive object>identifiers drop f ;
 
-M: constant object>identifiers*
-    name>> name>> ;
-    
-M: function object>identifiers*
-    name>> name>> ;
-    
-M: defer object>identifiers*
-    name>> name>> ;
-    
-M: mtuple object>identifiers*
-    name>> name>> name-and-predicate ;
+! Addons
+M: mmethod object>identifiers drop f ;
+M: instance object>identifiers drop f ;
 
-M: mbuiltin object>identifiers*
-    name>> name>> name-and-predicate ;
-
-M: merror object>identifiers*
-    name>> name>> name-and-predicate ;
-    
-M: union object>identifiers*
-    name>> name>> name-and-predicate ;
-    
-M: mixin object>identifiers*
-    name>> name>> name-and-predicate ;
-    
-M: predicate object>identifiers*
-    name>> name>> name-and-predicate ;
-    
-M: symbol object>identifiers*
-    name>> name>> ;
-    
-M: symbols object>identifiers*
-    names>> [ name>> ] map ;
-
-M: slot object>identifiers*
-    name>> name>> ;
-
-M: math object>identifiers*
-    name>> name>> ;
-
-M: hook object>identifiers*
-    name>> name>> ;
+! literals
+M: block object>identifiers drop f ;
+M: mstring object>identifiers drop f ;
+M: mtoken object>identifiers drop f ;
+M: mnumber object>identifiers drop f ;
+M: escaped object>identifiers drop f ;
+M: mhashtable object>identifiers drop f ;
+M: marray object>identifiers drop f ;
+M: mvector object>identifiers drop f ;
+M: char object>identifiers drop f ;
+M: tuple-literal-assoc object>identifiers drop f ;
+M: tuple-literal-boa object>identifiers drop f ;
 
 
-M: singleton object>identifiers*
-    name>> name>> name-and-predicate ;
+M: mprimitive object>identifiers name>> name>> ;
+M: mgeneric object>identifiers name>> name>> ;
+M: mgeneric# object>identifiers name>> name>> ;
+M: constant object>identifiers name>> name>> ;
+M: function object>identifiers name>> name>> ;
+M: defer object>identifiers name>> name>> ;
+M: mtuple object>identifiers name>> name>> name-and-predicate ;
+M: mbuiltin object>identifiers name>> name>> name-and-predicate ;
+M: merror object>identifiers name>> name>> name-and-predicate ;
+M: munion object>identifiers name>> name>> name-and-predicate ;
+M: mixin object>identifiers name>> name>> name-and-predicate ;
+M: predicate object>identifiers name>> name>> name-and-predicate ;
+M: symbol object>identifiers name>> name>> ;
+M: symbols object>identifiers names>> object>identifiers ;
+M: slot object>identifiers name>> name>> ;
+M: math object>identifiers name>> name>> ;
+M: hook object>identifiers name>> name>> ;
 
-M: singletons object>identifiers*
+M: singleton object>identifiers name>> name>> name-and-predicate ;
+
+M: singletons object>identifiers
     names>> [ name>> name-and-predicate ] map concat ;
 
-M: constructor object>identifiers*
-    name>> name>> ;
+M: constructor object>identifiers name>> name>> ;
+M: main object>identifiers name>> name>> ;
 
-M: main object>identifiers*
-    name>> name>> ;
+M: specialized-array object>identifiers class>> name>> ;
+M: specialized-arrays object>identifiers classes>> ;
 
-M: locals-function object>identifiers*
-    name>> name>> ;
-M: locals-memo object>identifiers*
-    name>> name>> ;
-M: locals-macro object>identifiers*
-    name>> name>> ;
-M: memo object>identifiers*
-    name>> name>> ;
-M: typed object>identifiers*
-    name>> name>> ;
-M: specialized-array object>identifiers*
-    class>> name>> ;
-M: specialized-arrays object>identifiers*
-    classes>> ;
-    
-M: macro object>identifiers*
-    name>> name>> ;    
-! XXX: todo
-M: syntax object>identifiers*
-    name>> ;
-M: c-function object>identifiers*
-    name>> name>> ;
-M: c-function-alias object>identifiers*
-    aliased-name>> name>> ;
-M: x-function object>identifiers*
-    name>> name>> ;
-M: gl-function object>identifiers*
-    name>> name>> ;    
-    
-M: enum object>identifiers*
-    name>> name>> ;
-    
+M: macro object>identifiers name>> name>> ;
+M: syntax object>identifiers name>> ;
+M: c-function object>identifiers name>> name>> ;
+M: c-function-alias object>identifiers aliased-name>> name>> ;
+M: x-function object>identifiers name>> name>> ;
+M: gl-function object>identifiers name>> name>> ;
 
-! M: ebnf object>identifiers*
-  !  name>> name>> ;
+! alien/ffi
+M: c-type object>identifiers name>> name>> ;
+M: struct object>identifiers name>> name>> ;
+M: packed-struct object>identifiers name>> name>> ;
+M: library object>identifiers name>> name>> ;
+M: typedef object>identifiers new>> name>> ;
+M: enum object>identifiers name>> name>> ;
+M: mpointer object>identifiers drop f ;
 
-  
-  
-M: library object>identifiers*
-    name>> name>> ;
-M: struct object>identifiers*
-    name>> name>> ;
-M: packed-struct object>identifiers*
-    name>> name>> ;
-M: typedef object>identifiers*
-    new>> name>> ;
-M: locals-typed object>identifiers*
-    name>> name>> ;
-    
-    
-M: alias object>identifiers*
-    name>> name>> ;
-M: hints object>identifiers*
-    name>> name>> ;  
-M: functor object>identifiers*
-    name>> name>> ;
-M: functor-syntax object>identifiers*
-    name>> name>> ;
-
-M: ebnf object>identifiers*
-    name>> name>> ;
-
-    
-M: c-type object>identifiers*
-    name>> name>> ;    
-M: protocol object>identifiers*
-    name>> name>> ; 
-M: article object>identifiers*
-    name>> string>> ;     
-M: about object>identifiers*
-    name>> string>> ;
-M: single-bind object>identifiers*
-    target>> ;
+! Locals/fry/etc
+M: locals-typed object>identifiers name>> name>> ;
+M: locals-function object>identifiers name>> name>> ;
+M: locals-memo object>identifiers name>> name>> ;
+M: locals-macro object>identifiers name>> name>> ;
+M: locals-mmethod object>identifiers drop f ;
+M: locals-block object>identifiers drop f ;
+M: memo object>identifiers name>> name>> ;
+M: typed object>identifiers name>> name>> ;
+M: mfry object>identifiers drop f ;
 
 
-M: long-string object>identifiers*
-    name>> name>> ;  
+! Language features
+M: alias object>identifiers name>> name>> ;
+M: functor object>identifiers name>> name>> ;
+M: functor-syntax object>identifiers name>> name>> ;
 
-M: c-global object>identifiers*
-    name>> name>> ;      
-
-M: parser object>identifiers*
-    name>> name>> ;
+! libraries
+M: ebnf object>identifiers name>> name>> ;
+M: mirc object>identifiers name>> name>> ;
 
 
-M: literal-parser object>identifiers*
-    name>> name>> ;
 
-    
+M: protocol object>identifiers name>> name>> ;
+M: article object>identifiers name>> string>> ;
+M: about object>identifiers name>> string>> ;
+M: single-bind object>identifiers target>> ;
+
+M: long-string object>identifiers name>> name>> ;
+M: c-global object>identifiers name>> name>> ;
+M: parser object>identifiers name>> name>> ;
+
+
+! nested
+M: private object>identifiers body>> object>identifiers ;
+M: compilation-unit object>identifiers code>> object>identifiers ;
+
+! stack checker
+M: hints object>identifiers name>> name>> ;
+M: mexecute( object>identifiers drop f ;
+M: mcall( object>identifiers drop f ;
+
+! Compiler
+M: codegen object>identifiers name1>> name>> ;
+M: conditional object>identifiers name1>> name>> ;
+M: mfoldable-insn object>identifiers name>> name>> ;
+M: mflushable-insn object>identifiers name>> name>> ;
+M: minsn object>identifiers name>> name>> ;
+M: mvreg-insn object>identifiers name>> name>> ;
+M: mregisters object>identifiers names>> object>identifiers ;
+M: mhi-registers object>identifiers names>> object>identifiers ;
+
+! simd
+M: simd-128 object>identifiers name>> name>> ;
+M: simd-128-cord object>identifiers drop f ;
+M: simd-intrinsic object>identifiers name>> name>> ;
+M: locals-simd-intrinsic object>identifiers name>> name>> ;
+
+M: mdata-map( object>identifiers drop f ;
+M: mdata-map!( object>identifiers drop f ;
+
+! cocoa/objc
+M: import object>identifiers name>> name>> ;
+
+
 MACRO: any-predicate? ( words -- quot )
     [ '[ _ execute ] ] map
     [ [ ] ] [ '[ _ 1|| ] ] if-empty ;
@@ -246,49 +241,52 @@ MACRO: any-predicate? ( words -- quot )
 
 : modern-source-path ( path -- path' )
     vocab-source-path modern-if-available ;
-    
+
 : lookup-vocab ( vocab -- seq )
     modern-source-path dup . flush
     parse-modern-file second
     [ dup object>identifiers ] { } map>assoc ;
 
+: each-vocab-object ( vocab -- seq )
+    ;
+
 : lookup-vocab-failures ( vocab -- seq )
     lookup-vocab [ nip not ] assoc-filter ;
-    
+
 : filter-failures ( seq -- seq' )
     [
         drop {
             ! Comments
-            comment? nested-comment?
-            
+            comment? mnested-comment?
+
             ! Lookup
             from? qualified? qualified-with? in? using? use? rename? exclude? forget?
-            
+
             ! Word properties
-            flushable? inline? recursive? foldable? final?
-            
+            mflushable? minline? mrecursive? mfoldable? mfinal?
+
             ! Enclosers
             compilation-unit? private?
-            
+
             ! Object literals
-            block? locals-block? fry?
+            block? locals-block? mfry?
             mstring? mtoken? mnumber?
-            marray? mhashtable? mvector? char? pointer? escaped?
+            marray? mhashtable? mvector? char? mpointer? escaped?
             tuple-literal-assoc? tuple-literal-boa?
-            
+
             ! Function instances
             instance? mmethod? locals-mmethod?
-            
+
             ! Calls
-            execute(? call(? data-map(? data-map!(?
+            mexecute(? mcall(? mdata-map(? mdata-map!(?
 
             ! Basis/compiler
             import?
             codegen?
             conditional?
-            foldable-insn? flushable-insn?
-            insn? vreg-insn?
-            registers? hi-registers?
+            mfoldable-insn? mflushable-insn?
+            minsn? mvreg-insn?
+            mregisters? mhi-registers?
             simd-128? simd-128-cord? simd-intrinsic?
             locals-simd-intrinsic?
 
@@ -299,7 +297,7 @@ MACRO: any-predicate? ( words -- quot )
     "" disk-vocabs-in-root/prefix
     [ don't-load? not ] filter no-prefixes
     [ name>> ] map ;
-    
+
 : filter-vocabs ( seq -- seq )
     [ lookup-vocab-failures filter-failures ] map harvest ;
 
@@ -308,11 +306,11 @@ MACRO: any-predicate? ( words -- quot )
 : extra-vocabs ( -- seq ) "resource:extra" vocabs-from ;
 
 : diff-bad-basis-vocabs ( seq -- seq' )
-    { "specialized-vectors" "tools.scaffold" } diff ;
+    { } diff ;
 
 : diff-bad-extra-vocabs ( seq -- seq' )
-    { "irc.messages" "yaml.conversion" } diff ;
-    
+    { "modern.parser.terse" "yaml.conversion" } diff ;
+
 : load-core ( -- seq )
     core-vocabs filter-vocabs ;
 
@@ -325,29 +323,29 @@ MACRO: any-predicate? ( words -- quot )
     "resource:extra" vocabs-from
     diff-bad-extra-vocabs
     filter-vocabs ;
-    
+
 : lookup-vocab' ( vocab -- seq )
     modern-source-path dup . flush
     parse-modern-file second
     [ [ object>identifiers ] keep ] { } map>assoc
     [ drop ] assoc-filter >hashtable ;
 
-    
+
 : untracked-words ( vocab -- seq )
     [ lookup-vocab' keys ]
     [
         [ vocab-words ] [ ".private" append vocab-words ] bi append
         [ name>> ] map [ flatten ] bi@ [ diff ] [ swap diff ] 2bi
     ] bi 2array ;
-    
+
 : vocabs-untracked-words ( seq -- seq' )
     [ dup untracked-words ] { } map>assoc ;
 
 : core-untracked-words ( -- seq )
     core-vocabs vocabs-untracked-words ;
-    
+
 : basis-untracked-words ( -- seq )
     basis-vocabs diff-bad-basis-vocabs vocabs-untracked-words ;
-    
+
 : extra-untracked-words ( -- seq )
     extra-vocabs diff-bad-extra-vocabs vocabs-untracked-words ;
