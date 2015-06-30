@@ -1,0 +1,14 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: slots.syntax.syntax
+
+PARSER: copy-slots{ ;
+PARSER: get[ ;
+PARSER: get{ ;
+PARSER: set-slots[ ;
+PARSER: set-slots{ ;
+PARSER: set[ ;
+PARSER: set{ ;
+PARSER: slots[ ;
+PARSER: slots{ ;

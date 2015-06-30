@@ -1,0 +1,8 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: math.vectors.simd.cords.syntax
+
+<PRIVATE
+PARSER: SIMD-128-CORD: ;
+PRIVATE>

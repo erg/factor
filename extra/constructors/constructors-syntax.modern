@@ -1,0 +1,7 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: constructors.syntax
+
+PARSER: CONSTRUCTOR: ;
+PARSER: SLOT-CONSTRUCTOR: ;

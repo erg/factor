@@ -1,0 +1,18 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: alien.syntax.syntax
+
+PARSER: &: ;
+PARSER: ALIEN: ;
+PARSER: BAD-ALIEN ;
+PARSER: C-GLOBAL: ;
+PARSER: C-TYPE: ;
+PARSER: CALLBACK: ;
+PARSER: DLL" ;
+PARSER: ENUM: ;
+PARSER: FUNCTION-ALIAS: ;
+PARSER: FUNCTION: ;
+PARSER: LIBRARY: ;
+PARSER: TYPEDEF: ;
+PARSER: pointer: ;

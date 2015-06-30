@@ -1,0 +1,7 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: cpu.x86.assembler.syntax.syntax
+
+PARSER: HI-REGISTERS: ;
+PARSER: REGISTERS: ;
