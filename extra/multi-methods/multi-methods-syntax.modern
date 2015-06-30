@@ -3,6 +3,6 @@
 USING: ;
 IN: multi-methods.syntax
 
-PARSER: GENERIC: ;
-PARSER: M: ;
-PARSER: METHOD: ;
+PARSER: generic { name signature } GENERIC: token parse-signature(--) ;
+PARSER: m { class name body } M: parse token body ;
+PARSER: method { } METHOD:  ;

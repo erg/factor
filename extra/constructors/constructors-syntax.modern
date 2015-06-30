@@ -3,5 +3,5 @@
 USING: ;
 IN: constructors.syntax
 
-PARSER: CONSTRUCTOR: ;
-PARSER: SLOT-CONSTRUCTOR: ;
+PARSER: constructor { } CONSTRUCTOR:  ;
+PARSER: slot-constructor { } SLOT-CONSTRUCTOR:  ;

@@ -3,4 +3,4 @@
 USING: ;
 IN: irc.messages.base.syntax
 
-PARSER: IRC: ;
+PARSER: irc { name command body } IRC: token parse ; strings-until ;

@@ -3,5 +3,5 @@
 USING: ;
 IN: alien.data.syntax
 
-PARSER: c-array@ ;
-PARSER: c-array{ ;
+PARSER: c-array@ { } c-array@  ;
+PARSER: c-array{ { } c-array{  ;

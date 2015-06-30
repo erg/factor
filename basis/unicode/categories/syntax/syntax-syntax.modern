@@ -3,5 +3,5 @@
 USING: ;
 IN: unicode.categories.syntax.syntax
 
-PARSER: CATEGORY-NOT: ;
-PARSER: CATEGORY: ;
+PARSER: category-not { } CATEGORY-NOT:  ;
+PARSER: category { } CATEGORY:  ;

@@ -3,4 +3,4 @@
 USING: ;
 IN: trees.avl.syntax
 
-PARSER: AVL{ ;
+PARSER: avl{ { } AVL{  ;

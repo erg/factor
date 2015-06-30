@@ -3,4 +3,4 @@
 USING: ;
 IN: xmode.loader.syntax.syntax
 
-PARSER: RULE: ;
+PARSER: rule { } RULE:  ;

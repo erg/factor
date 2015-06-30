@@ -3,6 +3,6 @@
 USING: ;
 IN: cpu.8080.emulator.syntax
 
-PARSER: INSTRUCTION: ;
-PARSER: cycles ;
-PARSER: opcode ;
+PARSER: instruction { } INSTRUCTION:  ;
+PARSER: cycles { } cycles  ;
+PARSER: opcode { } opcode  ;

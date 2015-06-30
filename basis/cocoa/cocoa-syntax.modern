@@ -3,8 +3,8 @@
 USING: ;
 IN: cocoa.syntax
 
-PARSER: -> ;
-PARSER: FRAMEWORK: ;
-PARSER: IMPORT: ;
-PARSER: SEL: ;
-PARSER: SUPER-> ;
+PARSER: -> { } ->  ;
+PARSER: framework { } FRAMEWORK:  ;
+PARSER: import { name } IMPORT: token ;
+PARSER: sel { } SEL:  ;
+PARSER: super-> { } SUPER->  ;

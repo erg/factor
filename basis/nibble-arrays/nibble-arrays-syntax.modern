@@ -3,4 +3,4 @@
 USING: ;
 IN: nibble-arrays.syntax
 
-PARSER: N{ ;
+PARSER: n{ { } N{  ;

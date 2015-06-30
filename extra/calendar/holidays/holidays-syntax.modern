@@ -3,5 +3,5 @@
 USING: ;
 IN: calendar.holidays.syntax
 
-PARSER: HOLIDAY-NAME: ;
-PARSER: HOLIDAY: ;
+PARSER: holiday-name { } HOLIDAY-NAME:  ;
+PARSER: holiday { } HOLIDAY:  ;

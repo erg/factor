@@ -3,5 +3,5 @@
 USING: ;
 IN: vlists.syntax
 
-PARSER: VA{ ;
-PARSER: VL{ ;
+PARSER: va{ { } VA{  ;
+PARSER: vl{ { } VL{  ;

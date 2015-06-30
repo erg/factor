@@ -3,5 +3,5 @@
 USING: ;
 IN: cocoa.subclassing.syntax
 
-PARSER: CLASS: ;
-PARSER: METHOD: ;
+PARSER: class { } CLASS:  ;
+PARSER: method { } METHOD:  ;

@@ -3,4 +3,4 @@
 USING: ;
 IN: poker.syntax
 
-PARSER: HAND{ ;
+PARSER: hand{ { } HAND{  ;

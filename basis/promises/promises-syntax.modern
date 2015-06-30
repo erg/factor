@@ -3,4 +3,4 @@
 USING: ;
 IN: promises.syntax
 
-PARSER: LAZY: ;
+PARSER: lazy { } LAZY:  ;

@@ -3,4 +3,4 @@
 USING: ;
 IN: memoize.syntax.syntax
 
-PARSER: MEMO[ ;
+PARSER: memo[ { } MEMO[  ;

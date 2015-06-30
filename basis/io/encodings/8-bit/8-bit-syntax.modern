@@ -3,4 +3,4 @@
 USING: ;
 IN: io.encodings.8-bit.syntax
 
-PARSER: 8-BIT: ;
+PARSER: 8-bit { } 8-BIT:  ;

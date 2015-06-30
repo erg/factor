@@ -3,4 +3,4 @@
 USING: ;
 IN: compiler.cfg.renaming.functor.syntax
 
-PARSER: RENAMING: ;
+PARSER: renaming { } RENAMING:  ;

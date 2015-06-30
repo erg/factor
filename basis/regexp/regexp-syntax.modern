@@ -3,14 +3,14 @@
 USING: ;
 IN: regexp.syntax
 
-PARSER: R! ;
-PARSER: R" ;
-PARSER: R# ;
-PARSER: R' ;
-PARSER: R( ;
-PARSER: R/ ;
-PARSER: R@ ;
-PARSER: R[ ;
-PARSER: R` ;
-PARSER: R{ ;
-PARSER: R| ;
+PARSER: r! { } R!  ;
+PARSER: r" { } R"  ;
+PARSER: r# { } R#  ;
+PARSER: r' { } R'  ;
+PARSER: r( { } R(  ;
+PARSER: r/ { } R/  ;
+PARSER: r@ { } R@  ;
+PARSER: r[ { } R[  ;
+PARSER: r` { } R`  ;
+PARSER: r{ { } R{  ;
+PARSER: r| { } R|  ;

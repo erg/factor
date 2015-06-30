@@ -3,8 +3,8 @@
 USING: ;
 IN: xml.syntax.syntax
 
-PARSER: <XML ;
-PARSER: TAG: ;
-PARSER: TAGS: ;
-PARSER: XML-NS: ;
-PARSER: [XML ;
+PARSER: <xml { } <XML  ;
+PARSER: tag { } TAG:  ;
+PARSER: tags { } TAGS:  ;
+PARSER: xml-ns { } XML-NS:  ;
+PARSER: [xml { } [XML  ;

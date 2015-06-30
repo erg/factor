@@ -3,4 +3,4 @@
 USING: ;
 IN: tuple-arrays.syntax
 
-PARSER: TUPLE-ARRAY: ;
+PARSER: tuple-array { } TUPLE-ARRAY:  ;

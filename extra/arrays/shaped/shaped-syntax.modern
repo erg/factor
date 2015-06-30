@@ -3,4 +3,4 @@
 USING: ;
 IN: arrays.shaped.syntax
 
-PARSER: sa{ ;
+PARSER: sa{ { } sa{  ;

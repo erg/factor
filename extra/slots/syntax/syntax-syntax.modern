@@ -3,12 +3,12 @@
 USING: ;
 IN: slots.syntax.syntax
 
-PARSER: copy-slots{ ;
-PARSER: get[ ;
-PARSER: get{ ;
-PARSER: set-slots[ ;
-PARSER: set-slots{ ;
-PARSER: set[ ;
-PARSER: set{ ;
-PARSER: slots[ ;
-PARSER: slots{ ;
+PARSER: copy-slots{ { } copy-slots{  ;
+PARSER: get[ { } get[  ;
+PARSER: get{ { } get{  ;
+PARSER: set-slots[ { } set-slots[  ;
+PARSER: set-slots{ { } set-slots{  ;
+PARSER: set[ { } set[  ;
+PARSER: set{ { } set{  ;
+PARSER: slots[ { } slots[  ;
+PARSER: slots{ { } slots{  ;

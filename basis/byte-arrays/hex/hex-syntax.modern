@@ -3,4 +3,4 @@
 USING: ;
 IN: byte-arrays.hex.syntax
 
-PARSER: HEX{ ;
+PARSER: hex{ { } HEX{  ;

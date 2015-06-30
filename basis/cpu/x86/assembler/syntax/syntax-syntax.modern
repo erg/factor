@@ -3,5 +3,5 @@
 USING: ;
 IN: cpu.x86.assembler.syntax.syntax
 
-PARSER: HI-REGISTERS: ;
-PARSER: REGISTERS: ;
+PARSER: hi-registers { names } HI-REGISTERS: ; parse-until ;
+PARSER: registers { names } REGISTERS: ; parse-until ;

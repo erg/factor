@@ -3,4 +3,4 @@
 USING: ;
 IN: bit-arrays.syntax
 
-PARSER: ?{ ;
+PARSER: ?{ { } ?{  ;

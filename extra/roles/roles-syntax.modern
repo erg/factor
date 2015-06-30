@@ -3,5 +3,5 @@
 USING: ;
 IN: roles.syntax
 
-PARSER: ROLE: ;
-PARSER: TUPLE: ;
+PARSER: role { } ROLE:  ;
+PARSER: tuple { name body } TUPLE: token body ;

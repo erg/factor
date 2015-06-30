@@ -3,7 +3,7 @@
 USING: ;
 IN: code-arrays.syntax
 
-PARSER: H{{ ;
-PARSER: V{{ ;
-PARSER: [[ ;
-PARSER: {{ ;
+PARSER: h{{ { } H{{  ;
+PARSER: v{{ { } V{{  ;
+PARSER: [[ { } [[  ;
+PARSER: {{ { } {{  ;

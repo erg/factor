@@ -3,5 +3,5 @@
 USING: ;
 IN: specialized-arrays.syntax
 
-PARSER: SPECIALIZED-ARRAY: ;
-PARSER: SPECIALIZED-ARRAYS: ;
+PARSER: specialized-array { class } SPECIALIZED-ARRAY: token ;
+PARSER: specialized-arrays { classes } SPECIALIZED-ARRAYS: ; strings-until ;

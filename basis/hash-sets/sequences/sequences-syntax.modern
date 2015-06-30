@@ -3,4 +3,4 @@
 USING: ;
 IN: hash-sets.sequences.syntax
 
-PARSER: SHS{ ;
+PARSER: shs{ { } SHS{  ;

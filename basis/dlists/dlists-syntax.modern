@@ -3,4 +3,4 @@
 USING: ;
 IN: dlists.syntax
 
-PARSER: DL{ ;
+PARSER: dl{ { } DL{  ;

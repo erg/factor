@@ -3,4 +3,4 @@
 USING: ;
 IN: colors.constants.syntax
 
-PARSER: COLOR: ;
+PARSER: color { } COLOR:  ;

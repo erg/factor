@@ -3,5 +3,5 @@
 USING: ;
 IN: method-chains.syntax
 
-PARSER: AFTER: ;
-PARSER: BEFORE: ;
+PARSER: after { } AFTER:  ;
+PARSER: before { } BEFORE:  ;

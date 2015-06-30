@@ -3,4 +3,4 @@
 USING: ;
 IN: colors.flex-hex.syntax
 
-PARSER: FLEXHEXCOLOR: ;
+PARSER: flexhexcolor { } FLEXHEXCOLOR:  ;

@@ -3,7 +3,7 @@
 USING: ;
 IN: multiline.syntax
 
-PARSER: /* ;
-PARSER: DELIMITED: ;
-PARSER: HEREDOC: ;
-PARSER: STRING: ;
+PARSER: /* { } /*  ;
+PARSER: delimited { } DELIMITED:  ;
+PARSER: heredoc { } HEREDOC:  ;
+PARSER: string { name text } STRING: token ; parse-comment-until ;

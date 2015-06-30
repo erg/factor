@@ -3,4 +3,4 @@
 USING: ;
 IN: trees.splay.syntax
 
-PARSER: SPLAY{ ;
+PARSER: splay{ { } SPLAY{  ;

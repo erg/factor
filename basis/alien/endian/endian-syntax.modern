@@ -3,7 +3,7 @@
 USING: ;
 IN: alien.endian.syntax
 
-PARSER: BE-PACKED-STRUCT: ;
-PARSER: BE-STRUCT: ;
-PARSER: LE-PACKED-STRUCT: ;
-PARSER: LE-STRUCT: ;
+PARSER: be-packed-struct { } BE-PACKED-STRUCT:  ;
+PARSER: be-struct { } BE-STRUCT:  ;
+PARSER: le-packed-struct { } LE-PACKED-STRUCT:  ;
+PARSER: le-struct { } LE-STRUCT:  ;

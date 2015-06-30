@@ -3,7 +3,7 @@
 USING: ;
 IN: compiler.cfg.instructions.syntax.syntax
 
-PARSER: FLUSHABLE-INSN: ;
-PARSER: FOLDABLE-INSN: ;
-PARSER: INSN: ;
-PARSER: VREG-INSN: ;
+PARSER: flushable-insn { name body } FLUSHABLE-INSN: token ; parse-until ;
+PARSER: foldable-insn { name body } FOLDABLE-INSN: token ; parse-until ;
+PARSER: insn { name body } INSN: token ; parse-until ;
+PARSER: vreg-insn { name body } VREG-INSN: token ; parse-until ;

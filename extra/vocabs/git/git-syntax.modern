@@ -3,4 +3,4 @@
 USING: ;
 IN: vocabs.git.syntax
 
-PARSER: USE-REV: ;
+PARSER: use-rev { } USE-REV:  ;

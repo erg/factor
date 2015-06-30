@@ -3,4 +3,4 @@
 USING: ;
 IN: slides.syntax
 
-PARSER: STRIP-TEASE: ;
+PARSER: strip-tease { } STRIP-TEASE:  ;

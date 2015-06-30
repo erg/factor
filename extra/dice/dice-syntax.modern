@@ -3,4 +3,4 @@
 USING: ;
 IN: dice.syntax
 
-PARSER: ROLL: ;
+PARSER: roll { } ROLL:  ;

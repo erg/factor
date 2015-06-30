@@ -3,4 +3,4 @@
 USING: ;
 IN: macros.syntax
 
-PARSER: MACRO: ;
+PARSER: macro { name signature body } MACRO: token parse-signature(--) ; parse-until ;

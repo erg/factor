@@ -3,4 +3,4 @@
 USING: ;
 IN: mongodb.tuple.syntax
 
-PARSER: MDBTUPLE: ;
+PARSER: mdbtuple { } MDBTUPLE:  ;
