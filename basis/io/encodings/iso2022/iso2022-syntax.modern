@@ -1,0 +1,8 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: io.encodings.iso2022.syntax
+
+<PRIVATE
+PARSER: ESC ;
+PRIVATE>

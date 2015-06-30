@@ -1,0 +1,11 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: functors.syntax
+
+PARSER: DEFERS ;
+PARSER: DEFINES ;
+PARSER: DEFINES-CLASS ;
+PARSER: DEFINES-PRIVATE ;
+PARSER: FUNCTOR: ;
+PARSER: IS ;

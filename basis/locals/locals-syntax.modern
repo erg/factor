@@ -1,0 +1,13 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: locals.syntax
+
+PARSER: :: ;
+PARSER: :> ;
+PARSER: IDENTITY-MEMO:: ;
+PARSER: M:: ;
+PARSER: MACRO:: ;
+PARSER: MEMO:: ;
+PARSER: [let ;
+PARSER: [| ;

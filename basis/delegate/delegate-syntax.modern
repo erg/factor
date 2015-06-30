@@ -1,0 +1,9 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: delegate.syntax
+
+PARSER: BROADCAST: ;
+PARSER: CONSULT: ;
+PARSER: PROTOCOL: ;
+PARSER: SLOT-PROTOCOL: ;

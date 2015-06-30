@@ -1,0 +1,9 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: compiler.cfg.instructions.syntax.syntax
+
+PARSER: FLUSHABLE-INSN: ;
+PARSER: FOLDABLE-INSN: ;
+PARSER: INSN: ;
+PARSER: VREG-INSN: ;

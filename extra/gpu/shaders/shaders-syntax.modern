@@ -1,0 +1,12 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: gpu.shaders.syntax
+
+PARSER: GLSL-PROGRAM: ;
+PARSER: GLSL-SHADER-FILE: ;
+PARSER: GLSL-SHADER: ;
+PARSER: VERTEX-FORMAT: ;
+PARSER: VERTEX-STRUCT: ;
+PARSER: feedback-format: ;
+PARSER: geometry-shader-vertices-out: ;
