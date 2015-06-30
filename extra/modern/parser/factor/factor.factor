@@ -4,147 +4,11 @@ USING: accessors assocs combinators constructors kernel make
 modern.parser multiline namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
-(*
 
-all-words [ "syntax" word-prop ] filter
-[ vocabulary>> ] collect-by .
-
-
-! words we define that aren't parsing words
-parsers get-global keys
-all-words [ parsing-word? ] filter
-natural-sort [ name>> ] map diff
-{
-    "IMPORTS:"
-    "NAME:"
-    "PARSER:"
-    "LITERAL-PARSER:"
-    "AUTHOR:"
-    "PACKAGE:"
-}
-
-! words we don't define
-! not generated words
-parsers get-global keys
-all-words [ "syntax" word-prop ] filter
-[ name>> ] map swap diff
-natural-sort
-[ . ] each
-
-"\""
-"$"
-"${"
-"&:"
-"("
-"->"
-"/*"
-"8-BIT:"
-"<<<<<<"
-"<<<<<<<"
-"<EBNF"
-"======"
-"======="
-">>>>>>"
-">>>>>>>"
-"?{"
-"ALIEN:"
-"B"
-"B:"
-"BACKWARD-ANALYSIS:"
-"BAD-ALIEN"
-"BROADCAST:"
-"BV{"
-"B{"
-"CALLBACK:"
-"CATEGORY-NOT:"
-"CATEGORY:"
-"CFSTRING:"
-"CLASS:"
-"COLOR:"
-"CONSTRUCTOR:"
-"CONSULT:"
-"CS{"
-"C{"
-"D"
-"DEFERS"
-"DEFINES"
-"DEFINES-CLASS"
-"DEFINES-PRIVATE"
-"DELIMITED:"
-"DESTRUCTOR:"
-"DLL\""
-"DL{"
-"FORWARD-ANALYSIS:"
-"FRAMEWORK:"
-"HEREDOC:"
-"HS{"
-"ICON:"
-"IDENTITY-MEMO:"
-"IDENTITY-MEMO::"
-"IHS{"
-"IH{"
-"INTERSECTION:"
-"IS"
-"I["
-"LOG:"
-"MAIN-WINDOW:"
-"METHOD:"
-"M\\"
-"NAN:"
-"P\""
-"PEG:"
-"PIXEL-FORMAT-ATTRIBUTE-TABLE:"
-"PRIVATE>"
-"R"
-"R!"
-"R\""
-"R#"
-"R'"
-"R("
-"R/"
-"R@"
-"RECT:"
-"RENAMING:"
-"RESET"
-"R["
-"R`"
-"R{"
-"R|"
-"S@"
-"SBUF\""
-"SEL:"
-"SLOT-CONSTRUCTOR:"
-"SLOT-PROTOCOL:"
-"SPECIAL-OBJECT:"
-"SUPER->"
-"S{"
-"TEST:"
-"TIP:"
-"TOKENIZER:"
-"TR:"
-"UNION-STRUCT:"
-"UNUSE:"
-"URL\""
-"W{"
-"X509_V_:"
-"[EBNF"
-"[let"
-"c-array@"
-"c-array{"
-"call-next-method"
-"delimiter"
-"deprecated"
-"eval("
-"f"
-"flags{"
-"intersection{"
-"maybe{"
-"not{"
-"shuffle("
-"union{"
-
-*)
-
+TUPLE: mparser < parsed name start slots body ;
+CONSTRUCTOR: <mparser> mparser ( name start slots body -- mparser ) ;
+: parse-mparser ( -- mparser )
+    get-string parse parse body <mparser> ;
 
 ERROR: string-expected got separator ;
 ! TUPLE: mstring < parsed class string ;
@@ -507,10 +371,7 @@ CONSTRUCTOR: <merror> merror ( name body -- error ) ;
 : parse-merror ( -- merror )
     token body <merror> ;
 
-! TUPLE: mparser < parsed name start slots body ;
-! CONSTRUCTOR: mparser ( name start slots body -- mparser ) ;
-! : parse-mparser ( -- mparser )
-    ! get-string parse parse body <mparser> ;
+
 
 TUPLE: mprimitive < parsed name signature ;
 CONSTRUCTOR: <mprimitive> mprimitive ( name signature -- package ) ;
@@ -789,7 +650,7 @@ CONSTRUCTOR: <mirc> mirc ( name command body -- mirc ) ;
 : parse-irc ( -- irc )
     token parse ";" strings-until <mirc> ;
 
-! \ parse-mparser "PARSER:" register-parser
+\ parse-mparser "PARSER:" register-parser
 \ parse-package "PACKAGE:" register-parser
 \ parse-import "IMPORT:" register-parser
 \ parse-imports "IMPORTS:" register-parser
@@ -1857,3 +1718,192 @@ SYMBOL: was-private?
 
 find . | grep '\-syntax.modern' | xargs cat
 */
+
+(*
+
+all-words [ "syntax" word-prop ] filter
+[ vocabulary>> ] collect-by .
+
+
+! words we define that aren't parsing words
+parsers get-global keys
+all-words [ parsing-word? ] filter
+natural-sort [ name>> ] map diff
+{
+    "IMPORTS:"
+    "NAME:"
+    "PARSER:"
+    "LITERAL-PARSER:"
+    "AUTHOR:"
+    "PACKAGE:"
+}
+
+! words we don't define
+! not generated words
+parsers get-global keys
+all-words [ "syntax" word-prop ] filter
+[ name>> ] map swap diff
+natural-sort
+[ . ] each
+
+"\""
+"$"
+"${"
+"&:"
+"("
+"->"
+"/*"
+"8-BIT:"
+"<<<<<<"
+"<<<<<<<"
+"<EBNF"
+"======"
+"======="
+">>>>>>"
+">>>>>>>"
+"?{"
+"ALIEN:"
+"B"
+"B:"
+"BACKWARD-ANALYSIS:"
+"BAD-ALIEN"
+"BROADCAST:"
+"BV{"
+"B{"
+"CALLBACK:"
+"CATEGORY-NOT:"
+"CATEGORY:"
+"CFSTRING:"
+"CLASS:"
+"COLOR:"
+"CONSTRUCTOR:"
+"CONSULT:"
+"CS{"
+"C{"
+"D"
+"DEFERS"
+"DEFINES"
+"DEFINES-CLASS"
+"DEFINES-PRIVATE"
+"DELIMITED:"
+"DESTRUCTOR:"
+"DLL\""
+"DL{"
+"FORWARD-ANALYSIS:"
+"FRAMEWORK:"
+"HEREDOC:"
+"HS{"
+"ICON:"
+"IDENTITY-MEMO:"
+"IDENTITY-MEMO::"
+"IHS{"
+"IH{"
+"INTERSECTION:"
+"IS"
+"I["
+"LOG:"
+"MAIN-WINDOW:"
+"METHOD:"
+"M\\"
+"NAN:"
+"P\""
+"PEG:"
+"PIXEL-FORMAT-ATTRIBUTE-TABLE:"
+"PRIVATE>"
+"R"
+"R!"
+"R\""
+"R#"
+"R'"
+"R("
+"R/"
+"R@"
+"RECT:"
+"RENAMING:"
+"RESET"
+"R["
+"R`"
+"R{"
+"R|"
+"S@"
+"SBUF\""
+"SEL:"
+"SLOT-CONSTRUCTOR:"
+"SLOT-PROTOCOL:"
+"SPECIAL-OBJECT:"
+"SUPER->"
+"S{"
+"TEST:"
+"TIP:"
+"TOKENIZER:"
+"TR:"
+"UNION-STRUCT:"
+"UNUSE:"
+"URL\""
+"W{"
+"X509_V_:"
+"[EBNF"
+"[let"
+"c-array@"
+"c-array{"
+"call-next-method"
+"delimiter"
+"deprecated"
+"eval("
+"f"
+"flags{"
+"intersection{"
+"maybe{"
+"not{"
+"shuffle("
+"union{"
+
+
+clear
+SYMBOL: was-private?
+ all-words [ "syntax" word-prop ] filter
+[ vocabulary>> ] collect-by >alist
+
+[ first2 [ [ ".private" ?tail drop modern-syntax-path ] keep ] dip 3array ] map
+[ second "syntax" = ] filter
+[
+    f was-private? [
+        dup first dup . utf8 [
+            "! Copyright (C) 2015 Doug Coleman." print
+            "! See http://factorcode.org/license.txt for BSD license." print
+            "USING: ;" print
+            [
+                second ".private" ?tail [ ".syntax" append "IN: " prepend print nl ] dip
+                [ "<PRIVATE" print was-private? on ] when
+            ] [
+                third natural-sort [
+                    [ name>>
+
+                        {
+                            [ drop "PARSER: " ]
+                            [ >lower dup length 1 > [ ":" ?tail drop ] when " " ]
+                            [ parsers get ?at [ def>>  last def>> penultimate dup wrapper? [ wrapped>> "slots" word-prop [ name>> ] map " " join "{ " " } " surround ] [ drop "{ } " ] if ] [ drop "{ } " ] if  ]
+                            [ " " ]
+                            [
+                              parsers get ?at
+                              [ dup def>> last  def>> last \ slots>boa =
+                                    [
+                                      def>> but-last >array
+                                      [ dup word? [ name>> ] when  ] map " " join
+                                     ] [ def>> last name>> ] if
+                              ]
+                              [ drop "" ] if
+                            ]
+                            [ drop " ;" ]
+                        } cleave
+                    ] "" append-outputs-as print
+                ] each
+            ] bi
+            was-private? get [ "PRIVATE>" print ] when
+        ] with-file-writer
+    ] with-variable
+] each
+
+
+*)
+

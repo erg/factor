@@ -323,3 +323,14 @@ ERROR: not-a-source-path path ;
 
 : extra-untracked-words ( -- seq )
     extra-vocabs diff-bad-extra-vocabs vocabs-untracked-words ;
+
+: vocab-names>syntax ( strings -- seq )
+    [ modern-syntax-path ] map [ exists? ] filter ;
+
+: core-syntax-files ( -- seq ) core-vocabs vocab-names>syntax ;
+: basis-syntax-files ( -- seq ) basis-vocabs vocab-names>syntax ;
+: extra-syntax-files ( -- seq ) extra-vocabs vocab-names>syntax ;
+
+: load-core-syntax ( -- seq ) core-syntax-files [ dup parse-modern-file ] { } map>assoc ;
+: load-basis-syntax ( -- seq ) basis-syntax-files [ dup parse-modern-file ] { } map>assoc ;
+: load-extra-syntax ( -- seq ) extra-syntax-files [ dup parse-modern-file ] { } map>assoc ;
