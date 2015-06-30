@@ -16,6 +16,15 @@ IN: modern.lookup
 ! "syntax"
 ! alien: SINGLETONS: stdcall thiscall fastcall cdecl mingw ; SYMBOLS:
 (*
+
+clear "sequences"
+[ lookup-vocab [ first private? ] filter values flatten ]
+[ ".private" append v:vocab-words [ name>> ] map ] bi swap diff
+
+clear "sequences"
+[ lookup-vocab [ first private? ] filter values flatten ]
+[ ".private" append v:vocab-words [ name>> ] map ] bi swap diff
+
 clear basis-untracked-words
 [
     first2
@@ -261,8 +270,10 @@ ERROR: not-a-source-path path ;
     parse-modern-file second
     [ dup object>identifiers ] { } map>assoc ;
 
-: each-vocab-object ( vocab -- seq )
-    ;
+: vocab>namespace ( vocab -- public private )
+    lookup-vocab
+    [ first private? not ] partition
+    [ values flatten ] bi@ ;
 
 : lookup-vocab-failures ( vocab -- seq )
     lookup-vocab [ nip not ] assoc-filter ;
@@ -334,3 +345,13 @@ ERROR: not-a-source-path path ;
 : load-core-syntax ( -- seq ) core-syntax-files [ parse-modern-file ] map ;
 : load-basis-syntax ( -- seq ) basis-syntax-files [ parse-modern-file ] map ;
 : load-extra-syntax ( -- seq ) extra-syntax-files [ parse-modern-file ] map ;
+
+: load-vocab-namespace ( name -- triple )
+    dup
+    lookup-vocab [ first private? not ] partition
+    [ values flatten ] bi@ 3array ;
+
+: check-load-vocab-namespace ( triple -- )
+    [ first print ]
+    [ first2 [ vocab-words [ name>> ] map ] dip swap diff . ]
+    [ first3 nip [ ".private" append vocab-words [ name>> ] map ] dip swap diff . ] tri ;
