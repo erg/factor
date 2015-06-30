@@ -160,7 +160,7 @@ M: munion object>identifiers name>> name>> name-and-predicate ;
 M: mixin object>identifiers name>> name>> name-and-predicate ;
 M: predicate object>identifiers name>> name>> name-and-predicate ;
 M: symbol object>identifiers name>> name>> ;
-M: symbols object>identifiers names>> object>identifiers ;
+M: symbols object>identifiers names>> ;
 M: math object>identifiers name>> name>> ;
 M: hook object>identifiers name>> name>> ;
 
@@ -268,6 +268,11 @@ M: import object>identifiers name>> name>> ;
 
 ! More:
 M: mtest object>identifiers name>> name>> ;
+M: mreset object>identifiers drop f ;
+M: mspecial-object object>identifiers name>> name>> ;
+M: tr object>identifiers name>> name>> ;
+M: mintersection object>identifiers name>> name>> name-and-predicate ;
+
 
 
 MACRO: any-predicate? ( words -- quot )

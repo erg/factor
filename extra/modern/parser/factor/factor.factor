@@ -457,7 +457,7 @@ CONSTRUCTOR: <symbol> symbol ( name -- symbol ) ;
 TUPLE: symbols < parsed names ;
 CONSTRUCTOR: <symbols> symbols ( names -- symbols ) ;
 : parse-symbols ( -- symbols )
-    ";" parse-until <symbols> ;
+    ";" strings-until <symbols> ;
 
 TUPLE: compilation-unit < parsed code ;
 CONSTRUCTOR: <compilation-unit> compilation-unit ( code -- compilation-unit ) ;
@@ -558,11 +558,6 @@ TUPLE: protocol < parsed name functions ;
 CONSTRUCTOR: <protocol> protocol ( name functions -- obj ) ;
 : parse-protocol ( -- obj )
     token ";" parse-until <protocol> ;
-
-TUPLE: tr < parsed name body ;
-CONSTRUCTOR: <tr> tr ( name body -- obj ) ;
-: parse-tr ( -- obj )
-    token ";" parse-until <tr> ;
 
 TUPLE: exclude < parsed name body ;
 CONSTRUCTOR: <exclude> exclude ( name body -- obj ) ;
@@ -770,8 +765,32 @@ CONSTRUCTOR: <mtest> mtest ( name -- obj ) ;
     token <mtest> ;
 \ parse-test "TEST:" register-parser
 
+TUPLE: mspecial-object < parsed name value ;
+CONSTRUCTOR: <mspecial-object> mspecial-object ( name value -- obj ) ;
+: parse-special-object ( -- obj )
+    token parse <mspecial-object> ;
+\ parse-special-object "SPECIAL-OBJECT:" register-parser
+
+TUPLE: mreset < parsed name value ;
+CONSTRUCTOR: <mreset> mreset ( -- obj ) ;
+: parse-reset ( -- obj )
+    <mreset> ;
+\ parse-reset "RESET" register-parser
 
 
+TUPLE: tr < parsed name body ;
+CONSTRUCTOR: <tr> tr ( name body -- obj ) ;
+: parse-tr ( -- obj )
+    token ";" parse-until <tr> ;
+
+\ parse-tr "TR:" register-parser
+
+
+TUPLE: mintersection < parsed name body ;
+CONSTRUCTOR: <mintersection> mintersection ( name body -- obj ) ;
+: parse-intersection ( -- obj )
+    token ";" parse-until <mintersection> ;
+\ parse-intersection "INTERSECTION:" register-parser
 
 /*
 all-words [ "syntax" word-prop ] filter
