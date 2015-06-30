@@ -190,10 +190,8 @@ ERROR: multiline-string-expected got ;
     } cond ;
 
 : get-string ( -- string/f )
-    "\r\n\s#" texts-read-until {
+    "\r\n\s" texts-read-until {
         { [ dup "\r\n\s" member? ] [ drop [ get-string ] when-empty ] }
-        { [ dup CHAR: # = ] [
-            drop parse-comment save-comment [ get-string ] when-empty ] }
         [ drop ]
     } cond ;
 
