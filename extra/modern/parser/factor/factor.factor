@@ -1,12 +1,10 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors assocs combinators constructors kernel make
-modern.parser namespaces nested-comments sequences ;
+modern.parser multiline namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
 (*
-
-
 
 all-words [ "syntax" word-prop ] filter
 [ vocabulary>> ] collect-by .
@@ -902,7 +900,7 @@ CONSTRUCTOR: <mirc> mirc ( name command body -- mirc ) ;
 \ parse-help "HELP:" register-parser
 \ parse-irc "IRC:" register-parser
 
-(*
+/*
 all-words [ "syntax" word-prop ] filter
 [ vocabulary>> ] collect-by >alist
 [ first2 [ [ ".private" ?tail drop modern-source-path ] keep ] dip 3array ] map
@@ -1710,7 +1708,7 @@ sort-keys [ . ] each
 {
     "resource:extra/nested-comments/nested-comments.factor"
     "nested-comments"
-    V{ POSTPONE: (* }
+    V{ POSTPONE: uhh(* }
 }
 {
     "resource:extra/opencl/syntax/syntax.factor"
@@ -1833,4 +1831,29 @@ sort-keys [ . ] each
     "xkcd"
     V{ POSTPONE: XKCD: }
 }
-*)
+
+
+SYMBOL: was-private?
+ all-words [ "syntax" word-prop ] filter
+[ vocabulary>> ] collect-by >alist
+[ first2 [ [ ".private" ?tail drop modern-syntax-path ] keep ] dip 3array ] map
+[
+    f was-private? [
+        dup first dup . utf8 [
+            "! Copyright (C) 2015 Doug Coleman." print
+            "! See http://factorcode.org/license.txt for BSD license." print
+            "USING: ;" print
+            [
+                second ".private" ?tail [ ".syntax" append "IN: " prepend print nl ] dip
+                [ "<PRIVATE" print was-private? on ] when
+            ] [
+                third natural-sort [ name>> "PARSER: " " ;" surround print ] each
+            ] bi
+            was-private? get [ "PRIVATE>" print ] when
+        ] with-file-writer
+    ] with-variable
+] each
+
+
+find . | grep '\-syntax.modern' | xargs cat
+*/
