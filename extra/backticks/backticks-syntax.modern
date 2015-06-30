@@ -3,4 +3,4 @@
 USING: ;
 IN: backticks.syntax
 
-PARSER: ` ;
+PARSER: ` { } `  ;

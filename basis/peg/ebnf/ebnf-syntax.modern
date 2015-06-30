@@ -4,5 +4,5 @@ USING: ;
 IN: peg.ebnf.syntax
 
 <PRIVATE
-PARSER: TOKENIZER: ;
+PARSER: tokenizer { } TOKENIZER:  ;
 PRIVATE>

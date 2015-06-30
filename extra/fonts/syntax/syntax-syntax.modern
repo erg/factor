@@ -3,4 +3,4 @@
 USING: ;
 IN: fonts.syntax.syntax
 
-PARSER: FONT: ;
+PARSER: font { } FONT:  ;

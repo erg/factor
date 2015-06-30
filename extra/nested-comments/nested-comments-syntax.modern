@@ -3,4 +3,4 @@
 USING: ;
 IN: nested-comments.syntax
 
-PARSER: (* ;
+PARSER: (* { comment } (* *) parse-comment-until ;

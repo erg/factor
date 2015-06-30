@@ -3,4 +3,4 @@
 USING: ;
 IN: html.templates.fhtml.syntax
 
-PARSER: %> ;
+PARSER: %> { } %>  ;

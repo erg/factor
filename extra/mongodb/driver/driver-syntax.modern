@@ -3,4 +3,4 @@
 USING: ;
 IN: mongodb.driver.syntax
 
-PARSER: r/ ;
+PARSER: r/ { } r/  ;

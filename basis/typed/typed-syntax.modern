@@ -3,5 +3,5 @@
 USING: ;
 IN: typed.syntax
 
-PARSER: TYPED: ;
-PARSER: TYPED:: ;
+PARSER: typed { name signature body } TYPED: token parse-signature(--) body ;
+PARSER: typed: { name signature body } TYPED:: token parse-signature(--) body ;

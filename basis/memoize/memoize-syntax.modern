@@ -3,5 +3,5 @@
 USING: ;
 IN: memoize.syntax
 
-PARSER: IDENTITY-MEMO: ;
-PARSER: MEMO: ;
+PARSER: identity-memo { } IDENTITY-MEMO:  ;
+PARSER: memo { name signature body } MEMO: token parse-signature(--) body ;

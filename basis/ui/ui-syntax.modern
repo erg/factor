@@ -3,4 +3,4 @@
 USING: ;
 IN: ui.syntax
 
-PARSER: MAIN-WINDOW: ;
+PARSER: main-window { } MAIN-WINDOW:  ;

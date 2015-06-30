@@ -3,4 +3,4 @@
 USING: ;
 IN: match.syntax
 
-PARSER: MATCH-VARS: ;
+PARSER: match-vars { } MATCH-VARS:  ;

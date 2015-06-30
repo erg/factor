@@ -3,4 +3,4 @@
 USING: ;
 IN: hashtables.numbers.syntax
 
-PARSER: NH{ ;
+PARSER: nh{ { } NH{  ;

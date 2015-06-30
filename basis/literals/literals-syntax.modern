@@ -3,7 +3,7 @@
 USING: ;
 IN: literals.syntax
 
-PARSER: $ ;
-PARSER: $[ ;
-PARSER: ${ ;
-PARSER: flags{ ;
+PARSER: $ { } $  ;
+PARSER: $[ { body } $[ ] parse-until ;
+PARSER: ${ { } ${  ;
+PARSER: flags{ { } flags{  ;

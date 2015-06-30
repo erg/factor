@@ -3,8 +3,8 @@
 USING: ;
 IN: variables.syntax
 
-PARSER: GLOBAL: ;
-PARSER: TYPED-GLOBAL: ;
-PARSER: TYPED-VAR: ;
-PARSER: VAR: ;
-PARSER: set: ;
+PARSER: global { } GLOBAL:  ;
+PARSER: typed-global { } TYPED-GLOBAL:  ;
+PARSER: typed-var { } TYPED-VAR:  ;
+PARSER: var { } VAR:  ;
+PARSER: set { } set:  ;

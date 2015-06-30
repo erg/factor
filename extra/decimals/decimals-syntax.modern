@@ -3,4 +3,4 @@
 USING: ;
 IN: decimals.syntax
 
-PARSER: D: ;
+PARSER: d { } D:  ;

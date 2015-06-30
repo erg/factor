@@ -3,4 +3,4 @@
 USING: ;
 IN: persistent.hashtables.syntax
 
-PARSER: PH{ ;
+PARSER: ph{ { } PH{  ;

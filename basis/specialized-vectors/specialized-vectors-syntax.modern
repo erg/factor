@@ -3,5 +3,5 @@
 USING: ;
 IN: specialized-vectors.syntax
 
-PARSER: SPECIALIZED-VECTOR: ;
-PARSER: SPECIALIZED-VECTORS: ;
+PARSER: specialized-vector { } SPECIALIZED-VECTOR:  ;
+PARSER: specialized-vectors { } SPECIALIZED-VECTORS:  ;

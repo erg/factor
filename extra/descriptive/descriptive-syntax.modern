@@ -3,5 +3,5 @@
 USING: ;
 IN: descriptive.syntax
 
-PARSER: DESCRIPTIVE: ;
-PARSER: DESCRIPTIVE:: ;
+PARSER: descriptive { } DESCRIPTIVE:  ;
+PARSER: descriptive: { } DESCRIPTIVE::  ;

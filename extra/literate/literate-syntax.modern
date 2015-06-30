@@ -3,4 +3,4 @@
 USING: ;
 IN: literate.syntax
 
-PARSER: <LITERATE ;
+PARSER: <literate { } <LITERATE  ;

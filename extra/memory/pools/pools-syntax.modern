@@ -3,4 +3,4 @@
 USING: ;
 IN: memory.pools.syntax
 
-PARSER: POOL: ;
+PARSER: pool { } POOL:  ;

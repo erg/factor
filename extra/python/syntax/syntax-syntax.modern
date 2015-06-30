@@ -3,6 +3,6 @@
 USING: ;
 IN: python.syntax.syntax
 
-PARSER: PY-FROM: ;
-PARSER: PY-METHODS: ;
-PARSER: PY-QUALIFIED-FROM: ;
+PARSER: py-from { } PY-FROM:  ;
+PARSER: py-methods { } PY-METHODS:  ;
+PARSER: py-qualified-from { } PY-QUALIFIED-FROM:  ;

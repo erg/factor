@@ -3,4 +3,4 @@
 USING: ;
 IN: logging.syntax
 
-PARSER: LOG: ;
+PARSER: log { } LOG:  ;

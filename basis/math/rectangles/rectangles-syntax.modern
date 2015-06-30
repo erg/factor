@@ -3,4 +3,4 @@
 USING: ;
 IN: math.rectangles.syntax
 
-PARSER: RECT: ;
+PARSER: rect { } RECT:  ;

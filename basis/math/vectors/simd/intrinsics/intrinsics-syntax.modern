@@ -3,5 +3,5 @@
 USING: ;
 IN: math.vectors.simd.intrinsics.syntax
 
-PARSER: SIMD-INTRINSIC: ;
-PARSER: SIMD-INTRINSIC:: ;
+PARSER: simd-intrinsic { name body } SIMD-INTRINSIC: token ; parse-until ;
+PARSER: simd-intrinsic: { name body } SIMD-INTRINSIC:: token ; parse-until ;

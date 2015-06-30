@@ -3,7 +3,7 @@
 USING: ;
 IN: delegate.syntax
 
-PARSER: BROADCAST: ;
-PARSER: CONSULT: ;
-PARSER: PROTOCOL: ;
-PARSER: SLOT-PROTOCOL: ;
+PARSER: broadcast { } BROADCAST:  ;
+PARSER: consult { } CONSULT:  ;
+PARSER: protocol { name functions } PROTOCOL: token ; parse-until ;
+PARSER: slot-protocol { } SLOT-PROTOCOL:  ;

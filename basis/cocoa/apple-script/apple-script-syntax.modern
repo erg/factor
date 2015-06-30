@@ -3,4 +3,4 @@
 USING: ;
 IN: cocoa.apple-script.syntax
 
-PARSER: APPLESCRIPT: ;
+PARSER: applescript { } APPLESCRIPT:  ;

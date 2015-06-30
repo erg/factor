@@ -3,4 +3,4 @@
 USING: ;
 IN: tr.syntax
 
-PARSER: TR: ;
+PARSER: tr { } TR:  ;

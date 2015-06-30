@@ -3,5 +3,5 @@
 USING: ;
 IN: bootstrap.image.syntax.syntax
 
-PARSER: RESET ;
-PARSER: SPECIAL-OBJECT: ;
+PARSER: reset { } RESET  ;
+PARSER: special-object { } SPECIAL-OBJECT:  ;

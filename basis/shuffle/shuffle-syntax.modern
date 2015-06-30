@@ -3,4 +3,4 @@
 USING: ;
 IN: shuffle.syntax
 
-PARSER: shuffle( ;
+PARSER: shuffle( { } shuffle(  ;

@@ -3,4 +3,4 @@
 USING: ;
 IN: bit-vectors.syntax
 
-PARSER: ?V{ ;
+PARSER: ?v{ { } ?V{  ;

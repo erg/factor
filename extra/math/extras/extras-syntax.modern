@@ -3,5 +3,5 @@
 USING: ;
 IN: math.extras.syntax
 
-PARSER: .. ;
-PARSER: ... ;
+PARSER: .. { } ..  ;
+PARSER: ... { } ...  ;

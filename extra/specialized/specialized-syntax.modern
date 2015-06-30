@@ -3,4 +3,4 @@
 USING: ;
 IN: specialized.syntax
 
-PARSER: specialized ;
+PARSER: specialized { } specialized  ;

@@ -3,4 +3,4 @@
 USING: ;
 IN: opencl.syntax.syntax
 
-PARSER: SINGLETONS-UNION: ;
+PARSER: singletons-union { } SINGLETONS-UNION:  ;

@@ -3,4 +3,4 @@
 USING: ;
 IN: xkcd.syntax
 
-PARSER: XKCD: ;
+PARSER: xkcd { } XKCD:  ;

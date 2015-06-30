@@ -3,5 +3,5 @@
 USING: ;
 IN: compiler.codegen.syntax
 
-PARSER: CODEGEN: ;
-PARSER: CONDITIONAL: ;
+PARSER: codegen { name1 name2 } CODEGEN: token token ;
+PARSER: conditional { name1 name2 } CONDITIONAL: token token ;

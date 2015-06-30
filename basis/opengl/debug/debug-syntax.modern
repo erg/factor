@@ -3,4 +3,4 @@
 USING: ;
 IN: opengl.debug.syntax
 
-PARSER: GB ;
+PARSER: gb { } GB  ;

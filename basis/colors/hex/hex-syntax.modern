@@ -3,4 +3,4 @@
 USING: ;
 IN: colors.hex.syntax
 
-PARSER: HEXCOLOR: ;
+PARSER: hexcolor { } HEXCOLOR:  ;

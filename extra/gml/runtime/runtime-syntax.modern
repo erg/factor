@@ -3,8 +3,8 @@
 USING: ;
 IN: gml.runtime.syntax
 
-PARSER: EXEC: ;
-PARSER: EXEC:: ;
-PARSER: GML: ;
-PARSER: GML:: ;
-PARSER: exec" ;
+PARSER: exec { } EXEC:  ;
+PARSER: exec: { } EXEC::  ;
+PARSER: gml { } GML:  ;
+PARSER: gml: { } GML::  ;
+PARSER: exec" { } exec"  ;

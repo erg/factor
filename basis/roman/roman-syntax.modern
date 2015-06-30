@@ -3,5 +3,5 @@
 USING: ;
 IN: roman.syntax
 
-PARSER: ROMAN-OP: ;
-PARSER: ROMAN: ;
+PARSER: roman-op { } ROMAN-OP:  ;
+PARSER: roman { } ROMAN:  ;

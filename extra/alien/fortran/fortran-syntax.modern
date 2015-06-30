@@ -3,6 +3,6 @@
 USING: ;
 IN: alien.fortran.syntax
 
-PARSER: FUNCTION: ;
-PARSER: LIBRARY: ;
-PARSER: SUBROUTINE: ;
+PARSER: function { return-value name arguments } FUNCTION: token token ; parse-until ;
+PARSER: library { name } LIBRARY: token ;
+PARSER: subroutine { } SUBROUTINE:  ;

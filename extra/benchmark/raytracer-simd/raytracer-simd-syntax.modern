@@ -3,4 +3,4 @@
 USING: ;
 IN: benchmark.raytracer-simd.syntax
 
-PARSER: no-compile ;
+PARSER: no-compile { } no-compile  ;

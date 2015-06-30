@@ -3,4 +3,4 @@
 USING: ;
 IN: morse.syntax
 
-PARSER: [MORSE ;
+PARSER: [morse { } [MORSE  ;

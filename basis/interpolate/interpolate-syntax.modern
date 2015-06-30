@@ -3,4 +3,4 @@
 USING: ;
 IN: interpolate.syntax
 
-PARSER: I[ ;
+PARSER: i[ { } I[  ;

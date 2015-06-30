@@ -3,4 +3,4 @@
 USING: ;
 IN: hash-sets.numbers.syntax
 
-PARSER: NHS{ ;
+PARSER: nhs{ { } NHS{  ;

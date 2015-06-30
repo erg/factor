@@ -3,4 +3,4 @@
 USING: ;
 IN: opengl.gl.extensions.syntax
 
-PARSER: GL-FUNCTION: ;
+PARSER: gl-function { return-value name arguments } GL-FUNCTION: token token ; parse-until ;

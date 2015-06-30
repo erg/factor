@@ -3,4 +3,4 @@
 USING: ;
 IN: peg.syntax
 
-PARSER: PEG: ;
+PARSER: peg { } PEG:  ;

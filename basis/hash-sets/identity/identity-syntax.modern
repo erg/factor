@@ -3,4 +3,4 @@
 USING: ;
 IN: hash-sets.identity.syntax
 
-PARSER: IHS{ ;
+PARSER: ihs{ { } IHS{  ;

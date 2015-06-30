@@ -3,4 +3,4 @@
 USING: ;
 IN: hints.syntax
 
-PARSER: HINTS: ;
+PARSER: hints { name sequence } HINTS: token body ;

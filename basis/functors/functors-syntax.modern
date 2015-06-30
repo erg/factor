@@ -3,9 +3,9 @@
 USING: ;
 IN: functors.syntax
 
-PARSER: DEFERS ;
-PARSER: DEFINES ;
-PARSER: DEFINES-CLASS ;
-PARSER: DEFINES-PRIVATE ;
-PARSER: FUNCTOR: ;
-PARSER: IS ;
+PARSER: defers { } DEFERS  ;
+PARSER: defines { } DEFINES  ;
+PARSER: defines-class { } DEFINES-CLASS  ;
+PARSER: defines-private { } DEFINES-PRIVATE  ;
+PARSER: functor { name signature definitions } FUNCTOR: token parse-signature(--) ;FUNCTOR parse-until ;
+PARSER: is { } IS  ;

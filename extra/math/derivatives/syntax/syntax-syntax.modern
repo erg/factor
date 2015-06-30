@@ -3,4 +3,4 @@
 USING: ;
 IN: math.derivatives.syntax.syntax
 
-PARSER: DERIVATIVE: ;
+PARSER: derivative { } DERIVATIVE:  ;

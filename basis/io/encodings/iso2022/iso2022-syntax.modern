@@ -4,5 +4,5 @@ USING: ;
 IN: io.encodings.iso2022.syntax
 
 <PRIVATE
-PARSER: ESC ;
+PARSER: esc { } ESC  ;
 PRIVATE>

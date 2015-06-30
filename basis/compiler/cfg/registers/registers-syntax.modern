@@ -3,5 +3,5 @@
 USING: ;
 IN: compiler.cfg.registers.syntax
 
-PARSER: D ;
-PARSER: R ;
+PARSER: d { } D  ;
+PARSER: r { } R  ;

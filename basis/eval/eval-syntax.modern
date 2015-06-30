@@ -3,4 +3,4 @@
 USING: ;
 IN: eval.syntax
 
-PARSER: eval( ;
+PARSER: eval( { } eval(  ;

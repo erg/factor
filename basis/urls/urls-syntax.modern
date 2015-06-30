@@ -3,4 +3,4 @@
 USING: ;
 IN: urls.syntax
 
-PARSER: URL" ;
+PARSER: url" { } URL"  ;

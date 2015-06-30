@@ -3,4 +3,4 @@
 USING: ;
 IN: xml.errors.syntax
 
-PARSER: XML-ERROR: ;
+PARSER: xml-error { } XML-ERROR:  ;

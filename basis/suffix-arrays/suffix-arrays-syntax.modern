@@ -3,4 +3,4 @@
 USING: ;
 IN: suffix-arrays.syntax
 
-PARSER: SA{ ;
+PARSER: sa{ { } SA{  ;

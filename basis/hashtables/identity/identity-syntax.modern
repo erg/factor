@@ -3,4 +3,4 @@
 USING: ;
 IN: hashtables.identity.syntax
 
-PARSER: IH{ ;
+PARSER: ih{ { } IH{  ;

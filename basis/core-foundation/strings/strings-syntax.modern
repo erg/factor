@@ -3,4 +3,4 @@
 USING: ;
 IN: core-foundation.strings.syntax
 
-PARSER: CFSTRING: ;
+PARSER: cfstring { } CFSTRING:  ;

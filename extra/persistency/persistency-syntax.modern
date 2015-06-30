@@ -3,5 +3,5 @@
 USING: ;
 IN: persistency.syntax
 
-PARSER: %" ;
-PARSER: STORED-TUPLE: ;
+PARSER: %" { } %"  ;
+PARSER: stored-tuple { } STORED-TUPLE:  ;
