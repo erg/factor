@@ -3,10 +3,8 @@
 USING: accessors arrays assocs combinators.short-circuit fry
 hashtables io io.files kernel macros modern.parser
 modern.parser.factor nested-comments prettyprint sequences
-sequences.deep sets splitting strings vocabs vocabs.hierarchy
-vocabs.loader vocabs.metadata ;
-FROM: modern.parser.factor => in? macro locals-mmethod?
-enum ;
+sequences.deep sets splitting strings vocabs vocabs.files
+vocabs.hierarchy vocabs.loader vocabs.metadata ;
 IN: modern.lookup
 
 
@@ -79,7 +77,7 @@ M: sequence object>identifiers
 M: comment object>identifiers drop f ;
 M: using object>identifiers drop f ;
 M: use object>identifiers drop f ;
-M: in object>identifiers drop f ;
+M: min object>identifiers drop f ;
 M: from object>identifiers drop f ;
 M: exclude object>identifiers drop f ;
 M: qualified object>identifiers drop f ;
@@ -142,7 +140,7 @@ M: main object>identifiers name>> name>> ;
 M: specialized-array object>identifiers class>> name>> ;
 M: specialized-arrays object>identifiers classes>> ;
 
-M: macro object>identifiers name>> name>> ;
+M: mmacro object>identifiers name>> name>> ;
 M: syntax object>identifiers name>> ;
 M: c-function object>identifiers name>> name>> ;
 M: c-function-alias object>identifiers aliased-name>> name>> ;
@@ -155,7 +153,7 @@ M: struct object>identifiers name>> name>> ;
 M: packed-struct object>identifiers name>> name>> ;
 M: library object>identifiers name>> name>> ;
 M: typedef object>identifiers new>> name>> ;
-M: enum object>identifiers name>> name>> ;
+M: menum object>identifiers name>> name>> ;
 M: mpointer object>identifiers drop f ;
 
 ! Locals/fry/etc
@@ -239,6 +237,12 @@ MACRO: any-predicate? ( words -- quot )
         drop
     ] if ;
 
+: modern-docs-path ( path -- path' )
+    vocab-docs-path modern-if-available ;
+
+: modern-tests-path ( path -- path' )
+    vocab-tests-path modern-if-available ;
+
 : modern-source-path ( path -- path' )
     vocab-source-path modern-if-available ;
 
@@ -253,53 +257,13 @@ MACRO: any-predicate? ( words -- quot )
 : lookup-vocab-failures ( vocab -- seq )
     lookup-vocab [ nip not ] assoc-filter ;
 
-: filter-failures ( seq -- seq' )
-    [
-        drop {
-            ! Comments
-            comment? mnested-comment?
-
-            ! Lookup
-            from? qualified? qualified-with? in? using? use? rename? exclude? forget?
-
-            ! Word properties
-            mflushable? minline? mrecursive? mfoldable? mfinal?
-
-            ! Enclosers
-            compilation-unit? private?
-
-            ! Object literals
-            block? locals-block? mfry?
-            mstring? mtoken? mnumber?
-            marray? mhashtable? mvector? char? mpointer? escaped?
-            tuple-literal-assoc? tuple-literal-boa?
-
-            ! Function instances
-            instance? mmethod? locals-mmethod?
-
-            ! Calls
-            mexecute(? mcall(? mdata-map(? mdata-map!(?
-
-            ! Basis/compiler
-            import?
-            codegen?
-            conditional?
-            mfoldable-insn? mflushable-insn?
-            minsn? mvreg-insn?
-            mregisters? mhi-registers?
-            simd-128? simd-128-cord? simd-intrinsic?
-            locals-simd-intrinsic?
-
-        } any-predicate? not
-    ] assoc-filter ;
-
 : vocabs-from ( root -- vocabs )
     "" disk-vocabs-in-root/prefix
     [ don't-load? not ] filter no-prefixes
     [ name>> ] map ;
 
 : filter-vocabs ( seq -- seq )
-    [ lookup-vocab-failures filter-failures ] map harvest ;
+    [ lookup-vocab-failures ] map harvest ;
 
 : core-vocabs ( -- seq ) "resource:core" vocabs-from ;
 : basis-vocabs ( -- seq ) "resource:basis" vocabs-from ;
