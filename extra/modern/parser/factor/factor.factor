@@ -6,9 +6,9 @@ IN: modern.parser.factor
 
 
 TUPLE: mparser < parsed name start slots body ;
-CONSTRUCTOR: <mparser> mparser ( name start slots body -- mparser ) ;
-: parse-mparser ( -- mparser )
-    get-string parse parse body <mparser> ;
+CONSTRUCTOR: <mparser> mparser ( name slots start body -- mparser ) ;
+: parse-parser ( -- mparser )
+    raw parse raw body <mparser> ;
 
 ERROR: string-expected got separator ;
 ! TUPLE: mstring < parsed class string ;
@@ -650,7 +650,7 @@ CONSTRUCTOR: <mirc> mirc ( name command body -- mirc ) ;
 : parse-irc ( -- irc )
     token parse ";" strings-until <mirc> ;
 
-\ parse-mparser "PARSER:" register-parser
+\ parse-parser "PARSER:" register-parser
 \ parse-package "PACKAGE:" register-parser
 \ parse-import "IMPORT:" register-parser
 \ parse-imports "IMPORTS:" register-parser
