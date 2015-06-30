@@ -299,7 +299,7 @@ CONSTRUCTOR: <mdata-map!(> mdata-map!( ( signature -- data-map! ) ;
 TUPLE: hints < parsed name sequence ;
 CONSTRUCTOR: <hints> hints ( name sequence -- hints ) ;
 : parse-hints ( -- generic )
-    token body <hints> ;
+    parse body <hints> ;
 
 TUPLE: mgeneric < parsed name signature ;
 CONSTRUCTOR: <mgeneric> mgeneric ( name signature -- generic ) ;
@@ -760,6 +760,18 @@ CONSTRUCTOR: <mirc> mirc ( name command body -- mirc ) ;
 \ parse-long-string "STRING:" register-parser
 \ parse-help "HELP:" register-parser
 \ parse-irc "IRC:" register-parser
+
+! The above is enough to kind of correctly parse factor.
+
+! tools.test
+TUPLE: mtest < parsed name ;
+CONSTRUCTOR: <mtest> mtest ( name -- obj ) ;
+: parse-test ( -- obj )
+    token <mtest> ;
+\ parse-test "TEST:" register-parser
+
+
+
 
 /*
 all-words [ "syntax" word-prop ] filter
