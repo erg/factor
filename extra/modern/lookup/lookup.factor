@@ -2,9 +2,9 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators.short-circuit fry
 hashtables io io.files kernel macros modern.parser
-modern.parser.factor nested-comments prettyprint sequences
-sequences.deep sets splitting strings vocabs vocabs.files
-vocabs.hierarchy vocabs.loader vocabs.metadata ;
+modern.parser.factor namespaces nested-comments prettyprint
+sequences sequences.deep sets splitting strings vocabs
+vocabs.files vocabs.hierarchy vocabs.loader vocabs.metadata ;
 IN: modern.lookup
 
 
@@ -18,13 +18,28 @@ IN: modern.lookup
 (*
 
 TO FIX:
-IN: random.unix
-HINTS: M\ unix-random random-bytes* { fixnum unix-random } ;
 SPECIALIZED-ARRAY: uint
 SLOT: foo
 
-two IN: forms, math.complex in basis -- move to math.complex.syntax, or..
+compiler.codegen
+"M\\"
 
+"compiler.cfg.hats": nested << <PRIVATE PRIVATE> >>
+
+IN: syntax
+two IN: forms, math.complex in basis -- move to math.complex.syntax, or..
+    {
+        "math.complex"
+        {
+            "malformed-complex"
+            "malformed-complex?"
+            "parse-complex"
+            "C{"
+        }
+        { }
+    }
+IN: syntax
+    { "tools.walker" { "B" "B:" } { } }
 
 
 
@@ -162,7 +177,9 @@ M: singletons object>identifiers
     names>> [ name>> name-and-predicate ] map concat ;
 
 M: constructor object>identifiers name>> name>> ;
-M: main object>identifiers name>> name>> ;
+
+! XXX: put a main word slot on vocab object
+M: main object>identifiers drop f ; ! name>> name>> ; doesn't define, just reuses symbol
 
 
 M: mmacro object>identifiers name>> name>> ;
@@ -174,7 +191,7 @@ M: gl-function object>identifiers name>> name>> ;
 
 ! alien/ffi
 M: c-type object>identifiers name>> name>> ;
-M: struct object>identifiers name>> name>> ;
+M: struct object>identifiers name>> name>> name-and-predicate ;
 M: packed-struct object>identifiers name>> name>> ;
 M: library object>identifiers drop f ;
 M: typedef object>identifiers new>> name>> ;
@@ -196,7 +213,10 @@ M: mfry object>identifiers drop f ;
 ! Language features
 M: alias object>identifiers name>> name>> ;
 M: functor object>identifiers name>> name>> ;
-M: functor-syntax object>identifiers name>> name>> ;
+
+! Weird functor syntax defines functor-specific syntax stuff
+! not actual symbols
+M: functor-syntax object>identifiers drop f ; ! name>> name>> ;
 
 ! libraries
 M: ebnf object>identifiers name>> name>> ;
@@ -205,8 +225,8 @@ M: mirc object>identifiers name>> name>> ;
 
 
 M: protocol object>identifiers name>> name>> ;
-M: article object>identifiers name>> string>> ;
-M: about object>identifiers name>> string>> ;
+M: article object>identifiers drop f ; ! name>> string>> ;
+M: about object>identifiers drop f ; ! name>> string>> ;
 M: single-bind object>identifiers target>> ;
 
 M: long-string object>identifiers name>> name>> ;
@@ -219,13 +239,14 @@ M: private object>identifiers body>> object>identifiers ;
 M: compilation-unit object>identifiers code>> object>identifiers ;
 
 ! stack checker
-M: hints object>identifiers name>> name>> ;
+M: hints object>identifiers drop f ; ! name>> name>> ;
 M: mexecute( object>identifiers drop f ;
 M: mcall( object>identifiers drop f ;
 
 ! Compiler
-M: codegen object>identifiers name1>> name>> ;
-M: conditional object>identifiers name1>> name>> ;
+M: codegen object>identifiers drop f ; ! name1>> name>> ; ! only defines a method
+M: conditional object>identifiers drop f ; ! name1>> name>> ; ! only defines a method
+
 M: mfoldable-insn object>identifiers name>> name>> ;
 M: mflushable-insn object>identifiers name>> name>> ;
 M: minsn object>identifiers name>> name>> ;
@@ -244,6 +265,9 @@ M: mdata-map!( object>identifiers drop f ;
 
 ! cocoa/objc
 M: import object>identifiers name>> name>> ;
+
+! More:
+M: mtest object>identifiers name>> name>> ;
 
 
 MACRO: any-predicate? ( words -- quot )
@@ -362,12 +386,32 @@ ERROR: not-a-source-path path ;
 : load-basis-syntax ( -- seq ) basis-syntax-files [ parse-modern-file ] map ;
 : load-extra-syntax ( -- seq ) extra-syntax-files [ parse-modern-file ] map ;
 
-: load-vocab-namespace ( name -- triple )
+: load-namespace ( name -- triple )
     dup
     lookup-vocab [ first private? not ] partition
     [ values flatten ] bi@ 3array ;
 
-: check-load-vocab-namespace ( triple -- )
-    [ first print ]
-    [ first2 [ vocab-words [ name>> ] map ] dip swap diff . ]
-    [ first3 nip [ ".private" append vocab-words [ name>> ] map ] dip swap diff . ] tri ;
+: check-loaded-namespace ( triple -- triple )
+    [ first ]
+    [ first2 [ vocab-words [ name>> ] map ] dip swap diff ]
+    [ first3 nip [ ".private" append vocab-words [ name>> ] map ] dip swap diff ] tri 3array ;
+
+: check-loaded-namespace2 ( triple -- triple )
+    [ first ]
+    [ first2 [ vocab-words [ name>> ] map ] dip diff ]
+    [ first3 nip [ ".private" append vocab-words [ name>> ] map ] dip diff ] tri 3array ;
+
+: vocab-loaded? ( name -- ? )
+    dictionary get at ;
+
+: check-loaded-namespaces ( names -- triples )
+    [ vocab-loaded? ] filter
+    [ load-namespace ] map
+    [ check-loaded-namespace ] map
+    [ first3 [ empty? ] both? nip ] reject ;
+
+: check-loaded-namespaces2 ( names -- triples )
+    [ vocab-loaded? ] filter
+    [ load-namespace ] map
+    [ check-loaded-namespace2 ] map
+    [ first3 [ empty? ] both? nip ] reject ;
