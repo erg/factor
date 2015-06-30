@@ -5,6 +5,11 @@ modern.parser namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
 (*
+
+all-words [ "syntax" word-prop ] filter
+[ vocabulary>> ] collect-by .
+
+
 ! words we define that aren't parsing words
 parsers get-global keys
 all-words [ parsing-word? ] filter
@@ -894,43 +899,3 @@ CONSTRUCTOR: <mirc> mirc ( name command body -- mirc ) ;
 \ parse-long-string "STRING:" register-parser
 \ parse-help "HELP:" register-parser
 \ parse-irc "IRC:" register-parser
-
-! qw{ CODEGEN: CATEGORY: ENUM: SIMD-INTRINSIC:
-! CLASS: FUNCTION-ALIAS: M\\ TAGS: COM-INTERFACE:
-
-! "EUC:" "GIR:" "8-BIT:" "CLASS:" "ENUM:" "RENAMING:" "TEST:" "CHLOE:" "FORGET:" "XML-NS:"
-! "BEFORE:" "AFTER:" "IMPLEMENT-STRUCTS:" "DESTRUCTOR:" "FOREIGN-RECORD-TYPE:" "FOREIGN-ENUM-TYPE:" "FORWARD-ANALYSIS:"
-! "COM-INTERFACE:" "INTERSECTION:" "LOG:" "CFSTRING:" "CONSULT:" "PEG:" "BACKWARD-ANALYSIS:" "MACRO::"
-! "UNION-STRUCT:" "PACKED-STRUCT:" "SLOT-PROTOCOL:" "ICON:" "TAGS:" "TAG:" "ROMAN-OP:"
-! "STRING:" "SIMD-128:" "MATCH-VARS:" "CALLBACK:" "CATEGORY:" "PIXEL-FORMAT-ATTRIBUTE-TABLE:" "pointer:"
-! "CATEGORY-NOT:" "FUNCTOR-SYNTAX:" "IDENTITY-MEMO:" "XML-ERROR:" "RULE:" "COMPONENT:" "X509_V_:"
-! "X-FUNCTION:" "SIMD-INTRINSIC:" "SIMD-INTRINSIC::"
-
-! "MAIN-WINDOW:" "GIR:" "TUPLE-ARRAY:" "VARIANT:" "SPECIALIZED-VECTOR:" "FOREIGN-RECORD-TYPE:" "FOREIGN-ATOMIC-TYPE:"
-! "SOLUTION:" "CUDA-LIBRARY:" "CUDA-FUNCTION:" "HOLIDAY:" "HOLIDAY-NAME:" "FRAMEWORK:" "GAME:"
-! "INTERSECTION:" "DESTRUCTOR:" "FORWARD-ANALYSIS:" "RENAMING:" "MACRO::" "XML-NS:" "CALLBACK:" "GLSL-SHADER:"
-! "UNIFORM-TUPLE:" "GLSL-PROGRAM:" "LITERAL-PARSER:" "CONSTRUCTOR:" "STRING:" "ENUM:" "GLSL-SHADER-FILE:"
-! "AFTER:" "system-attachment:" "initial:" "color-attachment:" "CFSTRING:" "DERIVATIVE:" "FUNCTOR-SYNTAX:"
-! "VERTEX-FORMAT:" "SELECTOR:" "REGISTER:" "METHOD:" "TODO:" "LAZY:"
-! "ROLE:" "UNION-STRUCT:" "INSTRUCTION:" "SUBROUTINE:"
-
-! "resource:core" vocabs-in-root [ vocab? ] filter [ vocab-files ] map concat
-! "resource:core" vocabs-in-root [ vocab? ] filter [ vocab-files ] map concat
-! [ "-docs.factor" tail? not ] filter
-! [ "-tests.factor" tail? not ] filter [ parse-file ] map
-
-! "resource:basis" vocabs-in-root [ vocab? ] filter [ vocab-files ] map concat
-! [ "-docs.factor" tail? not ] filter
-! [ "-tests.factor" tail? not ] filter
-! { "resource:basis/tools/completion/completion.factor"
-! "resource:basis/functors/functors.factor" "resource:basis/ui/tools/listener/completion/completion.factor"
-! "resource:basis/simple-tokenizer/simple-tokenizer.factor" } diff
-! [ dup . flush parse-file drop ] map
-
-(*
-"resource:core" root-name>modules [ path>files ] map concat
-{ "/home/erg/factor/core/vocabs/loader/test/a/a.factor"
- "/home/erg/factor/core/vocabs/loader/test/c/c.factor"
-"/home/erg/factor/core/vocabs/loader/test/b/b.factor" } diff
-[ dup . flush parse-file ] map
-*)
