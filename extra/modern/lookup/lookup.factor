@@ -17,6 +17,18 @@ IN: modern.lookup
 ! alien: SINGLETONS: stdcall thiscall fastcall cdecl mingw ; SYMBOLS:
 (*
 
+TO FIX:
+IN: random.unix
+HINTS: M\ unix-random random-bytes* { fixnum unix-random } ;
+SPECIALIZED-ARRAY: uint
+SLOT: foo
+
+two IN: forms, math.complex in basis -- move to math.complex.syntax, or..
+
+
+
+
+
 clear "sequences"
 [ lookup-vocab [ first private? ] filter values flatten ]
 [ ".private" append v:vocab-words [ name>> ] map ] bi swap diff
@@ -134,9 +146,15 @@ M: mixin object>identifiers name>> name>> name-and-predicate ;
 M: predicate object>identifiers name>> name>> name-and-predicate ;
 M: symbol object>identifiers name>> name>> ;
 M: symbols object>identifiers names>> object>identifiers ;
-M: slot object>identifiers name>> name>> ;
 M: math object>identifiers name>> name>> ;
 M: hook object>identifiers name>> name>> ;
+
+! Generated symbols and vocabs
+! XXX: accessors
+M: slot object>identifiers drop f ;
+M: specialized-array object>identifiers drop f ; ! class>> name>> ;
+M: specialized-arrays object>identifiers drop f ; ! classes>> object>identifiers ;
+
 
 M: singleton object>identifiers name>> name>> name-and-predicate ;
 
@@ -146,8 +164,6 @@ M: singletons object>identifiers
 M: constructor object>identifiers name>> name>> ;
 M: main object>identifiers name>> name>> ;
 
-M: specialized-array object>identifiers class>> name>> ;
-M: specialized-arrays object>identifiers classes>> ;
 
 M: mmacro object>identifiers name>> name>> ;
 M: syntax object>identifiers name>> ;
@@ -160,7 +176,7 @@ M: gl-function object>identifiers name>> name>> ;
 M: c-type object>identifiers name>> name>> ;
 M: struct object>identifiers name>> name>> ;
 M: packed-struct object>identifiers name>> name>> ;
-M: library object>identifiers name>> name>> ;
+M: library object>identifiers drop f ;
 M: typedef object>identifiers new>> name>> ;
 M: menum object>identifiers name>> name>> ;
 M: mpointer object>identifiers drop f ;
