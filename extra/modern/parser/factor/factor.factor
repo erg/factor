@@ -549,10 +549,10 @@ CONSTRUCTOR: <article> article ( name body -- obj ) ;
 : parse-article ( -- obj )
     token ";" parse-until <article> ;
 
-TUPLE: c-global < parsed name ;
-CONSTRUCTOR: <c-global> c-global ( name -- obj ) ;
+TUPLE: c-global < parsed type name ;
+CONSTRUCTOR: <c-global> c-global ( type name -- obj ) ;
 : parse-c-global ( -- obj )
-    token <c-global> ;
+    token token <c-global> ;
 
 TUPLE: protocol < parsed name functions ;
 CONSTRUCTOR: <protocol> protocol ( name functions -- obj ) ;
