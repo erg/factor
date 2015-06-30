@@ -237,14 +237,24 @@ MACRO: any-predicate? ( words -- quot )
         drop
     ] if ;
 
+ERROR: not-a-source-path path ;
+: force-modern-path ( path -- path' )
+    ".factor" ?tail [ ".modern" append ] [ not-a-source-path ] if ;
 : modern-docs-path ( path -- path' )
     vocab-docs-path modern-if-available ;
-
 : modern-tests-path ( path -- path' )
     vocab-tests-path modern-if-available ;
-
 : modern-source-path ( path -- path' )
     vocab-source-path modern-if-available ;
+: modern-syntax-path ( path -- path' )
+    vocab-source-path ".factor" ?tail drop "-syntax.modern" append ;
+
+: force-modern-docs-path ( path -- path' )
+    vocab-docs-path force-modern-path ;
+: force-modern-tests-path ( path -- path' )
+    vocab-tests-path force-modern-path ;
+: force-modern-source-path ( path -- path' )
+    vocab-source-path force-modern-path ;
 
 : lookup-vocab ( vocab -- seq )
     modern-source-path dup . flush
