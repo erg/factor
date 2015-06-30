@@ -96,9 +96,23 @@ clear core-vocabs
 }
 *)
 
+! functors
+! GENERATED NAMES generated names
+: constructor-name ( name -- string ) "<" ">" surround ;
+
+: name-and-global-setter ( name -- string )
+    dup "set-" prepend 2array ;
+
+: name-and-tr-fast ( name -- pair )
+    dup "-fast" append 2array ;
 
 : name-and-predicate ( name -- seq )
     dup "?" append 2array ;
+
+: name-and-predicate-and-constructor ( name -- seq )
+    [ ]
+    [ "?" append ]
+    [ constructor-name ] tri 3array ;
 
 
 GENERIC: object>identifiers ( object -- string )
@@ -176,7 +190,10 @@ M: singleton object>identifiers name>> name>> name-and-predicate ;
 M: singletons object>identifiers
     names>> [ name>> name-and-predicate ] map concat ;
 
+! C:
 M: constructor object>identifiers name>> name>> ;
+! CONSTRUCTOR:
+M: new-constructor object>identifiers name>> name>> ;
 
 ! XXX: put a main word slot on vocab object
 M: main object>identifiers drop f ; ! name>> name>> ; doesn't define, just reuses symbol
@@ -230,7 +247,7 @@ M: about object>identifiers drop f ; ! name>> string>> ;
 M: single-bind object>identifiers target>> ;
 
 M: long-string object>identifiers name>> name>> ;
-M: c-global object>identifiers name>> name>> ;
+M: c-global object>identifiers name>> name>> name-and-global-setter ;
 M: parser object>identifiers name>> name>> ;
 
 
@@ -270,8 +287,11 @@ M: import object>identifiers name>> name>> ;
 M: mtest object>identifiers name>> name>> ;
 M: mreset object>identifiers drop f ;
 M: mspecial-object object>identifiers name>> name>> ;
-M: tr object>identifiers name>> name>> ;
+M: tr object>identifiers name>> name>> name-and-tr-fast ;
 M: mintersection object>identifiers name>> name>> name-and-predicate ;
+M: method-literal object>identifiers drop f ;
+M: unicode-category object>identifiers name>> name>> name-and-predicate ;
+M: unicode-category-not object>identifiers name>> name>> name-and-predicate ;
 
 
 
