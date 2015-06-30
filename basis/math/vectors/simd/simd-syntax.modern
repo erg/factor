@@ -4,5 +4,5 @@ USING: ;
 IN: math.vectors.simd.syntax
 
 <PRIVATE
-PARSER: SIMD-128: ;
+PARSER: simd-128 { name } SIMD-128: token ;
 PRIVATE>

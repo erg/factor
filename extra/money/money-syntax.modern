@@ -3,4 +3,4 @@
 USING: ;
 IN: money.syntax
 
-PARSER: DECIMAL: ;
+PARSER: decimal { } DECIMAL:  ;

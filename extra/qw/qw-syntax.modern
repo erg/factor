@@ -3,4 +3,4 @@
 USING: ;
 IN: qw.syntax
 
-PARSER: qw{ ;
+PARSER: qw{ { } qw{  ;

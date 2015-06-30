@@ -4,5 +4,5 @@ USING: ;
 IN: tools.test.syntax
 
 <PRIVATE
-PARSER: TEST: ;
+PARSER: test { } TEST:  ;
 PRIVATE>

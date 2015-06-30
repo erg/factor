@@ -3,4 +3,4 @@
 USING: ;
 IN: pair-rocket.syntax
 
-PARSER: => ;
+PARSER: => { } =>  ;

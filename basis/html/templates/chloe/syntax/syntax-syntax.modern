@@ -3,4 +3,4 @@
 USING: ;
 IN: html.templates.chloe.syntax.syntax
 
-PARSER: CHLOE: ;
+PARSER: chloe { } CHLOE:  ;

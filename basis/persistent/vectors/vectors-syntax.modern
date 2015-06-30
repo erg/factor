@@ -3,4 +3,4 @@
 USING: ;
 IN: persistent.vectors.syntax
 
-PARSER: PV{ ;
+PARSER: pv{ { } PV{  ;

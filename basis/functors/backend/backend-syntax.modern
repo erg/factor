@@ -3,4 +3,4 @@
 USING: ;
 IN: functors.backend.syntax
 
-PARSER: FUNCTOR-SYNTAX: ;
+PARSER: functor-syntax { name body } FUNCTOR-SYNTAX: token body ;

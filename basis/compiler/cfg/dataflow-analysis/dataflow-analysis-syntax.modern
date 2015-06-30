@@ -3,5 +3,5 @@
 USING: ;
 IN: compiler.cfg.dataflow-analysis.syntax
 
-PARSER: BACKWARD-ANALYSIS: ;
-PARSER: FORWARD-ANALYSIS: ;
+PARSER: backward-analysis { } BACKWARD-ANALYSIS:  ;
+PARSER: forward-analysis { } FORWARD-ANALYSIS:  ;

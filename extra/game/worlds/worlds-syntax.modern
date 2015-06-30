@@ -3,4 +3,4 @@
 USING: ;
 IN: game.worlds.syntax
 
-PARSER: GAME: ;
+PARSER: game { } GAME:  ;

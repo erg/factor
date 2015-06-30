@@ -3,5 +3,5 @@
 USING: ;
 IN: alien.data.map.syntax
 
-PARSER: data-map!( ;
-PARSER: data-map( ;
+PARSER: data-map!( { signature } data-map!( parse-signature--) ;
+PARSER: data-map( { signature } data-map( parse-signature--) ;

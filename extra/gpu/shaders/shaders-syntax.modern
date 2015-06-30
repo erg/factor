@@ -3,10 +3,10 @@
 USING: ;
 IN: gpu.shaders.syntax
 
-PARSER: GLSL-PROGRAM: ;
-PARSER: GLSL-SHADER-FILE: ;
-PARSER: GLSL-SHADER: ;
-PARSER: VERTEX-FORMAT: ;
-PARSER: VERTEX-STRUCT: ;
-PARSER: feedback-format: ;
-PARSER: geometry-shader-vertices-out: ;
+PARSER: glsl-program { } GLSL-PROGRAM:  ;
+PARSER: glsl-shader-file { } GLSL-SHADER-FILE:  ;
+PARSER: glsl-shader { } GLSL-SHADER:  ;
+PARSER: vertex-format { } VERTEX-FORMAT:  ;
+PARSER: vertex-struct { } VERTEX-STRUCT:  ;
+PARSER: feedback-format { } feedback-format:  ;
+PARSER: geometry-shader-vertices-out { } geometry-shader-vertices-out:  ;

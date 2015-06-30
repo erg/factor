@@ -3,4 +3,4 @@
 USING: ;
 IN: units.reduction.syntax
 
-PARSER: STORAGE: ;
+PARSER: storage { } STORAGE:  ;

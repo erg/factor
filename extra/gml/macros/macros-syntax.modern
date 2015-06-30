@@ -3,4 +3,4 @@
 USING: ;
 IN: gml.macros.syntax
 
-PARSER: LOG-GML: ;
+PARSER: log-gml { } LOG-GML:  ;

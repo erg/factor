@@ -3,11 +3,11 @@
 USING: ;
 IN: locals.syntax
 
-PARSER: :: ;
-PARSER: :> ;
-PARSER: IDENTITY-MEMO:: ;
-PARSER: M:: ;
-PARSER: MACRO:: ;
-PARSER: MEMO:: ;
-PARSER: [let ;
-PARSER: [| ;
+PARSER: : { name signature body } :: token parse-signature(--) body ;
+PARSER: :> { } :> if ;
+PARSER: identity-memo: { } IDENTITY-MEMO::  ;
+PARSER: m: { class name body } M:: parse token body ;
+PARSER: macro: { name signature body } MACRO:: token parse-signature(--) ; parse-until ;
+PARSER: memo: { name signature body } MEMO:: token parse-signature(--) body ;
+PARSER: [let { } [let  ;
+PARSER: [| { body } [| ] parse-until ;

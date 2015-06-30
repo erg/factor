@@ -3,5 +3,5 @@
 USING: ;
 IN: variants.syntax
 
-PARSER: VARIANT-MEMBER: ;
-PARSER: VARIANT: ;
+PARSER: variant-member { } VARIANT-MEMBER:  ;
+PARSER: variant { } VARIANT:  ;

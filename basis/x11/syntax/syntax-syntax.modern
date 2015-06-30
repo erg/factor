@@ -3,4 +3,4 @@
 USING: ;
 IN: x11.syntax.syntax
 
-PARSER: X-FUNCTION: ;
+PARSER: x-function { return-value name arguments } X-FUNCTION: token token ; parse-until ;

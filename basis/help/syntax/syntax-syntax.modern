@@ -3,6 +3,6 @@
 USING: ;
 IN: help.syntax.syntax
 
-PARSER: ABOUT: ;
-PARSER: ARTICLE: ;
-PARSER: HELP: ;
+PARSER: about { name } ABOUT: token ;
+PARSER: article { name body } ARTICLE: token ; parse-until ;
+PARSER: help { name body } HELP: token ; parse-until ;

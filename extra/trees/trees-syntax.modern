@@ -3,4 +3,4 @@
 USING: ;
 IN: trees.syntax
 
-PARSER: TREE{ ;
+PARSER: tree{ { } TREE{  ;

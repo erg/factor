@@ -3,4 +3,4 @@
 USING: ;
 IN: io.encodings.euc.syntax
 
-PARSER: EUC: ;
+PARSER: euc { } EUC:  ;

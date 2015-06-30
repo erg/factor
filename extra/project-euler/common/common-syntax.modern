@@ -3,4 +3,4 @@
 USING: ;
 IN: project-euler.common.syntax
 
-PARSER: SOLUTION: ;
+PARSER: solution { } SOLUTION:  ;

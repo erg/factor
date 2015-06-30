@@ -3,4 +3,4 @@
 USING: ;
 IN: html.templates.chloe.components.syntax
 
-PARSER: COMPONENT: ;
+PARSER: component { } COMPONENT:  ;

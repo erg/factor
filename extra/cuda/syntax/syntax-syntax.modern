@@ -3,6 +3,6 @@
 USING: ;
 IN: cuda.syntax.syntax
 
-PARSER: CUDA-FUNCTION: ;
-PARSER: CUDA-GLOBAL: ;
-PARSER: CUDA-LIBRARY: ;
+PARSER: cuda-function { } CUDA-FUNCTION:  ;
+PARSER: cuda-global { } CUDA-GLOBAL:  ;
+PARSER: cuda-library { } CUDA-LIBRARY:  ;

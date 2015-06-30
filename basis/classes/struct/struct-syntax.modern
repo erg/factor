@@ -3,8 +3,8 @@
 USING: ;
 IN: classes.struct.syntax
 
-PARSER: PACKED-STRUCT: ;
-PARSER: S@ ;
-PARSER: STRUCT: ;
-PARSER: S{ ;
-PARSER: UNION-STRUCT: ;
+PARSER: packed-struct { name slots } PACKED-STRUCT: token ; parse-until ;
+PARSER: s@ { } S@  ;
+PARSER: struct { name slots } STRUCT: token ; parse-until ;
+PARSER: s{ { } S{  ;
+PARSER: union-struct { } UNION-STRUCT:  ;

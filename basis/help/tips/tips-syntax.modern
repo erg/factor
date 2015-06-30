@@ -3,4 +3,4 @@
 USING: ;
 IN: help.tips.syntax
 
-PARSER: TIP: ;
+PARSER: tip { } TIP:  ;

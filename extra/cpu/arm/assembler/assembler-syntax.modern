@@ -3,4 +3,4 @@
 USING: ;
 IN: cpu.arm.assembler.syntax
 
-PARSER: REGISTER: ;
+PARSER: register { } REGISTER:  ;

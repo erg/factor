@@ -3,4 +3,4 @@
 USING: ;
 IN: smalltalk.selectors.syntax
 
-PARSER: SELECTOR: ;
+PARSER: selector { } SELECTOR:  ;

@@ -3,5 +3,5 @@
 USING: ;
 IN: pair-methods.syntax
 
-PARSER: PAIR-GENERIC: ;
-PARSER: PAIR-M: ;
+PARSER: pair-generic { } PAIR-GENERIC:  ;
+PARSER: pair-m { } PAIR-M:  ;

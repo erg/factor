@@ -3,4 +3,4 @@
 USING: ;
 IN: fry.syntax
 
-PARSER: '[ ;
+PARSER: '[ { body } '[ ] parse-until ;

@@ -3,4 +3,4 @@
 USING: ;
 IN: llvm.types.syntax
 
-PARSER: TYPE: ;
+PARSER: type { } TYPE:  ;

@@ -3,4 +3,4 @@
 USING: ;
 IN: gpu.render.syntax
 
-PARSER: UNIFORM-TUPLE: ;
+PARSER: uniform-tuple { } UNIFORM-TUPLE:  ;

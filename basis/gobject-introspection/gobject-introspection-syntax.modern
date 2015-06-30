@@ -3,8 +3,8 @@
 USING: ;
 IN: gobject-introspection.syntax
 
-PARSER: FOREIGN-ATOMIC-TYPE: ;
-PARSER: FOREIGN-ENUM-TYPE: ;
-PARSER: FOREIGN-RECORD-TYPE: ;
-PARSER: GIR: ;
-PARSER: IMPLEMENT-STRUCTS: ;
+PARSER: foreign-atomic-type { } FOREIGN-ATOMIC-TYPE:  ;
+PARSER: foreign-enum-type { } FOREIGN-ENUM-TYPE:  ;
+PARSER: foreign-record-type { } FOREIGN-RECORD-TYPE:  ;
+PARSER: gir { } GIR:  ;
+PARSER: implement-structs { } IMPLEMENT-STRUCTS:  ;

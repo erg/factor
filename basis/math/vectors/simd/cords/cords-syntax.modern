@@ -4,5 +4,5 @@ USING: ;
 IN: math.vectors.simd.cords.syntax
 
 <PRIVATE
-PARSER: SIMD-128-CORD: ;
+PARSER: simd-128-cord { name1 name2 } SIMD-128-CORD: token token ;
 PRIVATE>

@@ -3,4 +3,4 @@
 USING: ;
 IN: openssl.libssl.syntax
 
-PARSER: X509_V_: ;
+PARSER: x509_v_ { } X509_V_:  ;

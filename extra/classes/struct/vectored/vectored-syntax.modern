@@ -3,4 +3,4 @@
 USING: ;
 IN: classes.struct.vectored.syntax
 
-PARSER: VECTORED-STRUCT: ;
+PARSER: vectored-struct { } VECTORED-STRUCT:  ;

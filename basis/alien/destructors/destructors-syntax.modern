@@ -3,4 +3,4 @@
 USING: ;
 IN: alien.destructors.syntax
 
-PARSER: DESTRUCTOR: ;
+PARSER: destructor { } DESTRUCTOR:  ;

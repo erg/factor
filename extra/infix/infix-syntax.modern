@@ -3,5 +3,5 @@
 USING: ;
 IN: infix.syntax
 
-PARSER: INFIX:: ;
-PARSER: [infix ;
+PARSER: infix: { } INFIX::  ;
+PARSER: [infix { } [infix  ;
