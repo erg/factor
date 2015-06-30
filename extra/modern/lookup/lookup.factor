@@ -331,6 +331,6 @@ ERROR: not-a-source-path path ;
 : basis-syntax-files ( -- seq ) basis-vocabs vocab-names>syntax ;
 : extra-syntax-files ( -- seq ) extra-vocabs vocab-names>syntax ;
 
-: load-core-syntax ( -- seq ) core-syntax-files [ dup parse-modern-file ] { } map>assoc ;
-: load-basis-syntax ( -- seq ) basis-syntax-files [ dup parse-modern-file ] { } map>assoc ;
-: load-extra-syntax ( -- seq ) extra-syntax-files [ dup parse-modern-file ] { } map>assoc ;
+: load-core-syntax ( -- seq ) core-syntax-files [ parse-modern-file ] map ;
+: load-basis-syntax ( -- seq ) basis-syntax-files [ parse-modern-file ] map ;
+: load-extra-syntax ( -- seq ) extra-syntax-files [ parse-modern-file ] map ;
