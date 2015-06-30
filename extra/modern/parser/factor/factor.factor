@@ -792,6 +792,32 @@ CONSTRUCTOR: <mintersection> mintersection ( name body -- obj ) ;
     token ";" parse-until <mintersection> ;
 \ parse-intersection "INTERSECTION:" register-parser
 
+TUPLE: new-constructor < parsed name class signature body ;
+CONSTRUCTOR: <new-constructor> new-constructor ( name class signature body -- obj ) ;
+: parse-new-constructor ( -- obj )
+    token token parse-signature(--) ";" parse-until <new-constructor> ;
+\ parse-new-constructor "CONSTRUCTOR:" register-parser
+
+TUPLE: method-literal < parsed class generic ;
+CONSTRUCTOR: <method-literal> method-literal ( class generic -- obj ) ;
+: parse-method-literal ( -- obj )
+    token token <method-literal> ;
+\ parse-method-literal "M\\" register-parser
+
+TUPLE: unicode-category < parsed name body ;
+CONSTRUCTOR: <unicode-category> unicode-category ( name body -- obj ) ;
+: parse-unicode-category ( -- obj )
+    token token <unicode-category> ;
+\ parse-unicode-category "CATEGORY:" register-parser
+
+TUPLE: unicode-category-not < parsed name body ;
+CONSTRUCTOR: <unicode-category-not> unicode-category-not ( name body -- obj ) ;
+: parse-unicode-category-not ( -- obj )
+    token token <unicode-category-not> ;
+\ parse-unicode-category-not "CATEGORY-NOT:" register-parser
+
+
+
 /*
 all-words [ "syntax" word-prop ] filter
 [ vocabulary>> ] collect-by >alist
