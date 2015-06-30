@@ -1,0 +1,10 @@
+! Copyright (C) 2015 Doug Coleman.
+! See http://factorcode.org/license.txt for BSD license.
+USING: ;
+IN: variables.syntax
+
+PARSER: GLOBAL: ;
+PARSER: TYPED-GLOBAL: ;
+PARSER: TYPED-VAR: ;
+PARSER: VAR: ;
+PARSER: set: ;
