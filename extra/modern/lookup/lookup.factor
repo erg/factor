@@ -41,24 +41,20 @@ SLOT: foo
 ! functors
 ! GENERATED NAMES generated names
 
-: constructor-name ( name -- string ) "<" ">" surround ;
+: constructor-name ( name -- name' ) "<" ">" surround ;
 : append-main ( name -- name' ) "-main" append ;
 : predicate-name ( name -- name' ) "?" append ;
+: setter-name ( name -- name' ) "set-" prepend ;
+: fast-name ( name -- name' ) "-fast" append ;
+: attributes-name ( name -- name' ) "-attributes" append ;
 
-: name-and-global-setter ( name -- string )
-    dup "set-" prepend 2array ;
-
-
-: name-and-tr-fast ( name -- pair )
-    dup "-fast" append 2array ;
-
-: name-and-predicate ( name -- seq )
-    dup predicate-name 2array ;
+: name-and-global-setter ( name -- string ) [ ] [ setter-name ] bi 2array ;
+: name-and-tr-fast ( name -- pair ) [ ] [ fast-name ] bi 2array ;
+: name-and-predicate ( name -- seq ) [ ] [ predicate-name ] bi 2array ;
+: name-and-attributes ( name -- seq ) [ ] [ attributes-name ] bi 2array ;
 
 : name-and-predicate-and-constructor ( name -- seq )
-    [ ]
-    [ "?" append ]
-    [ constructor-name ] tri 3array ;
+    [ ] [ predicate-name ] [ constructor-name ] tri 3array ;
 
 : enum>symbols ( enum -- obj )
     {
@@ -167,6 +163,7 @@ M: gl-function object>identifiers name>> name>> ;
 M: c-type object>identifiers name>> name>> ;
 M: struct object>identifiers name>> name>> name-and-predicate ;
 M: packed-struct object>identifiers name>> name>> ;
+M: union-struct object>identifiers name>> name>> ;
 M: library object>identifiers drop f ;
 M: typedef object>identifiers new>> name>> ;
 M: menum object>identifiers enum>symbols ;
@@ -195,7 +192,7 @@ M: functor-syntax object>identifiers drop f ; ! name>> name>> ;
 ! libraries
 M: ebnf object>identifiers name>> name>> ;
 M: mirc object>identifiers name>> name>> ;
-
+M: 8-bit object>identifiers name>> name>> name-and-predicate ;
 
 
 M: protocol object>identifiers name>> name>> ;
@@ -252,6 +249,7 @@ M: unicode-category-not object>identifiers name>> name>> name-and-predicate ;
 
 M: main-window object>identifiers name>> name>> ;
 M: solution object>identifiers name>> name>> append-main ;
+M: game object>identifiers name>> name>> name-and-attributes ;
 
 
 MACRO: any-predicate? ( words -- quot )
