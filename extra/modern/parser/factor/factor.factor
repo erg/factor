@@ -822,11 +822,17 @@ CONSTRUCTOR: <unicode-category-not> unicode-category-not ( name body -- obj ) ;
     token token <unicode-category-not> ;
 \ parse-unicode-category-not "CATEGORY-NOT:" register-parser
 
-TUPLE: main-window < parsed name options body ;
-CONSTRUCTOR: <main-window> main-window ( name options body -- obj ) ;
+TUPLE: main-window < parsed name attributes body ;
+CONSTRUCTOR: <main-window> main-window ( name attributes body -- obj ) ;
 : parse-main-window ( -- obj )
     token parse body <main-window> ;
 \ parse-main-window "MAIN-WINDOW:" register-parser
+
+TUPLE: game < parsed name attributes body ;
+CONSTRUCTOR: <game> game ( name attributes body -- obj ) ;
+: parse-game ( -- obj )
+    token parse body <game> ;
+\ parse-game "GAME:" register-parser
 
 TUPLE: solution < parsed name ;
 CONSTRUCTOR: <solution> solution ( name -- obj ) ;
@@ -841,6 +847,13 @@ CONSTRUCTOR: <c-callback> c-callback ( return-value name arguments -- c-callback
 \ parse-c-callback "CALLBACK:" register-parser
 
 
+TUPLE: 8-bit < parsed name encoding1 encoding2 ;
+CONSTRUCTOR: <8-bit> 8-bit ( name encoding1 encoding2 -- 8-bit ) ;
+: parse-8-bit ( -- 8-bit )
+    token token token <8-bit> ;
+\ parse-8-bit "8-BIT:" register-parser
+
+
 /*
 all-words [ "syntax" word-prop ] filter
 [ vocabulary>> ] collect-by >alist
@@ -851,28 +864,6 @@ sort-keys [ . ] each
     "alien.data"
     V{ POSTPONE: c-array{ POSTPONE: c-array@ }
 } .......
-
-SYMBOL: was-private?
- all-words [ "syntax" word-prop ] filter
-[ vocabulary>> ] collect-by >alist
-[ first2 [ [ ".private" ?tail drop modern-syntax-path ] keep ] dip 3array ] map
-[
-    f was-private? [
-        dup first dup . utf8 [
-            "! Copyright (C) 2015 Doug Coleman." print
-            "! See http://factorcode.org/license.txt for BSD license." print
-            "USING: ;" print
-            [
-                second ".private" ?tail [ ".syntax" append "IN: " prepend print nl ] dip
-                [ "<PRIVATE" print was-private? on ] when
-            ] [
-                third natural-sort [ name>> "PARSER: " " ;" surround print ] each
-            ] bi
-            was-private? get [ "PRIVATE>" print ] when
-        ] with-file-writer
-    ] with-variable
-] each
-
 
 find . | grep '\-syntax.modern' | xargs cat
 */
