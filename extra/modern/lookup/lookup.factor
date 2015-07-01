@@ -288,7 +288,7 @@ ERROR: not-a-source-path path ;
     vocab-source-path force-modern-path ;
 
 : lookup-vocab ( vocab -- seq )
-    modern-source-path dup . flush
+    modern-source-path
     parse-modern-file second
     [ dup object>identifiers ] { } map>assoc ;
 
@@ -373,12 +373,26 @@ ERROR: not-a-source-path path ;
     lookup-vocab [ first private? not ] partition
     [ values flatten ] bi@ 3array ;
 
-: check-loaded-namespace ( triple -- triple )
-    [ first ]
-    [ first2 [ vocab-words [ name>> ] map ] dip swap diff natural-sort ]
-    [ first3 nip [ ".private" append vocab-words [ name>> ] map ] dip swap diff natural-sort ] tri 3array ;
+: rewrite-source ( vocab-names -- )
+    [
+        modern-source-path
+        [ parse-modern-file second ] keep write-modern-file
+    ] each ;
 
-: check-loaded-namespace2 ( triple -- triple )
+: namespace-ok? ( triple -- ? )
+    first3 [ empty? ] both? nip ;
+
+: check-namespace ( triple -- triple )
+    [ first ]
+    [
+        first2 [ vocab-words [ name>> ] map ] dip swap diff natural-sort
+    ] [
+        first3 nip
+        [ ".private" append vocab-words [ name>> ] map ] dip
+        swap diff natural-sort
+    ] tri 3array ;
+
+: check-namespace2 ( triple -- triple )
     [ first ]
     [ first2 [ vocab-words [ name>> ] map ] dip diff natural-sort ]
     [ first3 nip [ ".private" append vocab-words [ name>> ] map ] dip diff natural-sort ] tri 3array ;
@@ -389,16 +403,25 @@ ERROR: not-a-source-path path ;
 : check-loaded-namespaces ( names -- triples )
     [ vocab-loaded? ] filter
     [ load-namespace ] map
-    [ check-loaded-namespace ] map
+    [ check-namespace ] map
     [ first3 [ empty? ] both? nip ] reject ;
 
 : check-loaded-namespaces2 ( names -- triples )
     [ vocab-loaded? ] filter
     [ load-namespace ] map
-    [ check-loaded-namespace2 ] map
+    [ check-namespace2 ] map
     [ first3 [ empty? ] both? nip ] reject ;
 
-: rewrite-source ( vocab-names -- )
-    [
-        modern-source-path [ parse-modern-file second ] keep write-modern-file
-    ] each ;
+: test-namespace ( name -- ? )
+    load-namespace check-namespace namespace-ok? ;
+
+: test-namespace2 ( name -- ? )
+    load-namespace check-namespace2 namespace-ok? ;
+
+: failing-namespaces ( names -- names' )
+    [ dup test-namespace ] { } map>assoc
+    [ second ] reject keys ;
+
+: failing-namespaces2 ( names -- names' )
+    [ dup test-namespace2 ] { } map>assoc
+    [ second ] reject keys ;
