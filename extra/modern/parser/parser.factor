@@ -1,10 +1,10 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays ascii assocs combinators
+USING: accessors arrays assocs combinators
 combinators.short-circuit constructors fry io io.encodings.utf8
-io.files io.streams.document io.streams.string kernel locals
-make math math.parser multiline namespaces sequences
-sequences.extras strings io.streams.peek ;
+io.files io.streams.document io.streams.string kernel make
+math.parser namespaces sequences sequences.extras strings
+unicode.case ;
 IN: modern.parser
 
 ! "TUPLE: foo a b c ;" parse-modern-string
