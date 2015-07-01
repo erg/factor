@@ -1,75 +1,17 @@
 ! Copyright (C) 2014 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays assocs combinators.short-circuit fry
-hashtables io io.files kernel macros modern.parser
-modern.parser.factor namespaces nested-comments prettyprint
-sequences sequences.deep sets splitting strings vocabs
-vocabs.files vocabs.hierarchy vocabs.loader vocabs.metadata ;
+USING: accessors arrays assocs combinators.short-circuit
+combinators.smart fry hashtables io io.files kernel macros
+modern.parser modern.parser.factor namespaces nested-comments
+prettyprint sequences sequences.deep sets splitting strings
+vocabs vocabs.files vocabs.hierarchy vocabs.loader
+vocabs.metadata sorting ;
 IN: modern.lookup
 
 
-! Exceptions so far: SLOT: foo  foo>> >>foo
-! TUPLE: bar a ;   bar?
-! primitives
-! "io.encodings.utf16n"  unloaded stuff?
-! "system" vocab
-! "syntax"
-! alien: SINGLETONS: stdcall thiscall fastcall cdecl mingw ; SYMBOLS:
 (*
-
-TO FIX:
 SPECIALIZED-ARRAY: uint
 SLOT: foo
-
-compiler.codegen
-"M\\"
-
-"compiler.cfg.hats": nested << <PRIVATE PRIVATE> >>
-
-IN: syntax
-two IN: forms, math.complex in basis -- move to math.complex.syntax, or..
-    {
-        "math.complex"
-        {
-            "malformed-complex"
-            "malformed-complex?"
-            "parse-complex"
-            "C{"
-        }
-        { }
-    }
-IN: syntax
-    { "tools.walker" { "B" "B:" } { } }
-
-
-
-
-clear "sequences"
-[ lookup-vocab [ first private? ] filter values flatten ]
-[ ".private" append v:vocab-words [ name>> ] map ] bi swap diff
-
-clear "sequences"
-[ lookup-vocab [ first private? ] filter values flatten ]
-[ ".private" append v:vocab-words [ name>> ] map ] bi swap diff
-
-clear basis-untracked-words
-[
-    first2
-    [
-        [ string? not ] filter
-    ] [
-        [ string? not ] filter
-    ] bi*
-    2array
-] { } assoc-map-as
-[ second second empty? not ] filter
-
-clear core-vocabs
-[
-  [ [ vocab-words ] [ ".private" append vocab-words ] bi append [ name>> ] map ]
-  [ lookup-vocab values sift concat ] bi diff natural-sort .
-] each
-
 "syntax", "accessors"
 
 "resource:core/sequences/sequences.factor"
@@ -98,21 +40,35 @@ clear core-vocabs
 
 ! functors
 ! GENERATED NAMES generated names
+
 : constructor-name ( name -- string ) "<" ">" surround ;
+: append-main ( name -- name' ) "-main" append ;
+: predicate-name ( name -- name' ) "?" append ;
 
 : name-and-global-setter ( name -- string )
     dup "set-" prepend 2array ;
+
 
 : name-and-tr-fast ( name -- pair )
     dup "-fast" append 2array ;
 
 : name-and-predicate ( name -- seq )
-    dup "?" append 2array ;
+    dup predicate-name 2array ;
 
 : name-and-predicate-and-constructor ( name -- seq )
     [ ]
     [ "?" append ]
     [ constructor-name ] tri 3array ;
+
+: enum>symbols ( enum -- obj )
+    {
+        [ name>> name>> ]
+        [ name>> name>> constructor-name ]
+        [
+            slots>> [ dup mtoken? [ name>> ] [ elements>> first name>> ] if ] map
+            dup [ predicate-name ] map
+        ]
+    } { } cleave>sequence flatten ;
 
 
 GENERIC: object>identifiers ( object -- string )
@@ -202,6 +158,7 @@ M: main object>identifiers drop f ; ! name>> name>> ; doesn't define, just reuse
 M: mmacro object>identifiers name>> name>> ;
 M: syntax object>identifiers name>> ;
 M: c-function object>identifiers name>> name>> ;
+M: c-callback object>identifiers name>> name>> ;
 M: c-function-alias object>identifiers aliased-name>> name>> ;
 M: x-function object>identifiers name>> name>> ;
 M: gl-function object>identifiers name>> name>> ;
@@ -212,7 +169,7 @@ M: struct object>identifiers name>> name>> name-and-predicate ;
 M: packed-struct object>identifiers name>> name>> ;
 M: library object>identifiers drop f ;
 M: typedef object>identifiers new>> name>> ;
-M: menum object>identifiers name>> name>> ;
+M: menum object>identifiers enum>symbols ;
 M: mpointer object>identifiers drop f ;
 
 ! Locals/fry/etc
@@ -293,6 +250,8 @@ M: method-literal object>identifiers drop f ;
 M: unicode-category object>identifiers name>> name>> name-and-predicate ;
 M: unicode-category-not object>identifiers name>> name>> name-and-predicate ;
 
+M: main-window object>identifiers name>> name>> ;
+M: solution object>identifiers name>> name>> append-main ;
 
 
 MACRO: any-predicate? ( words -- quot )
@@ -418,13 +377,13 @@ ERROR: not-a-source-path path ;
 
 : check-loaded-namespace ( triple -- triple )
     [ first ]
-    [ first2 [ vocab-words [ name>> ] map ] dip swap diff ]
-    [ first3 nip [ ".private" append vocab-words [ name>> ] map ] dip swap diff ] tri 3array ;
+    [ first2 [ vocab-words [ name>> ] map ] dip swap diff natural-sort ]
+    [ first3 nip [ ".private" append vocab-words [ name>> ] map ] dip swap diff natural-sort ] tri 3array ;
 
 : check-loaded-namespace2 ( triple -- triple )
     [ first ]
-    [ first2 [ vocab-words [ name>> ] map ] dip diff ]
-    [ first3 nip [ ".private" append vocab-words [ name>> ] map ] dip diff ] tri 3array ;
+    [ first2 [ vocab-words [ name>> ] map ] dip diff natural-sort ]
+    [ first3 nip [ ".private" append vocab-words [ name>> ] map ] dip diff natural-sort ] tri 3array ;
 
 : vocab-loaded? ( name -- ? )
     dictionary get at ;
