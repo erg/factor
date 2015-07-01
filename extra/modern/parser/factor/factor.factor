@@ -10,15 +10,8 @@ CONSTRUCTOR: <mparser> mparser ( name slots start body -- mparser ) ;
 : parse-parser ( -- mparser )
     raw parse raw body <mparser> ;
 
-ERROR: string-expected got separator ;
-! TUPLE: mstring < parsed class string ;
-! CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
-
 TUPLE: text < parsed string from to ;
 CONSTRUCTOR: <text> text ( string from to -- text ) ;
-
-! TUPLE: comment < parsed text ;
-! CONSTRUCTOR: <comment> comment ( text -- comment ) ;
 
 TUPLE: mnested-comment < parsed comment ;
 CONSTRUCTOR: <mnested-comment> mnested-comment ( comment -- nested-comment ) ;
@@ -1055,3 +1048,4 @@ SYMBOL: was-private?
 
 
 *)
+
