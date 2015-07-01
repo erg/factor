@@ -397,3 +397,8 @@ ERROR: not-a-source-path path ;
     [ load-namespace ] map
     [ check-loaded-namespace2 ] map
     [ first3 [ empty? ] both? nip ] reject ;
+
+: rewrite-source ( vocab-names -- )
+    [
+        modern-source-path [ parse-modern-file second ] keep write-modern-file
+    ] each ;
