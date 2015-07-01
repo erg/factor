@@ -7,24 +7,6 @@ math.parser namespaces sequences sequences.extras strings
 unicode.case ;
 IN: modern.parser
 
-! "TUPLE: foo a b c ;" parse-modern-string
-! "resource:core/math/math.factor" parse-modern-file
-! ": add-one ( a -- b ) 1 + ;" parse-modern-string ...
-! "! omg omg\n!# lol" parse-modern-string ...
-! """ "asdf" """ parse-modern-string ...
-! """"asdf"""" parse-modern-string ...
-! "M: rational neg? 0 < ;" parse-modern-string ...
-! ": add-one ( a -- b ) 1 + ;" parse-modern-string write-parsed-string print
-! "resource:core/sequences/sequences.factor" parse-modern-file second write-parsed-string print
-! "[ 1 ]" parse-modern-string
-! "M: standard-generic definer drop \ GENERIC# f ;" parse-modern-string
-! "\\ GENERIC#" parse-modern-string
-! "GENERIC#" parse-modern-string
-! "resource:core/generic/standard/standard.factor" parse-source-file
-! "CONSTANT: simple-combination T{ standard-combination f 0 }" parse-modern-string
-! "resource:basis/formatting/formatting.factor" parse-modern-file
-
-
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
 
@@ -52,14 +34,13 @@ CONSTRUCTOR: <mtoken> mtoken ( name -- comment ) ;
 TUPLE: nested-comment < parsed comment ;
 CONSTRUCTOR: <nested-comment> nested-comment ( comment -- nested-comment ) ;
 
-TUPLE: typed-argument < parsed name signature ;
-CONSTRUCTOR: <typed-argument> typed-argument ( name signature -- typed ) ;
-
+! Extend the parser with PARSER:, LITERAL-PARSER:
 TUPLE: parser < parsed name slots syntax-name body ;
 CONSTRUCTOR: <parser> parser ( name slots syntax-name body -- obj ) ;
 
 TUPLE: literal-parser < parsed name ;
 CONSTRUCTOR: <literal-parser> literal-parser ( name -- obj ) ;
+
 
 SYMBOL: current-texts
 : save-current-texts ( text -- )
@@ -238,9 +219,6 @@ ERROR: expected expected got ;
     token 2dup dup [ name>> ] when swap member? [ 2drop ] [ expected ] if ;
 
 : body ( -- strings ) ";" parse-until ;
-
-: parse-nested-comment ( -- nested-comment )
-    "*)" parse-comment-until <nested-comment> ;
 
 : parse-parser ( -- obj )
     token parse token ";" parse-until <parser> ;
