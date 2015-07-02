@@ -853,6 +853,30 @@ CONSTRUCTOR: <munit-test> munit-test ( -- obj ) ;
 \ parse-unit-test "unit-test" register-parser
 
 
+TUPLE: slots-quot < parsed body ;
+CONSTRUCTOR: <slots-quot> slots-quot ( body -- block ) ;
+: parse-slots-quot ( -- block )
+    "]" parse-until <slots-quot> ;
+\ parse-slots-quot "slots[" register-parser
+
+TUPLE: slots-array < parsed body ;
+CONSTRUCTOR: <slots-array> slots-array ( body -- block ) ;
+: parse-slots-array ( -- array )
+    "}" parse-until <slots-array> ;
+\ parse-slots-array "slots{" register-parser
+
+TUPLE: let-block < parsed body ;
+CONSTRUCTOR: <let-block> let-block ( body -- block ) ;
+: parse-let-block ( -- let-block )
+    "]" parse-until <let-block> ;
+\ parse-let-block "[let" register-parser
+
+TUPLE: stack-effect < parsed in out ;
+CONSTRUCTOR: <stack-effect> stack-effect ( in out -- block ) ;
+: parse-stack-effect ( -- stack-effect )
+    parse-signature--) ;
+\ parse-stack-effect "(" register-parser
+
 
 /*
 all-words [ "syntax" word-prop ] filter
