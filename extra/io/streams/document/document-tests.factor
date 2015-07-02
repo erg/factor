@@ -4,8 +4,12 @@ USING: io io.streams.document io.streams.duplex kernel
 io.streams.string tools.test ;
 IN: io.streams.document.tests
 
-[ T{ document-object { object 97 } { position T{ document-position f 0 0 } } } ]
-[
+{
+    T{ document-object { object 97 }
+        { start T{ document-position f 0 0 } }
+        { finish T{ document-position f 0 1 } }
+    }
+} [
     "asdf" <string-reader> <document-stream> [
         read1
     ] with-input-stream
@@ -15,7 +19,8 @@ IN: io.streams.document.tests
 [
     T{ document-object
         { object 115 }
-        { position T{ document-position { column 1 } } }
+        { start T{ document-position { column 1 } } }
+        { finish T{ document-position { column 2 } } }
     }
 ] [
     "asdf\nfdsa" <string-reader> <document-stream> [
@@ -27,7 +32,8 @@ IN: io.streams.document.tests
 [
     T{ document-object
         { object "asdf" }
-        { position T{ document-position { column 0 } } }
+        { start T{ document-position { column 0 } } }
+        { finish T{ document-position { line 1 } { column 0 } } }
     }
 ] [
     "asdf\nfdsa" <string-reader> <document-stream> [
@@ -38,7 +44,8 @@ IN: io.streams.document.tests
 [
     T{ document-object
         { object "fdsa" }
-        { position T{ document-position { line 1 } { column 0 } } }
+        { start T{ document-position { line 1 } { column 0 } } }
+        { finish T{ document-position { line 2 } { column 0 } } }
     }
 ] [
     "asdf\nfdsa" <string-reader> <document-stream> [
@@ -50,7 +57,8 @@ IN: io.streams.document.tests
 [
     T{ document-object
         { object f }
-        { position T{ document-position { line 2 } { column 0 } } }
+        { start T{ document-position { line 2 } { column 0 } } }
+        { finish T{ document-position { line 3 } { column 0 } } }
     }
 ] [
     "asdf\nfdsa" <string-reader> <document-stream> [
@@ -63,7 +71,8 @@ IN: io.streams.document.tests
 [
     T{ document-object
         { object "fdsa\n1234\n5678\n" }
-        { position T{ document-position { line 1 } { column 0 } } }
+        { start T{ document-position { line 1 } { column 0 } } }
+        { finish T{ document-position { line 1 } { column 0 } } }
     }
 ] [
     "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
@@ -76,7 +85,8 @@ IN: io.streams.document.tests
 [
     T{ document-object
         { object "\nfds" }
-        { position T{ document-position { line 0 } { column 4 } } }
+        { start T{ document-position { line 0 } { column 4 } } }
+        { finish T{ document-position { line 1 } { column 3 } } }
     }
 ] [
     "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
@@ -88,11 +98,13 @@ IN: io.streams.document.tests
 [
     T{ document-object
         { object "a" }
-        { position T{ document-position { line 0 } { column 0 } } }
+        { start T{ document-position { line 0 } { column 0 } } }
+        { finish T{ document-position { line 0 } { column 1 } } }
     }
     T{ document-object
-        { position T{ document-position { column 1 } } }
         { object CHAR: s }
+        { start T{ document-position { column 1 } } }
+        { finish T{ document-position { column 2 } } }
     }
 ] [
     "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
@@ -104,11 +116,13 @@ IN: io.streams.document.tests
 [
     T{ document-object
         { object "d" }
-        { position T{ document-position { line 0 } { column 2 } } }
+        { start T{ document-position { line 0 } { column 2 } } }
+        { finish T{ document-position { line 0 } { column 3 } } }
     }
     T{ document-object
         { object CHAR: f }
-        { position T{ document-position { line 0 } { column 3 } } }
+        { start T{ document-position { line 0 } { column 3 } } }
+        { finish T{ document-position { line 0 } { column 4 } } }
     }
 ] [
     "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
@@ -120,11 +134,13 @@ IN: io.streams.document.tests
 [
     T{ document-object
         { object "df" }
-        { position T{ document-position { line 0 } { column 2 } } }
+        { start T{ document-position { line 0 } { column 2 } } }
+        { finish T{ document-position { line 0 } { column 4 } } }
     }
     T{ document-object
-        { position T{ document-position { column 4 } } }
         { object CHAR: \n }
+        { start T{ document-position { column 4 } } }
+        { finish T{ document-position { line 1 } { column 0 } } }
     }
 ] [
     "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
@@ -136,11 +152,13 @@ IN: io.streams.document.tests
 [
     T{ document-object
         { object "fdsa\n" }
-        { position T{ document-position { line 1 } { column 0 } } }
+        { start T{ document-position { line 1 } { column 0 } } }
+        { finish T{ document-position { line 2 } { column 0 } } }
     }
     T{ document-object
-        { position T{ document-position { line 2 } } }
         { object CHAR: 1 }
+        { start T{ document-position { line 2 } } }
+        { finish T{ document-position { line 2 } { column 1 } } }
     }
 ] [
     "asdf\nfdsa\n1234\n5678\n" <string-reader> <document-stream> [
@@ -154,6 +172,12 @@ IN: io.streams.document.tests
 "" [ input>document-stream "j" read-until ] with-string-reader
 ] unit-test
 
-[ T{ document-object { object "asdf" } } f ] [
-"asdf" [ input>document-stream "j" read-until ] with-string-reader
+{
+    T{ document-object
+        { object "asdf" }
+        { finish T{ document-position { column 4 } } }
+    }
+    f
+} [
+    "asdf" [ input>document-stream "j" read-until ] with-string-reader
 ] unit-test
