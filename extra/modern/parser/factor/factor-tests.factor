@@ -10,30 +10,30 @@ IN: modern.parser.factor.tests
         T{ marray
             { texts
                 V{
-                    T{ document-object { object "{" } }
                     T{ document-object
-                        { position
-                            T{ document-position { column 2 } }
-                        }
+                        { object "{" }
+                        { start T{ document-position { column 0 } } }
+                        { finish T{ document-position { column 1 } } }
+                    }
+                    T{ document-object
                         { object "1" }
+                        { start T{ document-position { column 2 } } }
+                        { finish T{ document-position { column 3 } } }
                     }
                     T{ document-object
-                        { position
-                            T{ document-position { column 4 } }
-                        }
                         { object "2" }
+                        { start T{ document-position { column 4 } } }
+                        { finish T{ document-position { column 5 } } }
                     }
                     T{ document-object
-                        { position
-                            T{ document-position { column 6 } }
-                        }
                         { object "3" }
+                        { start T{ document-position { column 6 } } }
+                        { finish T{ document-position { column 7 } } }
                     }
                     T{ document-object
-                        { position
-                            T{ document-position { column 8 } }
-                        }
                         { object "}" }
+                        { start T{ document-position { column 8 } } }
+                        { finish T{ document-position { column 9 } } }
                     }
                 }
             }

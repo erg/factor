@@ -1,7 +1,7 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays combinators constructors destructors fry
-io io.private io.streams.position kernel math math.order
+io io.private io.streams.position kernel locals math math.order
 namespaces sequences sequences.private strings ;
 IN: io.streams.document
 
@@ -13,8 +13,8 @@ TUPLE: document-stream < position-stream { line integer } { column integer } ;
 TUPLE: document-position { line integer } { column integer } ;
 CONSTRUCTOR: <document-position> document-position ( line column -- document-position ) ;
 
-TUPLE: document-object { position document-position } object ;
-CONSTRUCTOR: <document-object> document-object ( position object -- document-object ) ;
+TUPLE: document-object object { start document-position } { finish document-position } ;
+CONSTRUCTOR: <document-object> document-object ( start object finish -- document-object ) ;
 
 M: document-object length object>> length ;
 M: document-object nth object>> nth ;
@@ -24,8 +24,7 @@ M: document-object integer>fixnum object>> integer>fixnum ;
 : add-lines ( stream n -- stream )
     '[ _ + ] change-line ; inline
 
-: with-advance-line ( stream quot -- seq )
-    [ call ] 2keep drop
+: advance-line ( stream -- )
     1 add-lines 0 >>column drop ; inline
 
 : count-newlines ( string -- n )
@@ -51,43 +50,45 @@ M: document-object integer>fixnum object>> integer>fixnum ;
     [ 0 >>column 1 add-lines drop ]
     [ [ 1 + ] change-column drop ] if ; inline
 
-: with-advance-1 ( n stream quot -- n )
-    [ call ] 2keep drop over object>> advance-1 ; inline
-
 M: document-stream stream-element-type call-next-method ;
 
 M: document-stream stream-read
-    [ nip stream-tell ] [ call-next-method ] 2bi <document-object> ;
+    [ nip stream-tell ] [ call-next-method ] [ nip stream-tell ] 2tri <document-object> ;
 
 M: document-stream stream-contents*
-    [ stream-tell ] [ call-next-method ] bi <document-object> ;
+    [ stream-tell ] [ call-next-method ] [ stream-tell ] tri <document-object> ;
 
 M: document-stream stream-readln
-    [
-        [ stream-tell ] [ call-next-method ] bi <document-object>
-    ] with-advance-line ;
+    [ stream-tell ] [ call-next-method ] [ ] tri
+    [ advance-line ]
+    [ stream-tell ] bi <document-object> ;
 
 M: document-stream stream-read1
-    [
-        [ stream-tell ] [ call-next-method ] bi <document-object>
-    ] with-advance-1 ;
+    [ stream-tell ] [ call-next-method ] [ ] tri
+    [ over advance-1 ] [ stream-tell ] bi <document-object> ;
 
 M: document-stream stream-read-unsafe
     [ call-next-method ] 3keep
     rot drop pick 0 > [ advance-string ] [ 2drop ] if ;
 
-M: document-stream stream-read-until
-    [ nip stream-tell ]
-    [ call-next-method ]
-    [ nip ] 2tri
+M:: document-stream stream-read-until ( seps stream -- seq sep/f )
+    stream stream-tell :> start-pos
+    seps stream call-next-method :> ( read-seq read-sep )
 
-    ! pos seq sep stream
-    {
-        [ 2drop dup [ <document-object> ] [ 2drop f ] if ]
-        [ nip advance-string ]
-        [ over [ stream-tell swap <document-object> nip ] [ 3drop f ] if ]
-        [ swap advance-1 drop ]
-    } 3cleave ;
+    read-seq stream advance-string
+    stream stream-tell :> seq-finish-pos
+    read-seq [
+        start-pos read-seq seq-finish-pos <document-object>
+    ] [
+        f
+    ] if
+    stream read-sep advance-1
+    stream stream-tell :> sep-finish-pos
+    read-sep [
+        seq-finish-pos read-sep sep-finish-pos <document-object>
+    ] [
+        f
+    ] if ;
 
 M: document-stream stream-tell
     [ line>> ] [ column>> ] bi <document-position> ;
@@ -108,7 +109,7 @@ M: document-stream stream-tell
 
 ! Writing
 M: document-stream stream-write ( document-object stream -- )
-    [ [ position>> ] dip [ write-newlines ] [ write-spaces ] 2bi ]
+    [ [ start>> ] dip [ write-newlines ] [ write-spaces ] 2bi ]
     [ write-object ]
     [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ] 2tri ;
 
