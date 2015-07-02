@@ -847,6 +847,13 @@ CONSTRUCTOR: <8-bit> 8-bit ( name encoding1 encoding2 -- 8-bit ) ;
 \ parse-8-bit "8-BIT:" register-parser
 
 
+TUPLE: munit-test < parsed ;
+CONSTRUCTOR: <munit-test> munit-test ( -- obj ) ;
+: parse-unit-test ( -- munit-test ) <munit-test> ;
+\ parse-unit-test "unit-test" register-parser
+
+
+
 /*
 all-words [ "syntax" word-prop ] filter
 [ vocabulary>> ] collect-by >alist
