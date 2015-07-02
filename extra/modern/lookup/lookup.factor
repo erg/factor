@@ -373,11 +373,20 @@ ERROR: not-a-source-path path ;
     lookup-vocab [ first private? not ] partition
     [ values flatten ] bi@ 3array ;
 
+: rewrite-modern ( path -- )
+    [ parse-modern-file second ] keep write-modern-file ;
+
+: ?rewrite-modern ( path -- )
+    dup exists? [ rewrite-modern ] [ drop ] if ;
+
 : rewrite-source ( vocab-names -- )
-    [
-        modern-source-path
-        [ parse-modern-file second ] keep write-modern-file
-    ] each ;
+    [ modern-source-path ?rewrite-modern ] each ;
+
+: rewrite-docs ( vocab-names -- )
+    [ modern-docs-path ?rewrite-modern ] each ;
+
+: rewrite-tests ( vocab-names -- )
+    [ modern-tests-path ?rewrite-modern ] each ;
 
 : namespace-ok? ( triple -- ? )
     first3 [ empty? ] both? nip ;
