@@ -4,7 +4,7 @@ USING: accessors arrays assocs combinators
 combinators.short-circuit constructors fry io io.encodings.utf8
 io.files io.streams.document io.streams.string kernel make
 math.parser namespaces sequences sequences.extras strings
-unicode.case ;
+unicode.case vocabs.files vocabs.loader ;
 IN: modern.parser
 
 SYMBOL: parsers
@@ -271,3 +271,13 @@ ERROR: unrecognized-factor-file path ;
     utf8 [
         write-parsed-objects nl
     ] with-file-writer ;
+
+: load-vocab-docs ( names -- seq )
+    [ vocab-docs-path ] map
+    [ exists? ] filter
+    [ parse-modern-file ] map ;
+
+: load-vocab-tests ( names -- seq )
+    [ vocab-tests-path ] map
+    [ exists? ] filter
+    [ dup . flush parse-modern-file ] map ;

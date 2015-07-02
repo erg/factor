@@ -525,7 +525,7 @@ CONSTRUCTOR: <union-struct> union-struct ( name slots -- union-struct ) ;
 TUPLE: alias < parsed name target ;
 CONSTRUCTOR: <alias> alias ( name target -- alias ) ;
 : parse-alias ( -- alias )
-    token parse <alias> ;
+    token token <alias> ;
 
 TUPLE: mregisters < parsed names ;
 CONSTRUCTOR: <mregisters> mregisters ( names -- obj ) ;
