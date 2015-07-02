@@ -433,12 +433,6 @@ CONSTRUCTOR: <name> name ( name target -- object ) ;
 : parse-name ( -- name )
     token token <name> ;
 
-TUPLE: ebnf < parsed name text ;
-CONSTRUCTOR: <ebnf> ebnf ( name text -- ebnf ) ;
-: parse-ebnf ( -- ebnf )
-    token
-    ";EBNF" multiline-string-until <ebnf> ;
-
 TUPLE: defer < parsed name ;
 CONSTRUCTOR: <defer> defer ( name -- defer ) ;
 : parse-defer ( -- defer )
@@ -713,7 +707,6 @@ CONSTRUCTOR: <mirc> mirc ( name command body -- mirc ) ;
 \ parse-functor "FUNCTOR:" register-parser
 \ parse-functor-syntax "FUNCTOR-SYNTAX:" register-parser
 \ parse-name "NAME:" register-parser
-\ parse-ebnf "EBNF:" register-parser
 \ parse-symbol "SYMBOL:" register-parser
 \ parse-symbols "SYMBOLS:" register-parser
 \ parse-defer "DEFER:" register-parser
@@ -931,6 +924,30 @@ CONSTRUCTOR: <heredoc> heredoc ( name string -- heredoc ) ;
     dup name>> multiline-string-until <heredoc> ;
 \ parse-heredoc "HEREDOC:" register-parser
 
+TUPLE: color < parsed name ;
+CONSTRUCTOR: <color> color ( name -- color ) ;
+: parse-color ( -- color )
+    token <color> ;
+\ parse-color "COLOR:" register-parser
+
+
+TUPLE: ebnf < parsed name text ;
+CONSTRUCTOR: <ebnf> ebnf ( name text -- ebnf ) ;
+: parse-ebnf ( -- ebnf )
+    token
+    ";EBNF" multiline-string-until <ebnf> ;
+\ parse-ebnf "EBNF:" register-parser
+
+: parse-ebnf-acute ( -- ebnf )
+    token
+    "EBNF>" multiline-string-until <ebnf> ;
+\ parse-ebnf-acute "<EBNF" register-parser
+
+: parse-ebnf-bracket ( -- ebnf-bracket )
+    token
+    "EBNF]" multiline-string-until <ebnf> ;
+\ parse-ebnf-bracket "[EBNF" register-parser
+
 
 /*
 all-words [ "syntax" word-prop ] filter
@@ -947,23 +964,15 @@ find . | grep '\-syntax.modern' | xargs cat
 */
 
 (*
-
 all-words [ "syntax" word-prop ] filter
 [ vocabulary>> ] collect-by .
 
 
 ! words we define that aren't parsing words
+load-all
 parsers get-global keys
 all-words [ parsing-word? ] filter
-natural-sort [ name>> ] map diff
-{
-    "IMPORTS:"
-    "NAME:"
-    "PARSER:"
-    "LITERAL-PARSER:"
-    "AUTHOR:"
-    "PACKAGE:"
-}
+natural-sort [ name>> ] map diff .
 
 ! words we don't define
 ! not generated words
@@ -973,164 +982,20 @@ all-words [ "syntax" word-prop ] filter
 natural-sort
 [ . ] each
 
-"\""
-"$"
-"${"
-"&:"
-"("
-"->"
-"/*"
-"8-BIT:"
-"<<<<<<"
-"<<<<<<<"
-"<EBNF"
-"======"
-"======="
-">>>>>>"
-">>>>>>>"
-"?{"
-"ALIEN:"
-"B"
-"B:"
-"BACKWARD-ANALYSIS:"
-"BAD-ALIEN"
-"BROADCAST:"
-"BV{"
-"B{"
-"CALLBACK:"
-"CATEGORY-NOT:"
-"CATEGORY:"
-"CFSTRING:"
-"CLASS:"
-"COLOR:"
-"CONSTRUCTOR:"
-"CONSULT:"
-"CS{"
-"C{"
-"D"
-"DEFERS"
-"DEFINES"
-"DEFINES-CLASS"
-"DEFINES-PRIVATE"
-"DELIMITED:"
-"DESTRUCTOR:"
-"DLL\""
-"DL{"
-"FORWARD-ANALYSIS:"
-"FRAMEWORK:"
-"HEREDOC:"
-"HS{"
-"ICON:"
-"IDENTITY-MEMO:"
-"IDENTITY-MEMO::"
-"IHS{"
-"IH{"
-"INTERSECTION:"
-"IS"
-"I["
-"LOG:"
-"MAIN-WINDOW:"
-"METHOD:"
-"M\\"
-"NAN:"
-"P\""
-"PEG:"
-"PIXEL-FORMAT-ATTRIBUTE-TABLE:"
-"PRIVATE>"
-"R"
-"R!"
-"R\""
-"R#"
-"R'"
-"R("
-"R/"
-"R@"
-"RECT:"
-"RENAMING:"
-"RESET"
-"R["
-"R`"
-"R{"
-"R|"
-"S@"
-"SBUF\""
-"SEL:"
-"SLOT-CONSTRUCTOR:"
-"SLOT-PROTOCOL:"
-"SPECIAL-OBJECT:"
-"SUPER->"
-"S{"
-"TEST:"
-"TIP:"
-"TOKENIZER:"
-"TR:"
-"UNION-STRUCT:"
-"UNUSE:"
-"URL\""
-"W{"
-"X509_V_:"
-"[EBNF"
-"[let"
-"c-array@"
-"c-array{"
-"call-next-method"
-"delimiter"
-"deprecated"
-"eval("
-"f"
-"flags{"
-"intersection{"
-"maybe{"
-"not{"
-"shuffle("
-"union{"
-
-
-clear
-SYMBOL: was-private?
- all-words [ "syntax" word-prop ] filter
-[ vocabulary>> ] collect-by >alist
-
-[ first2 [ [ ".private" ?tail drop modern-syntax-path ] keep ] dip 3array ] map
-[ second "syntax" = ] filter
-[
-    f was-private? [
-        dup first dup . utf8 [
-            "! Copyright (C) 2015 Doug Coleman." print
-            "! See http://factorcode.org/license.txt for BSD license." print
-            "USING: ;" print
-            [
-                second ".private" ?tail [ ".syntax" append "IN: " prepend print nl ] dip
-                [ "<PRIVATE" print was-private? on ] when
-            ] [
-                third natural-sort [
-                    [ name>>
-
-                        {
-                            [ drop "PARSER: " ]
-                            [ >lower dup length 1 > [ ":" ?tail drop ] when " " ]
-                            [ parsers get ?at [ def>>  last def>> penultimate dup wrapper? [ wrapped>> "slots" word-prop [ name>> ] map " " join "{ " " } " surround ] [ drop "{ } " ] if ] [ drop "{ } " ] if  ]
-                            [ " " ]
-                            [
-                              parsers get ?at
-                              [ dup def>> last  def>> last \ slots>boa =
-                                    [
-                                      def>> but-last >array
-                                      [ dup word? [ name>> ] when  ] map " " join
-                                     ] [ def>> last name>> ] if
-                              ]
-                              [ drop "" ] if
-                            ]
-                            [ drop " ;" ]
-                        } cleave
-                    ] "" append-outputs-as print
-                ] each
-            ] bi
-            was-private? get [ "PRIVATE>" print ] when
-        ] with-file-writer
-    ] with-variable
-] each
-
+"\"" "$" "${" "&:" "(" "->" "/*" "8-BIT:"
+"<<<<<<" "<<<<<<<" "======" "=======" ">>>>>>" ">>>>>>>"
+"?{" "ALIEN:" "B" "B:" "BACKWARD-ANALYSIS:" "BAD-ALIEN" "BROADCAST:" "BV{"
+"B{" "CALLBACK:" "CATEGORY-NOT:" "CATEGORY:" "CFSTRING:" "CLASS:" "CONSTRUCTOR:"
+"CONSULT:" "CS{" "C{" "D" "DEFERS" "DEFINES" "DEFINES-CLASS" "DEFINES-PRIVATE"
+"DELIMITED:" "DESTRUCTOR:" "DLL\"" "DL{" "FORWARD-ANALYSIS:" "FRAMEWORK:" "HS{"
+"ICON:" "IDENTITY-MEMO:" "IDENTITY-MEMO::" "IHS{" "IH{" "INTERSECTION:" "IS" "I["
+"LOG:" "MAIN-WINDOW:" "METHOD:" "M\\" "NAN:" "P\"" "PEG:"
+"PIXEL-FORMAT-ATTRIBUTE-TABLE:" "PRIVATE>" "R" "R!" "R\"" "R#" "R'" "R(" "R/" "R@"
+"RECT:" "RENAMING:" "RESET" "R[" "R`" "R{" "R|" "S@" "SBUF\"" "SEL:" "SLOT-CONSTRUCTOR:"
+"SLOT-PROTOCOL:" "SPECIAL-OBJECT:" "SUPER->" "S{" "TEST:" "TIP:" "TOKENIZER:" "TR:"
+"UNION-STRUCT:" "UNUSE:" "URL\"" "W{" "X509_V_:" "c-array@" "c-array{" "call-next-method"
+"delimiter" "deprecated" "eval(" "f" "flags{" "intersection{" "maybe{" "not{"
+"shuffle(" "union{"
 
 *)
 
