@@ -434,3 +434,6 @@ ERROR: not-a-source-path path ;
 : failing-namespaces2 ( names -- names' )
     [ dup test-namespace2 ] { } map>assoc
     [ second ] reject keys ;
+
+! "uu" tests
+! yaml" docs
