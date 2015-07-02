@@ -4,6 +4,8 @@ USING: accessors assocs combinators constructors kernel make
 modern.parser multiline namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
+! FIXME: long-string, HEREDOC:
+! signatures
 
 TUPLE: mparser < parsed name start slots body ;
 CONSTRUCTOR: <mparser> mparser ( name slots start body -- mparser ) ;
@@ -860,10 +862,54 @@ CONSTRUCTOR: <slots-quot> slots-quot ( body -- block ) ;
 \ parse-slots-quot "slots[" register-parser
 
 TUPLE: slots-array < parsed body ;
-CONSTRUCTOR: <slots-array> slots-array ( body -- block ) ;
+CONSTRUCTOR: <slots-array> slots-array ( body -- obj ) ;
 : parse-slots-array ( -- array )
     "}" parse-until <slots-array> ;
 \ parse-slots-array "slots{" register-parser
+
+TUPLE: set-slots-array < parsed body ;
+CONSTRUCTOR: <set-slots-array> set-slots-array ( body -- obj ) ;
+: parse-set-slots-array ( -- array )
+    "}" parse-until <set-slots-array> ;
+\ parse-set-slots-array "set-slots{" register-parser
+
+TUPLE: set-slots-quot < parsed body ;
+CONSTRUCTOR: <set-slots-quot> set-slots-quot ( body -- obj ) ;
+: parse-set-slots-quot ( -- obj )
+    "]" parse-until <set-slots-quot> ;
+\ parse-set-slots-quot "set-slots[" register-parser
+
+TUPLE: copy-slots-array < parsed body ;
+CONSTRUCTOR: <copy-slots-array> copy-slots-array ( body -- obj ) ;
+: parse-copy-slots-array ( -- array )
+    "}" parse-until <copy-slots-array> ;
+\ parse-copy-slots-array "copy-slots{" register-parser
+
+TUPLE: set-array < parsed body ;
+CONSTRUCTOR: <set-array> set-array ( body -- obj ) ;
+: parse-set-array ( -- obj )
+    "}" parse-until <set-array> ;
+\ parse-set-array "set{" register-parser
+
+TUPLE: set-quot < parsed body ;
+CONSTRUCTOR: <set-quot> set-quot ( body -- obj ) ;
+: parse-set-quot ( -- obj )
+    "}" parse-until <set-quot> ;
+\ parse-set-quot "set[" register-parser
+
+TUPLE: get-array < parsed body ;
+CONSTRUCTOR: <get-array> get-array ( body -- obj ) ;
+: parse-get-array ( -- obj )
+    "}" parse-until <get-array> ;
+\ parse-get-array "get{" register-parser
+
+TUPLE: get-quot < parsed body ;
+CONSTRUCTOR: <get-quot> get-quot ( body -- obj ) ;
+: parse-get-quot ( -- obj )
+    "}" parse-until <get-quot> ;
+\ parse-get-quot "get[" register-parser
+
+
 
 TUPLE: let-block < parsed body ;
 CONSTRUCTOR: <let-block> let-block ( body -- block ) ;
@@ -872,10 +918,18 @@ CONSTRUCTOR: <let-block> let-block ( body -- block ) ;
 \ parse-let-block "[let" register-parser
 
 TUPLE: stack-effect < parsed in out ;
-CONSTRUCTOR: <stack-effect> stack-effect ( in out -- block ) ;
+CONSTRUCTOR: <stack-effect> stack-effect ( in out -- obj ) ;
 : parse-stack-effect ( -- stack-effect )
     parse-signature--) ;
 \ parse-stack-effect "(" register-parser
+
+
+TUPLE: heredoc < parsed name string ;
+CONSTRUCTOR: <heredoc> heredoc ( name string -- heredoc ) ;
+: parse-heredoc ( -- heredoc )
+    token
+    dup name>> multiline-string-until <heredoc> ;
+\ parse-heredoc "HEREDOC:" register-parser
 
 
 /*
