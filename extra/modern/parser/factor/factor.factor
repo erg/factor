@@ -638,7 +638,7 @@ CONSTRUCTOR: <help> help ( name body -- obj ) ;
 TUPLE: long-string < parsed name text ;
 CONSTRUCTOR: <long-string> long-string ( name text -- long-string ) ;
 : parse-long-string ( -- long-string )
-    token ";" parse-comment-until <long-string> ;
+    token "\n;" multiline-string-until <long-string> ;
 
 TUPLE: mirc < parsed name command body ;
 CONSTRUCTOR: <mirc> mirc ( name command body -- mirc ) ;
