@@ -26,15 +26,22 @@ IN: modern.refactor
         dup print flush
         parse-modern-file [
             second
-            dup [ munit-test? ] find-all keys [ 2 - ] map
+            dup [ munit-test? ] find-all keys
+            ! Make sure [ ] unit-test
+            [ 1 - ] map
+            over '[ _ nth block? ] filter
+            [ 1 - ] map
+            ! Make sure looks like [ ] [ ] unit-test
+            over '[ _ nth block? ] filter
             over
             '[
                 _ [
                     warn-rename-unit-test-quots
                     block>array
-                ] change-nth ] each
+                ] change-nth
+            ] each
         ] [
-            first 2drop ! write-modern-file
+            first write-modern-file
         ] bi
     ] [
         drop
