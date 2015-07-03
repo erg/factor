@@ -163,6 +163,7 @@ M: gl-function object>identifiers name>> name>> ;
 M: glsl-shader object>identifiers name>> name>> ;
 M: glsl-program object>identifiers name>> name>> ;
 M: uniform-tuple object>identifiers name>> name>> ;
+M: subroutine object>identifiers name>> name>> ;
 
 ! alien/ffi
 M: c-type object>identifiers name>> name>> ;
