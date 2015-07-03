@@ -188,10 +188,9 @@ ERROR: no-more-tokens ;
 : parse-input ( -- seq comments )
     [
         V{ } clone comments [
-            [ parse dup mtoken? [ dup name>> "hi" = [ B ] when ] when dup [ transfer-texts ] when ] loop>array
+            [ parse dup [ transfer-texts ] when ] loop>array
             comments get
         ] with-variable
-B
     ] with-texts ;
 
 ERROR: token-expected token ;
