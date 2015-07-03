@@ -131,7 +131,7 @@ ${example-indent}}]""""
     } diff [ dup  check-parsed-file ] { } map>assoc
     [ second not ] filter keys [ . ] each
 
-    
+
 
     "resource:extra" disk-vocabs-in-root
     ! [ vocab? ] filter
