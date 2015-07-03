@@ -6,6 +6,8 @@ IN: modern.parser.factor
 
 ! FIXME: long-string, HEREDOC:
 ! signatures
+! all-vocabs [ dup . flush yield lookup-vocab ] each 
+! math.blas.ffi
 
 TUPLE: mparser < parsed name start slots body ;
 CONSTRUCTOR: <mparser> mparser ( name slots start body -- mparser ) ;
@@ -31,6 +33,7 @@ DEFER: parse-nested-signature(--)
 DEFER: parse-signature-in
 DEFER: parse-signature-in'
 
+! fixme! infinite loop
 : parse-signature-in'' ( -- )
     raw dup ":" tail? [
         parse-nested-signature(--) <typed-argument> ,
@@ -74,7 +77,12 @@ DEFER: parse-signature-in'
     parse-signature-in parse-signature-out <signature> ;
 
 : parse-signature--) ( -- signature )
+B
     parse-signature-in' parse-signature-out <signature> ;
+
+: c-arguments ( -- arguments )
+    "(" expect
+    ")" strings-until ;
 
 TUPLE: syntax < parsed name body ;
 CONSTRUCTOR: <syntax> syntax ( name body -- syntax ) ;
@@ -471,22 +479,29 @@ CONSTRUCTOR: <library> library ( name -- library ) ;
 TUPLE: c-function < parsed return-value name arguments ;
 CONSTRUCTOR: <c-function> c-function ( return-value name arguments -- c-function ) ;
 : parse-c-function ( -- c-function )
-    token token ";" parse-until <c-function> ;
+    token token c-arguments ";" expect <c-function> ;
 
 TUPLE: x-function < parsed return-value name arguments ;
 CONSTRUCTOR: <x-function> x-function ( return-value name arguments -- c-function ) ;
 : parse-x-function ( -- c-function )
-    token token ";" parse-until <x-function> ;
+    token token c-arguments ";" expect <x-function> ;
 
 TUPLE: c-function-alias < parsed aliased-name return-value name arguments ;
 CONSTRUCTOR: <c-function-alias> c-function-alias ( aliased-name return-value name arguments -- c-function ) ;
 : parse-c-function-alias ( -- c-function )
-    token token token ";" parse-until <c-function-alias> ;
+    token token token c-arguments ";" expect <c-function-alias> ;
 
-TUPLE: gl-function < parsed return-value name arguments ;
-CONSTRUCTOR: <gl-function> gl-function ( return-value name arguments -- gl-function ) ;
+TUPLE: gl-function < parsed return-value name ptrs arguments ;
+CONSTRUCTOR: <gl-function> gl-function ( return-value name ptrs arguments -- gl-function ) ;
 : parse-gl-function ( -- gl-function )
-    token token ";" parse-until <gl-function> ;
+    token token parse c-arguments ";" expect <gl-function> ;
+
+
+TUPLE: subroutine < parsed name arguments ;
+CONSTRUCTOR: <subroutine> subroutine ( name arguments -- subroutine ) ;
+: parse-subroutine ( -- subroutine )
+    token c-arguments ";" expect <subroutine> ;
+! \ parse-subroutine "SUBROUTINE:" register-parser
 
 TUPLE: c-type < parsed name ;
 CONSTRUCTOR: <c-type> c-type ( name -- c-type ) ;
@@ -831,7 +846,7 @@ CONSTRUCTOR: <solution> solution ( name -- obj ) ;
 TUPLE: c-callback < parsed return-value name arguments ;
 CONSTRUCTOR: <c-callback> c-callback ( return-value name arguments -- c-callback ) ;
 : parse-c-callback ( -- c-callback )
-    token token ";" parse-until <c-callback> ;
+    token token c-arguments ";" expect <c-callback> ;
 \ parse-c-callback "CALLBACK:" register-parser
 
 
@@ -947,6 +962,25 @@ CONSTRUCTOR: <ebnf> ebnf ( name text -- ebnf ) ;
     token
     "EBNF]" multiline-string-until <ebnf> ;
 \ parse-ebnf-bracket "[EBNF" register-parser
+
+
+TUPLE: glsl-shader < parsed name class string ;
+CONSTRUCTOR: <glsl-shader> glsl-shader ( name class string -- glsl ) ;
+: parse-glsl-shader ( -- heredoc )
+    token token "\n;" multiline-string-until <glsl-shader> ;
+\ parse-glsl-shader "GLSL-SHADER:" register-parser
+
+TUPLE: glsl-program < parsed name words ;
+CONSTRUCTOR: <glsl-program> glsl-program ( name words -- glsl ) ;
+: parse-glsl-program ( -- heredoc )
+    token ";" parse-until <glsl-program> ;
+\ parse-glsl-program "GLSL-PROGRAM:" register-parser
+
+TUPLE: uniform-tuple < parsed name slots ;
+CONSTRUCTOR: <uniform-tuple> uniform-tuple ( name slots -- uniform-tuple ) ;
+: parse-uniform-tuple ( -- uniform-tuple )
+    token ";" parse-until <uniform-tuple> ;
+\ parse-uniform-tuple "UNIFORM-TUPLE:" register-parser
 
 
 /*
