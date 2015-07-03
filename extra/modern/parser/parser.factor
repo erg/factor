@@ -3,8 +3,8 @@
 USING: accessors arrays assocs combinators
 combinators.short-circuit constructors fry io io.encodings.utf8
 io.files io.streams.document io.streams.string kernel make
-math.parser namespaces sequences sequences.extras strings
-unicode.case vocabs.files vocabs.loader ;
+math.parser namespaces prettyprint sequences sequences.extras
+strings unicode.case vocabs.files vocabs.loader ;
 IN: modern.parser
 
 SYMBOL: parsers
@@ -188,9 +188,10 @@ ERROR: no-more-tokens ;
 : parse-input ( -- seq comments )
     [
         V{ } clone comments [
-            [ parse dup [ transfer-texts ] when ] loop>array
+            [ parse dup mtoken? [ dup name>> "hi" = [ B ] when ] when dup [ transfer-texts ] when ] loop>array
             comments get
         ] with-variable
+B
     ] with-texts ;
 
 ERROR: token-expected token ;
