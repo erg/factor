@@ -22,7 +22,7 @@ C: <B> B ( T -- B )
 
 { 1 0 } [ define-box ] must-infer-as
 
-[ T{ float-box f 5.0 } ] [ 5.0 <float-box> ] unit-test
+{ T{ float-box f 5.0 } } [ 5.0 <float-box> ] unit-test
 
 : twice ( word -- )
     [ execute ] [ execute ] bi ; inline
@@ -40,7 +40,7 @@ ALIAS: WW ${W}${W}
 
 >>
 
-[ 16 ] [ 2 sqsq ] unit-test
+{ 16 } [ 2 sqsq ] unit-test
 
 <<
 
@@ -56,7 +56,7 @@ ALIAS: W ${W}
 
 >>
 
-[ 4 ] [ 1 3 blah ] unit-test
+{ 4 } [ 1 3 blah ] unit-test
 
 <<
 
@@ -72,7 +72,7 @@ SYMBOL: W
 
 >>
 
-[ blorgh ] [ blorgh ] unit-test
+{ blorgh } [ blorgh ] unit-test
 
 <<
 
@@ -90,11 +90,11 @@ M: integer W 1 + ;
 
 >>
 
-[ 2   ] [ 1   snurv ] unit-test
-[ 3.0 ] [ 3.0 snurv ] unit-test
+{ 2   } [ 1   snurv ] unit-test
+{ 3.0 } [ 3.0 snurv ] unit-test
 
 ! Does replacing an ordinary word with a functor-generated one work?
-[ [ ] ] [
+{ [ ] } [
     "IN: functors.tests
 
     TUPLE: some-tuple ;
@@ -112,7 +112,7 @@ M: integer W 1 + ;
         "some-tuple" "functors.tests" lookup-word
         "some-generic" "functors.tests" lookup-word lookup-method >boolean
     ] unit-test ;
-    [ t ] [ "some-symbol" "functors.tests" lookup-word >boolean ] unit-test
+    { t } [ "some-symbol" "functors.tests" lookup-word >boolean ] unit-test
 
 test-redefinition
 
@@ -131,7 +131,7 @@ SYMBOL: W-symbol
 
 ;FUNCTOR
 
-[ [ ] ] [
+{ [ ] } [
     """IN: functors.tests
     << "some" redefine-test >>""" <string-reader> "functors-test" parse-stream
 ] unit-test
@@ -157,45 +157,45 @@ STRUCT: T-class
 
 >>
 
-[
+{
     {
         T{ struct-slot-spec
             { name "nemo" }
             { offset 0 }
             { class integer }
-            { initial 0 } 
+            { initial 0 }
             { type c:longlong }
         }
         T{ struct-slot-spec
             { name "x" }
             { offset 8 }
             { class object }
-            { initial f } 
+            { initial f }
             { type { c:char 4 } }
         }
         T{ struct-slot-spec
             { name "y" }
             { offset 12 }
             { class object }
-            { initial f } 
+            { initial f }
             { type { c:short 2 } }
         }
         T{ struct-slot-spec
             { name "z" }
             { offset 16 }
             { class fixnum }
-            { initial 5 } 
+            { initial 5 }
             { type c:char }
         }
         T{ struct-slot-spec
             { name "float" }
             { offset 20 }
             { class object }
-            { initial f } 
+            { initial f }
             { type { c:float 2 } }
         }
     }
-] [ a-struct struct-slots ] unit-test
+} [ a-struct struct-slots ] unit-test
 
 <<
 
@@ -213,8 +213,8 @@ ALIAS: W-W ${W}-${W}
 
 >>
 
-[ t ] [ \ an-inline-word inline? ] unit-test
-[ f ] [ \ an-inline-word-an-inline-word inline? ] unit-test
+{ t } [ \ an-inline-word inline? ] unit-test
+{ f } [ \ an-inline-word-an-inline-word inline? ] unit-test
 
 <<
 
@@ -233,4 +233,4 @@ TUPLE: T ; final
 
 >>
 
-[ t ] [ a-final-tuple final-class? ] unit-test
+{ t } [ a-final-tuple final-class? ] unit-test
