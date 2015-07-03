@@ -1,12 +1,12 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors assocs combinators constructors kernel make
+USING: accessors assocs combinators constructors io kernel make
 modern.parser multiline namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
 ! FIXME: long-string, HEREDOC:
 ! signatures
-! all-vocabs [ dup . flush yield lookup-vocab ] each 
+! all-vocabs [ dup . flush yield lookup-vocab ] each
 ! math.blas.ffi
 
 TUPLE: mparser < parsed name start slots body ;
@@ -33,23 +33,25 @@ DEFER: parse-nested-signature(--)
 DEFER: parse-signature-in
 DEFER: parse-signature-in'
 
+ERROR: signature-expected position ;
 ! fixme! infinite loop
-: parse-signature-in'' ( -- )
-    raw dup ":" tail? [
+: parse-signature-in'' ( -- parse-out? )
+    raw [ tell-input signature-expected ] unless*
+    dup ":" tail? [
         parse-nested-signature(--) <typed-argument> ,
         parse-signature-in''
     ] [
-        dup "--" = [
-            drop
-        ] [
-            , parse-signature-in''
-        ] if
+        {
+            { "--" [ t ] }
+            { ")" [ f ] }
+            [ , parse-signature-in'' ]
+        } case
     ] if ;
 
-: parse-signature-in' ( -- out )
-    [ parse-signature-in'' ] { } make ;
+: parse-signature-in' ( -- in parse-out? )
+    [ parse-signature-in'' ] { } make swap ;
 
-: parse-signature-in ( -- in )
+: parse-signature-in ( -- in ? )
     "(" expect parse-signature-in' ;
 
 : parse-signature-out' ( -- )
@@ -67,18 +69,20 @@ DEFER: parse-signature-in'
 : parse-signature-out ( -- out )
     [ parse-signature-out' ] { } make ;
 
+: maybe-parse-out ( ? -- out/f )
+    [ parse-signature-out ] [ f ] if ;
+
 : parse-nested-signature(--) ( -- signature )
     raw dup "(" = [
         drop
-        parse-signature-in' parse-signature-out <signature>
+        parse-signature-in' maybe-parse-out <signature>
     ] when ;
 
 : parse-signature(--) ( -- signature )
-    parse-signature-in parse-signature-out <signature> ;
+    parse-signature-in maybe-parse-out <signature> ;
 
 : parse-signature--) ( -- signature )
-B
-    parse-signature-in' parse-signature-out <signature> ;
+    parse-signature-in' maybe-parse-out <signature> ;
 
 : c-arguments ( -- arguments )
     "(" expect
@@ -501,7 +505,7 @@ TUPLE: subroutine < parsed name arguments ;
 CONSTRUCTOR: <subroutine> subroutine ( name arguments -- subroutine ) ;
 : parse-subroutine ( -- subroutine )
     token c-arguments ";" expect <subroutine> ;
-! \ parse-subroutine "SUBROUTINE:" register-parser
+\ parse-subroutine "SUBROUTINE:" register-parser
 
 TUPLE: c-type < parsed name ;
 CONSTRUCTOR: <c-type> c-type ( name -- c-type ) ;
