@@ -46,3 +46,5 @@ IN: modern.refactor
     ] [
         drop
     ] if ;
+
+: rewrite-all-tests ( -- ) all-vocabs [ rename-unit-test-quots ] each ;
