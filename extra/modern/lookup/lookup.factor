@@ -112,6 +112,8 @@ M: char object>identifiers drop f ;
 M: tuple-literal-assoc object>identifiers drop f ;
 M: tuple-literal-boa object>identifiers drop f ;
 
+M: signature object>identifiers drop f ;
+
 
 M: mprimitive object>identifiers name>> name>> ;
 M: mgeneric object>identifiers name>> name>> ;
@@ -158,6 +160,9 @@ M: c-callback object>identifiers name>> name>> ;
 M: c-function-alias object>identifiers aliased-name>> name>> ;
 M: x-function object>identifiers name>> name>> ;
 M: gl-function object>identifiers name>> name>> ;
+M: glsl-shader object>identifiers name>> name>> ;
+M: glsl-program object>identifiers name>> name>> ;
+M: uniform-tuple object>identifiers name>> name>> ;
 
 ! alien/ffi
 M: c-type object>identifiers name>> name>> ;
@@ -311,6 +316,12 @@ ERROR: not-a-source-path path ;
 : core-vocabs ( -- seq ) "resource:core" vocabs-from ;
 : basis-vocabs ( -- seq ) "resource:basis" vocabs-from ;
 : extra-vocabs ( -- seq ) "resource:extra" vocabs-from ;
+: all-vocabs ( -- seq )
+    [
+        core-vocabs
+        basis-vocabs
+        extra-vocabs
+    ] { } append-outputs-as ;
 
 : diff-bad-basis-vocabs ( seq -- seq' )
     { } diff ;
