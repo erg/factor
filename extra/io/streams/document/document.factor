@@ -21,28 +21,22 @@ M: document-object nth object>> nth ;
 M: document-object nth-unsafe object>> nth ;
 M: document-object integer>fixnum object>> integer>fixnum ;
 
-: add-lines ( stream n -- stream )
-    '[ _ + ] change-line ; inline
-
-: advance-line ( stream -- )
-    1 add-lines 0 >>column drop ; inline
-
-: count-newlines ( string -- n )
-    [ CHAR: \n = ] count ;
-
-: find-last-newline ( string -- n ? )
-    [ CHAR: \n = ] find-last >boolean ;
+: add-lines ( stream n -- stream ) '[ _ + ] change-line ; inline
+: advance-line ( stream -- ) 1 add-lines 0 >>column drop ; inline
+: count-newlines ( string -- n ) [ CHAR: \n = ] count ;
+: find-last-newline ( string -- n ) [ CHAR: \n = ] find-last drop ;
 
 : advance-string ( string stream -- )
     [ [ count-newlines ] dip over 0 >
     [ swap add-lines 0 >>column drop ] [ 2drop ] if ]
     [
         swap
-        [ length ] [ find-last-newline ] bi [
+        [ length ]
+        [ find-last-newline ] bi [
             - 1 - >>column drop
         ] [
-            drop swap [ + ] change-column drop
-        ] if
+            swap [ + ] change-column drop
+        ] if*
     ] 2bi ;
 
 : advance-1 ( stream n -- )
