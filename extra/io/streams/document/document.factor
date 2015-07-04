@@ -2,17 +2,20 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays combinators constructors destructors fry
 io io.private io.streams.position io.streams.string kernel
-locals math math.order namespaces sequences sequences.private
-strings ;
+locals math math.order math.vectors namespaces sequences
+sequences.private strings ;
 IN: io.streams.document
-
-TUPLE: document-stream < position-stream { line integer } { column integer } ;
-: <document-stream> ( stream -- document-stream )
-    \ document-stream new-disposable
-        swap >>stream ; inline
 
 TUPLE: document-position { line integer } { column integer } ;
 CONSTRUCTOR: <document-position> document-position ( line column -- document-position ) ;
+
+TUPLE: document-stream < position-stream
+    { line integer } { column integer }
+    { offset document-position } ;
+
+: <document-stream> ( stream -- document-stream )
+    \ document-stream new-disposable
+        swap >>stream ; inline
 
 TUPLE: document-object object { start document-position } { finish document-position } ;
 CONSTRUCTOR: <document-object> document-object ( start object finish -- document-object ) ;
@@ -123,11 +126,31 @@ M: document-stream stream-tell
     [ object>> ] [ stream>> ] bi*
     over integer? [ stream-write1 ] [ stream-write ] if ;
 
+: docpos- ( docpos1 docpos2 -- docpos )
+    [ [ line>> ] bi@ - ]
+    [ [ column>> ] bi@ - ] 2bi <document-position> ;
+
+: docpos+ ( docpos1 docpos2 -- docpos )
+    [ [ line>> ] bi@ + ]
+    [ [ column>> ] bi@ + ] 2bi <document-position> ;
+
+: adjust-finish-stream-offset ( finish stream -- )
+    [ stream-tell ] [ ] bi
+    {
+        [ [ swap docpos- ] dip offset<< ]
+    } 3cleave ;
+
 ! Writing
 M: document-stream stream-write ( document-object stream -- )
-    [ [ start>> ] dip [ write-newlines ] [ write-spaces ] 2bi ]
-    [ write-object ]
-    [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ] 2tri ;
+    {
+        [
+            [ [ start>> ] [ offset>> ] bi* docpos+ ] keep
+            [ write-newlines ] [ write-spaces ] 2bi
+        ]
+        [ write-object ]
+        [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ]
+        [ [ finish>> ] dip adjust-finish-stream-offset ]
+    } 2cleave ;
 
 M: document-stream stream-nl ( stream -- )
     stream>> stream-nl ;
