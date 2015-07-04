@@ -324,6 +324,23 @@ ERROR: not-a-source-path path ;
         extra-vocabs
     ] { } append-outputs-as ;
 
+: filter-exists ( seq -- seq' ) [ exists? ] filter ;
+
+: all-syntax ( -- seq )
+    all-vocabs [ modern-syntax-path ] map filter-exists ;
+
+: all-source ( -- seq )
+    all-vocabs [ modern-source-path ] map filter-exists ;
+
+: all-docs ( -- seq )
+    all-vocabs [ modern-docs-path ] map filter-exists ;
+
+: all-tests ( -- seq )
+    all-vocabs [ modern-tests-path ] map filter-exists ;
+
+: all-factor-files ( -- seq )
+    [ all-syntax all-source all-docs all-tests ] { } append-outputs-as ;
+
 : diff-bad-basis-vocabs ( seq -- seq' )
     { } diff ;
 
