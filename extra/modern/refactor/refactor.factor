@@ -62,7 +62,7 @@ IN: modern.refactor
     dup texts>> dup [
         last object>> ";" = [
             [
-                document-object new ";" >>object suffix
+                dup last ";" document-object-after suffix
             ] change-texts
         ] unless
     ] [
