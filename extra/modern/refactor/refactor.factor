@@ -1,8 +1,8 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors assocs combinators combinators.short-circuit
-fry io io.files kernel math modern.lookup modern.parser
-modern.parser.factor sequences sequences.extras ;
+fry io io.files io.streams.document kernel math modern.lookup
+modern.parser modern.parser.factor sequences sequences.extras ;
 FROM: sequences => change-nth ;
 IN: modern.refactor
 
@@ -48,3 +48,39 @@ IN: modern.refactor
     ] if ;
 
 : rewrite-all-tests ( -- ) all-vocabs [ rename-unit-test-quots ] each ;
+
+! Rewrite FUNCTION: to not have a trailing ;
+
+: c-function-remove-semi ( obj -- obj )
+    dup texts>> dup [
+        last object>> ";" = [ [ but-last ] change-texts ] when
+    ] [
+        drop
+    ] if ;
+
+: c-function-add-semi ( obj -- obj )
+    dup texts>> dup [
+        last object>> ";" = [
+            [
+                document-object new ";" >>object suffix
+            ] change-texts
+        ] unless
+    ] [
+        drop
+    ] if ;
+
+: rename-functions-no-semi ( names -- )
+    [
+        [
+            parse-modern-file second
+            [ dup c-function? [ c-function-remove-semi ] when ] map
+        ] keep write-modern-file
+    ] each ;
+
+: rename-functions-add-semi ( names -- )
+    [
+        [
+            parse-modern-file second
+            [ dup c-function? [ c-function-add-semi ] when ] map
+        ] keep write-modern-file
+    ] each ;
