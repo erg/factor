@@ -37,7 +37,7 @@ M: document-object integer>fixnum object>> integer>fixnum ;
     ] if* ;
 
 : document-object-after ( document-object object -- document-object' )
-    [ object>> ] dip 2dup calculate-finish-position <document-object> ;
+    [ finish>> ] dip 2dup calculate-finish-position <document-object> ;
 
 : advance-string ( string stream -- )
     [
