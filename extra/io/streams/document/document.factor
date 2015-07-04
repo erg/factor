@@ -22,14 +22,28 @@ M: document-object nth-unsafe object>> nth ;
 M: document-object integer>fixnum object>> integer>fixnum ;
 
 : add-lines ( stream n -- stream ) '[ _ + ] change-line ; inline
-: advance-line ( stream -- ) 1 add-lines 0 >>column drop ; inline
+: advance-stream-line ( stream -- ) 1 add-lines 0 >>column drop ; inline
 : count-newlines ( string -- n ) [ CHAR: \n = ] count ;
 : find-last-newline ( string -- n ) [ CHAR: \n = ] find-last drop ;
 
-: advance-string ( string stream -- )
-    [ [ count-newlines ] dip over 0 >
-    [ swap add-lines 0 >>column drop ] [ 2drop ] if ]
+: calculate-finish-position ( start string -- finish )
+    [ count-newlines ]
+    [ length ]
+    [ find-last-newline ] tri
     [
+        - [ line>> + ] dip <document-position>
+    ] [
+        [ [ line>> ] [ column>> ] bi ] 2dip swapd + [ + ] dip <document-position>
+    ] if* ;
+
+: document-object-after ( document-object object -- document-object' )
+    [ object>> ] dip 2dup calculate-finish-position <document-object> ;
+
+: advance-string ( string stream -- )
+    [
+        [ count-newlines ] dip over 0 >
+        [ swap add-lines 0 >>column drop ] [ 2drop ] if
+    ] [
         swap
         [ length ]
         [ find-last-newline ] bi [
@@ -54,8 +68,7 @@ M: document-stream stream-contents*
 
 M: document-stream stream-readln
     [ stream-tell ] [ call-next-method ] [ ] tri
-    [ advance-line ]
-    [ stream-tell ] bi <document-object> ;
+    [ advance-stream-line ] [ stream-tell ] bi <document-object> ;
 
 M: document-stream stream-read1
     [ stream-tell ] [ call-next-method ] [ ] tri
@@ -87,7 +100,6 @@ M:: document-stream stream-read-until ( seps stream -- seq sep/f )
 M: document-stream stream-tell
     [ line>> ] [ column>> ] bi <document-position> ;
 
-
 : write-newlines ( document-position stream -- )
     [ [ line>> ] bi@ [-] CHAR: \n <string> ]
     [ nip [ dup length ] dip swap dup 0 > [ add-lines 0 >>column drop ] [ 2drop ] if ]
@@ -99,7 +111,8 @@ M: document-stream stream-tell
     [ nip stream>> ] 2tri stream-write ;
 
 : write-object ( document-object stream -- )
-    [ object>> ] [ stream>> ] bi* over integer? [ stream-write1 ] [ stream-write ] if ;
+    [ object>> ] [ stream>> ] bi*
+    over integer? [ stream-write1 ] [ stream-write ] if ;
 
 ! Writing
 M: document-stream stream-write ( document-object stream -- )
