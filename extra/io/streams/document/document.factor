@@ -1,8 +1,9 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays combinators constructors destructors fry
-io io.private io.streams.position kernel locals math math.order
-namespaces sequences sequences.private strings ;
+io io.private io.streams.position io.streams.string kernel
+locals math math.order namespaces sequences sequences.private
+strings ;
 IN: io.streams.document
 
 TUPLE: document-stream < position-stream { line integer } { column integer } ;
@@ -26,14 +27,22 @@ M: document-object integer>fixnum object>> integer>fixnum ;
 : count-newlines ( string -- n ) [ CHAR: \n = ] count ;
 : find-last-newline ( string -- n ) [ CHAR: \n = ] find-last drop ;
 
-: calculate-finish-position ( start string -- finish )
+GENERIC: calculate-finish-position ( start obj -- finish )
+
+M: integer calculate-finish-position ( start obj -- finish )
+    CHAR: \n = [
+        line>> 0 <document-position>
+    ] [
+        [ line>> ] [ column>> 1 + ] bi <document-position>
+    ] if ;
+
+M: string calculate-finish-position ( start string -- finish )
     [ count-newlines ]
     [ length ]
     [ find-last-newline ] tri
-    [
-        - [ line>> + ] dip <document-position>
-    ] [
-        [ [ line>> ] [ column>> ] bi ] 2dip swapd + [ + ] dip <document-position>
+    [ - [ line>> + ] dip <document-position> ] [
+        [ [ line>> ] [ column>> ] bi ] 2dip
+        swapd + [ + ] dip <document-position>
     ] if* ;
 
 : document-object-after ( document-object object -- document-object' )
@@ -130,3 +139,9 @@ M: document-stream stream-nl ( stream -- )
 
 : output>document-stream ( -- )
     output-stream [ <document-stream> ] change ;
+
+: documents>string ( documents -- string )
+    [
+        output>document-stream
+        [ texts>> [ write ] each ] each nl
+    ] with-string-writer ;
