@@ -69,6 +69,7 @@ IN: modern.refactor
         drop
     ] if ;
 
+! Needs a new syntax definition word at same time
 : rename-functions-no-semi ( names -- )
     [
         [
@@ -84,3 +85,9 @@ IN: modern.refactor
             [ dup c-function? [ c-function-add-semi ] when ] map
         ] keep write-modern-file
     ] each ;
+
+! simple text replacement
+: rename-texts ( object assoc -- object )
+    '[
+        [ [ _ ?at drop ] change-object ] map
+    ] change-texts ;
