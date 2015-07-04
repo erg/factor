@@ -1022,7 +1022,7 @@ natural-sort
 "\"" "$" "${" "&:" "(" "->" "/*" "8-BIT:"
 "<<<<<<" "<<<<<<<" "======" "=======" ">>>>>>" ">>>>>>>"
 "?{" "ALIEN:" "B" "B:" "BACKWARD-ANALYSIS:" "BAD-ALIEN" "BROADCAST:" "BV{"
-"B{" "CALLBACK:" "CATEGORY-NOT:" "CATEGORY:" "CFSTRING:" "CLASS:" "CONSTRUCTOR:"
+"B{" "CATEGORY-NOT:" "CATEGORY:" "CFSTRING:" "CLASS:" "CONSTRUCTOR:"
 "CONSULT:" "CS{" "C{" "D" "DEFERS" "DEFINES" "DEFINES-CLASS" "DEFINES-PRIVATE"
 "DELIMITED:" "DESTRUCTOR:" "DLL\"" "DL{" "FORWARD-ANALYSIS:" "FRAMEWORK:" "HS{"
 "ICON:" "IDENTITY-MEMO:" "IDENTITY-MEMO::" "IHS{" "IH{" "INTERSECTION:" "IS" "I["
