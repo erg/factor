@@ -91,3 +91,30 @@ IN: modern.refactor
     '[
         [ [ _ ?at drop ] change-object ] map
     ] change-texts ;
+
+: rename-by-name ( paths assoc -- )
+    '[
+        [
+            parse-modern-file second [ _ rename-texts ] map
+        ] keep write-modern-file
+    ] each ;
+
+: rename-all-by-name ( assoc -- )
+    [ all-factor-files ] dip rename-by-name ;
+
+: rewrite-sbufs ( path -- )
+    [
+        parse-modern-file second
+        [
+            dup block? [
+                dup body>> [
+                    dup { [ mstring? ] [ class>> "SBUF" = ] } 1&&
+                    [
+                        [
+                            rest
+                        ] change-string
+                    ] when drop
+                ] each
+            ] when
+        ] map
+    ] keep write-modern-file ;
