@@ -420,6 +420,7 @@ ERROR: not-a-source-path path ;
 : namespace-ok? ( triple -- ? )
     first3 [ empty? ] both? nip ;
 
+! Words that we parse but are not in the loaded image
 : check-namespace ( triple -- triple )
     [ first ]
     [
@@ -430,6 +431,7 @@ ERROR: not-a-source-path path ;
         swap diff natural-sort
     ] tri 3array ;
 
+! Words in the image that don't have a symbol on disk
 : check-namespace2 ( triple -- triple )
     [ first ]
     [ first2 [ vocab-words [ name>> ] map ] dip diff natural-sort ]
@@ -463,6 +465,3 @@ ERROR: not-a-source-path path ;
 : failing-namespaces2 ( names -- names' )
     [ dup test-namespace2 ] { } map>assoc
     [ second ] reject keys ;
-
-! "uu" tests
-! yaml" docs
