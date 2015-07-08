@@ -20,7 +20,6 @@ TUPLE: document-stream < position-stream
         f >>diff ; inline
 
 : add-lines ( stream n -- stream ) '[ _ + ] change-line ; inline
-: advance-stream-line ( stream -- ) 1 add-lines 0 >>column drop ; inline
 : count-newlines ( string -- n ) [ CHAR: \n = ] count ;
 : find-last-newline ( string -- n/f ) [ CHAR: \n = ] find-last drop ;
 : count-trailing ( string -- n ) [ length ] [ find-last-newline ] bi [ - ] when* ;
@@ -49,26 +48,26 @@ M: document-object nth object>> nth ;
 M: document-object nth-unsafe object>> nth ;
 M: document-object integer>fixnum object>> integer>fixnum ;
 
-! GENERIC: calculate-finish-position ( start obj -- finish )
+GENERIC: calculate-finish-position ( start obj -- finish )
 
-! M: integer calculate-finish-position ( start obj -- finish )
-    ! CHAR: \n = [
-        ! line>> 0 <document-position>
-    ! ] [
-        ! [ line>> ] [ column>> 1 + ] bi <document-position>
-    ! ] if ;
+M: integer calculate-finish-position ( start obj -- finish )
+    CHAR: \n = [
+        line>> 0 <document-position>
+    ] [
+        [ line>> ] [ column>> 1 + ] bi <document-position>
+    ] if ;
 
-! M: string calculate-finish-position ( start string -- finish )
-    ! [ count-newlines ]
-    ! [ length ]
-    ! [ find-last-newline ] tri
-    ! [ - [ line>> + ] dip <document-position> ] [
-        ! [ [ line>> ] [ column>> ] bi ] 2dip
-        ! swapd + [ + ] dip <document-position>
-    ! ] if* ;
+M: string calculate-finish-position ( start string -- finish )
+    [ count-newlines ]
+    [ length ]
+    [ find-last-newline ] tri
+    [ - [ line>> + ] dip <document-position> ] [
+        [ [ line>> ] [ column>> ] bi ] 2dip
+        swapd + [ + ] dip <document-position>
+    ] if* ;
 
-! : document-object-after ( document-object object -- document-object' )
-    ! [ finish>> ] dip 2dup calculate-finish-position <document-object> ;
+: document-object-after ( document-object object -- document-object' )
+    [ finish>> ] dip 2dup calculate-finish-position <document-object> ;
 
 : advance-string ( string stream -- )
     [
@@ -89,6 +88,8 @@ M: document-object integer>fixnum object>> integer>fixnum ;
     [ 0 >>column 1 add-lines drop ]
     [ [ 1 + ] change-column drop ] if ; inline
 
+: advance-stream-line ( stream -- ) 1 add-lines 0 >>column drop ; inline
+
 M: document-stream stream-element-type call-next-method ;
 
 M: document-stream stream-read
@@ -99,7 +100,9 @@ M: document-stream stream-contents*
 
 M: document-stream stream-readln
     [ stream-tell ] [ call-next-method ] [ ] tri
-    [ advance-stream-line ] [ stream-tell ] bi <document-object> ;
+    2dup advance-string
+    [ stream-tell ] [ advance-stream-line ] bi <document-object> ;
+    ! [ advance-stream-line ] [ stream-tell ] bi
 
 M: document-stream stream-read1
     [ stream-tell ] [ call-next-method ] [ ] tri
@@ -171,11 +174,18 @@ M: document-stream stream-tell
         drop
     ] if ;
 
-: calculate-start ( document-object stream -- position )
+: calculate-start2 ( document-object stream -- position )
     [ start>> ] [ last-finish>> ] bi* [ docpos2+ ] when* ;
+
+! : calculate-start ( document-object stream -- position )
+! B
+    ! [ start>> ] [ last-finish>> ] bi* [ docpos+ ] when* ;
 
 : goto-start ( position stream -- )
     [ write-newlines ] [ write-spaces ] 2bi ;
+
+: goto-start2 ( position stream -- )
+    [ write-newlines2 ] [ write-spaces2 ] 2bi ;
 
 : calculate-diff ( document-object stream -- )
     [ [ object-diff ] [ diff>> ] bi* [ docpos+ ] when* ] keep diff<< ;
@@ -187,7 +197,8 @@ M: document-stream stream-tell
 M: document-stream stream-write ( document-object stream -- )
     {
         ! Go to the: start + diff
-        [ [ calculate-start ] keep goto-start ]
+        ! [ [ calculate-start2 ] keep goto-start2 ]
+        [ [ start>> ] dip goto-start2 ]
         ! Write the object
         [ write-object ]
         ! Advance stream
