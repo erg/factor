@@ -118,3 +118,6 @@ IN: modern.refactor
             ] when
         ] map
     ] keep write-modern-file ;
+
+: rewrite-string ( string assoc -- string' )
+    [ parse-modern-string ] dip '[ _ rename-texts ] map documents>string ;
