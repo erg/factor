@@ -33,7 +33,6 @@ DEFER: parse-signature-in
 DEFER: parse-signature-in'
 
 ERROR: signature-expected position ;
-! fixme! infinite loop
 : parse-signature-in'' ( -- parse-out? )
     raw [ tell-input signature-expected ] unless*
     dup ":" tail? [
