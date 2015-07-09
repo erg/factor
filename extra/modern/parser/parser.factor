@@ -261,7 +261,7 @@ ERROR: unrecognized-factor-file path ;
 
 : write-parsed-objects ( seq -- )
     output>document-stream
-    [ texts>> [ write ] each ] each ;
+    [ texts>> [ write ] each ] each nl ;
 
 : write-parsed-string ( seq -- string )
     [ write-parsed-objects ] with-string-writer ;
@@ -269,7 +269,7 @@ ERROR: unrecognized-factor-file path ;
 ! Add newline at end of file
 : write-modern-file ( seq path -- )
     utf8 [
-        write-parsed-objects nl
+        write-parsed-objects
     ] with-file-writer ;
 
 : load-vocab-docs ( names -- seq )
