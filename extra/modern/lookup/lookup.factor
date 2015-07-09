@@ -326,20 +326,20 @@ ERROR: not-a-source-path path ;
 
 : filter-exists ( seq -- seq' ) [ exists? ] filter ;
 
-: all-syntax ( -- seq )
+: all-syntax-paths ( -- seq )
     all-vocabs [ modern-syntax-path ] map filter-exists ;
 
-: all-source ( -- seq )
+: all-source-paths ( -- seq )
     all-vocabs [ modern-source-path ] map filter-exists ;
 
-: all-docs ( -- seq )
+: all-docs-paths ( -- seq )
     all-vocabs [ modern-docs-path ] map filter-exists ;
 
-: all-tests ( -- seq )
+: all-tests-paths ( -- seq )
     all-vocabs [ modern-tests-path ] map filter-exists ;
 
 : all-factor-files ( -- seq )
-    [ all-syntax all-source all-docs all-tests ] { } append-outputs-as ;
+    [ all-syntax-paths all-source-paths all-docs-paths all-tests-paths ] { } append-outputs-as ;
 
 : diff-bad-basis-vocabs ( seq -- seq' )
     { } diff ;

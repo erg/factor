@@ -2,7 +2,8 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: ascii io.encodings.utf8 io.files io.streams.document
 kernel modern.parser modern.parser.factor multiline sequences
-sets tools.test vocabs.hierarchy vocabs.loader ;
+sets tools.test vocabs.hierarchy vocabs.loader modern.lookup
+assocs ;
 IN: modern.parser.factor.tests
 
 {
@@ -48,6 +49,8 @@ IN: modern.parser.factor.tests
     }
 } [ "{ 1 2 3 }" parse-modern-string ] unit-test
 
+: check-parsed-string ( string -- ? )
+    dup parse-modern-string write-parsed-string sequence= ;
 
 : check-parsed-file ( path -- ? )
     [ utf8 file-contents ]
@@ -108,30 +111,14 @@ ${example-indent}}]""""
 : check-parsed-exact ( string -- ? )
     parse-modern-string [ write-parsed-string parse-modern-string ] keep = ;
 
-{ } [
-    all-source-paths [ check-parsed-file ] { } map>assoc [ nip ] assoc-reject
+{ { } } [
+    all-source-paths [ dup check-parsed-file ] { } map>assoc [ nip ] assoc-reject
 ] unit-test
 
+{ { } } [
+    all-docs-paths [ dup check-parsed-file ] { } map>assoc [ nip ] assoc-reject
+] unit-test
 
-/*
-! check if files are exact on disk
-    "resource:core" disk-vocabs-in-root
-    [ modern-source-path ] map sift
-    [ "loader/test" swap subseq? ] reject
-    [ replace-parsed-file ] each
-
-
-    "resource:basis" disk-vocabs-in-root
-    [ modern-source-path ] map sift
-    {
-    } diff [ dup  check-parsed-file ] { } map>assoc
-    [ second not ] filter keys [ . ] each
-
-
-
-    "resource:extra" disk-vocabs-in-root
-    ! [ vocab? ] filter
-    [ vocab-source-path ] map sift
-    [ dup flush check-parsed-file ] { } map>assoc
-    [ second not ] filter keys [ . ] each
-*/
+{ { } } [
+    all-tests-paths [ dup check-parsed-file ] { } map>assoc [ nip ] assoc-reject
+] unit-test
