@@ -23,25 +23,9 @@ TUPLE: document-stream < position-stream
 : count-newlines ( string -- n ) [ CHAR: \n = ] count ;
 : find-last-newline ( string -- n/f ) [ CHAR: \n = ] find-last drop ;
 : count-trailing ( string -- n ) [ length ] [ find-last-newline ] bi [ - ] when* ;
-: add-pairs ( a x b y -- ax by ) [ swap [ + ] dip ] dip + ; inline
-GENERIC: object-length ( obj -- nl trailing )
-M: integer object-length CHAR: \n = [ 1 0 ] [ 0 1 ] if ;
-M: sequence object-length [ count-newlines ] [ count-trailing ] bi ;
-: docpos- ( docpos1 docpos2 -- docpos )
-    [ [ line>> ] bi@ - ]
-    [ [ column>> ] bi@ - ] 2bi <document-position> ;
 
-: docpos+ ( docpos1 docpos2 -- docpos )
-    [ [ line>> ] bi@ + ]
-    [ [ column>> ] bi@ + ] 2bi <document-position> ;
-
-: object-diff ( object -- position )
-    [ object>> object-length <document-position> ]
-    [ length>> ] bi docpos- ;
-
-TUPLE: document-object object { start document-position } { finish document-position } ; ! { length document-position } ;
+TUPLE: document-object object { start document-position } { finish document-position } ;
 CONSTRUCTOR: <document-object> document-object ( start object finish -- document-object ) ;
-    ! dup object>> object-length <document-position> >>length ;
 
 M: document-object length object>> length ;
 M: document-object nth object>> nth ;
@@ -102,7 +86,6 @@ M: document-stream stream-readln
     [ stream-tell ] [ call-next-method ] [ ] tri
     2dup advance-string
     [ stream-tell ] [ advance-stream-line ] bi <document-object> ;
-    ! [ advance-stream-line ] [ stream-tell ] bi
 
 M: document-stream stream-read1
     [ stream-tell ] [ call-next-method ] [ ] tri
@@ -134,16 +117,6 @@ M:: document-stream stream-read-until ( seps stream -- seq sep/f )
 M: document-stream stream-tell
     [ line>> ] [ column>> ] bi <document-position> ;
 
-: write-newlines2 ( document-position stream -- )
-    [ [ line>> ] bi@ [-] CHAR: \n <string> ]
-    [ nip [ dup length ] dip swap dup 0 > [ add-lines 0 >>column drop ] [ 2drop ] if ]
-    [ nip stream>> ] 2tri stream-write ;
-
-: write-spaces2 ( document-position stream -- )
-    [ [ column>> ] bi@ [-] CHAR: \s <string> ]
-    [ nip [ dup length ] dip swap dup 0 > [ '[ _ + ] change-column drop ] [ 2drop ] if ]
-    [ nip stream>> ] 2tri stream-write ;
-
 : write-newlines ( document-position stream -- )
     [ line>> CHAR: \n <string> ] [ stream>> ] bi* stream-write ;
 
@@ -154,44 +127,15 @@ M: document-stream stream-tell
     [ object>> ] [ stream>> ] bi*
     over integer? [ stream-write1 ] [ stream-write ] if ;
 
-: write-offset ( offset stream -- )
-    [
-        over line>> 0 >
-        [ [ line>> CHAR: \n <string> ] dip stream>> stream-write ] [ 2drop ] if
-    ] [
-        over column>> 0 >
-        [ [ column>> CHAR: \s <string> ] dip stream>> stream-write ] [ 2drop ] if
-    ] bi-curry bi ;
-
-: calculate-start-diff ( document-object stream -- position )
-    [ [ start>> ] [ diff>> ] bi* [ docpos+ ] when* ]
-    [ nip last-finish>> [ swap docpos- ] when* ] 2bi ;
-
-: docpos2+ ( start finish -- docpos )
-    2dup [ line>> ] bi@ = [
-        [ 0 ] 2dip [ column>> ] bi@ - abs <document-position>
-    ] [
-        drop
-    ] if ;
-
-: docpos2- ( start finish -- docpos )
+: docpos- ( start finish -- docpos )
     2dup [ line>> ] bi@ = [
         [ 0 ] 2dip [ column>> ] bi@ - <document-position>
     ] [
         [ [ line>> ] bi@ - ] [ drop column>> ] 2bi <document-position>
     ] if ;
 
-: calculate-start2 ( document-object stream -- position )
-    [ start>> ] [ last-finish>> ] bi* [ docpos2+ ] when* ;
-
-: goto-start ( position stream -- )
+: write-diff-spacing ( position stream -- )
     [ write-newlines ] [ write-spaces ] 2bi ;
-
-: goto-start2 ( position stream -- )
-    [ write-newlines2 ] [ write-spaces2 ] 2bi ;
-
-: calculate-diff ( document-object stream -- )
-    [ [ object-diff ] [ diff>> ] bi* [ docpos+ ] when* ] keep diff<< ;
 
 : save-finish ( document-object stream -- )
     [ finish>> ] dip last-finish<< ;
@@ -199,22 +143,12 @@ M: document-stream stream-tell
 ! Writing
 M: document-stream stream-write ( document-object stream -- )
     {
-        ! Go to the: start + diff
-        ! [ [ calculate-start2 ] keep goto-start2 ]
-        ! [ [ start>> ] dip goto-start2 ] ! good
         [
-            [ [ start>> ] [ last-finish>> ] bi* [ docpos2- ] when* ] keep
-            goto-start
-            ! [ start>> docpos2+ ] dip goto-start2
+            [ [ start>> ] [ last-finish>> ] bi* [ docpos- ] when* ] keep
+            write-diff-spacing
         ]
-
-        ! Write the object
         [ write-object ]
-        ! Advance stream
         [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ]
-        ! Calculate the new diff - newline resets columns
-        ! [ calculate-diff ]
-        ! Save finish
         [ save-finish ]
     } 2cleave ;
 
