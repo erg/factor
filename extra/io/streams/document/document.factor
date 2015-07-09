@@ -174,12 +174,15 @@ M: document-stream stream-tell
         drop
     ] if ;
 
+: docpos2- ( start finish -- docpos )
+    2dup [ line>> ] bi@ = [
+        [ 0 ] 2dip [ column>> ] bi@ - <document-position>
+    ] [
+        [ [ line>> ] bi@ - ] [ drop column>> ] 2bi <document-position>
+    ] if ;
+
 : calculate-start2 ( document-object stream -- position )
     [ start>> ] [ last-finish>> ] bi* [ docpos2+ ] when* ;
-
-! : calculate-start ( document-object stream -- position )
-! B
-    ! [ start>> ] [ last-finish>> ] bi* [ docpos+ ] when* ;
 
 : goto-start ( position stream -- )
     [ write-newlines ] [ write-spaces ] 2bi ;
@@ -198,7 +201,13 @@ M: document-stream stream-write ( document-object stream -- )
     {
         ! Go to the: start + diff
         ! [ [ calculate-start2 ] keep goto-start2 ]
-        [ [ start>> ] dip goto-start2 ]
+        ! [ [ start>> ] dip goto-start2 ] ! good
+        [
+            [ [ start>> ] [ last-finish>> ] bi* [ docpos2- ] when* ] keep
+            goto-start
+            ! [ start>> docpos2+ ] dip goto-start2
+        ]
+
         ! Write the object
         [ write-object ]
         ! Advance stream
