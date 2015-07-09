@@ -8,22 +8,33 @@ TUPLE: mparser < parsed name start slots body ;
 CONSTRUCTOR: <mparser> mparser ( name slots start body -- mparser ) ;
 : parse-parser ( -- mparser )
     raw parse raw body <mparser> ;
+\ parse-parser "PARSER:" register-parser
 
 TUPLE: mnested-comment < parsed comment ;
 CONSTRUCTOR: <mnested-comment> mnested-comment ( comment -- nested-comment ) ;
 : parse-nested-comment ( -- nested-comment )
     "*)" parse-comment-until <mnested-comment> ;
+\ parse-nested-comment "(*" register-parser
 
-TUPLE: signature < parsed in out ;
-CONSTRUCTOR: <signature> signature ( in out -- signature ) ;
+
+DEFER: parse-signature(--)
+DEFER: parse-nested-signature(--)
+DEFER: parse-signature--)
+DEFER: parse-signature-in
+DEFER: parse-signature-in'
+
+TUPLE: stack-effect < parsed in out ;
+CONSTRUCTOR: <stack-effect> stack-effect ( in out -- obj ) ;
+: parse-stack-effect ( -- stack-effect )
+    parse-signature--) ;
+\ parse-stack-effect "(" register-parser
+
 
 TUPLE: typed-argument < parsed name signature ;
 CONSTRUCTOR: <typed-argument> typed-argument ( name signature -- typed ) ;
 
-DEFER: parse-signature(--)
-DEFER: parse-nested-signature(--)
-DEFER: parse-signature-in
-DEFER: parse-signature-in'
+TUPLE: signature < parsed in out ;
+CONSTRUCTOR: <signature> signature ( in out -- signature ) ;
 
 ERROR: signature-expected position ;
 : parse-signature-in'' ( -- parse-out? )
@@ -76,8 +87,37 @@ ERROR: signature-expected position ;
     parse-signature-in' maybe-parse-out <signature> ;
 
 : c-arguments ( -- arguments )
-    "(" expect
-    ")" strings-until ;
+    "(" expect ")" strings-until ;
+
+TUPLE: c-function < parsed return-value name arguments ;
+CONSTRUCTOR: <c-function> c-function ( return-value name arguments -- c-function ) ;
+: parse-c-function ( -- c-function )
+    token token c-arguments ";" expect <c-function> ;
+
+TUPLE: x-function < parsed return-value name arguments ;
+CONSTRUCTOR: <x-function> x-function ( return-value name arguments -- c-function ) ;
+: parse-x-function ( -- c-function )
+    token token c-arguments ";" expect <x-function> ;
+
+TUPLE: c-function-alias < parsed aliased-name return-value name arguments ;
+CONSTRUCTOR: <c-function-alias> c-function-alias ( aliased-name return-value name arguments -- c-function ) ;
+: parse-c-function-alias ( -- c-function )
+    token token token c-arguments ";" expect <c-function-alias> ;
+
+TUPLE: gl-function < parsed return-value name ptrs arguments ;
+CONSTRUCTOR: <gl-function> gl-function ( return-value name ptrs arguments -- gl-function ) ;
+: parse-gl-function ( -- gl-function )
+    token token parse c-arguments ";" expect <gl-function> ;
+
+
+TUPLE: subroutine < parsed name arguments ;
+CONSTRUCTOR: <subroutine> subroutine ( name arguments -- subroutine ) ;
+: parse-subroutine ( -- subroutine )
+    token c-arguments ";" expect <subroutine> ;
+\ parse-subroutine "SUBROUTINE:" register-parser
+
+
+
 
 TUPLE: syntax < parsed name body ;
 CONSTRUCTOR: <syntax> syntax ( name body -- syntax ) ;
@@ -471,33 +511,6 @@ CONSTRUCTOR: <library> library ( name -- library ) ;
 : parse-library ( -- library )
     token <library> ;
 
-TUPLE: c-function < parsed return-value name arguments ;
-CONSTRUCTOR: <c-function> c-function ( return-value name arguments -- c-function ) ;
-: parse-c-function ( -- c-function )
-    token token c-arguments ";" expect <c-function> ;
-
-TUPLE: x-function < parsed return-value name arguments ;
-CONSTRUCTOR: <x-function> x-function ( return-value name arguments -- c-function ) ;
-: parse-x-function ( -- c-function )
-    token token c-arguments ";" expect <x-function> ;
-
-TUPLE: c-function-alias < parsed aliased-name return-value name arguments ;
-CONSTRUCTOR: <c-function-alias> c-function-alias ( aliased-name return-value name arguments -- c-function ) ;
-: parse-c-function-alias ( -- c-function )
-    token token token c-arguments ";" expect <c-function-alias> ;
-
-TUPLE: gl-function < parsed return-value name ptrs arguments ;
-CONSTRUCTOR: <gl-function> gl-function ( return-value name ptrs arguments -- gl-function ) ;
-: parse-gl-function ( -- gl-function )
-    token token parse c-arguments ";" expect <gl-function> ;
-
-
-TUPLE: subroutine < parsed name arguments ;
-CONSTRUCTOR: <subroutine> subroutine ( name arguments -- subroutine ) ;
-: parse-subroutine ( -- subroutine )
-    token c-arguments ";" expect <subroutine> ;
-\ parse-subroutine "SUBROUTINE:" register-parser
-
 TUPLE: c-type < parsed name ;
 CONSTRUCTOR: <c-type> c-type ( name -- c-type ) ;
 : parse-c-type ( -- c-type )
@@ -649,7 +662,6 @@ CONSTRUCTOR: <mirc> mirc ( name command body -- mirc ) ;
 : parse-irc ( -- irc )
     token parse ";" strings-until <mirc> ;
 
-\ parse-parser "PARSER:" register-parser
 \ parse-package "PACKAGE:" register-parser
 \ parse-import "IMPORT:" register-parser
 \ parse-imports "IMPORTS:" register-parser
@@ -708,7 +720,6 @@ CONSTRUCTOR: <mirc> mirc ( name command body -- mirc ) ;
 \ parse-singletons "SINGLETONS:" register-parser
 \ parse-comment "!" register-parser
 \ parse-comment "#!" register-parser
-\ parse-nested-comment "(*" register-parser
 \ parse-postpone "POSTPONE:" register-parser
 \ parse-hints "HINTS:" register-parser
 \ parse-specialized-array "SPECIALIZED-ARRAY:" register-parser
@@ -919,12 +930,6 @@ CONSTRUCTOR: <let-block> let-block ( body -- block ) ;
 : parse-let-block ( -- let-block )
     "]" parse-until <let-block> ;
 \ parse-let-block "[let" register-parser
-
-TUPLE: stack-effect < parsed in out ;
-CONSTRUCTOR: <stack-effect> stack-effect ( in out -- obj ) ;
-: parse-stack-effect ( -- stack-effect )
-    parse-signature--) ;
-\ parse-stack-effect "(" register-parser
 
 
 TUPLE: heredoc < parsed name string ;
