@@ -9,9 +9,6 @@ CONSTRUCTOR: <mparser> mparser ( name slots start body -- mparser ) ;
 : parse-parser ( -- mparser )
     raw parse raw body <mparser> ;
 
-TUPLE: text < parsed string from to ;
-CONSTRUCTOR: <text> text ( string from to -- text ) ;
-
 TUPLE: mnested-comment < parsed comment ;
 CONSTRUCTOR: <mnested-comment> mnested-comment ( comment -- nested-comment ) ;
 : parse-nested-comment ( -- nested-comment )

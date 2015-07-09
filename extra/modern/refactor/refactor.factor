@@ -1,10 +1,17 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors assocs combinators combinators.short-circuit
-fry io io.files io.streams.document kernel math modern.lookup
-modern.parser modern.parser.factor sequences sequences.extras ;
+fry io io.files io.streams.document io.streams.string kernel
+math modern.lookup modern.parser modern.parser.factor sequences
+sequences.extras ;
 FROM: sequences => change-nth ;
 IN: modern.refactor
+
+: documents>string ( documents -- string )
+    [
+        output>document-stream
+        [ texts>> [ write ] each ] each nl
+    ] with-string-writer ;
 
 ! Renames "[" "]" to "{" "}"
 : block>array ( block -- array )

@@ -159,6 +159,11 @@ ERROR: multiline-string-expected got ;
         [ drop ]
     } cond ;
 
+: identifer ( -- object )
+    token-loop dup string? [
+        dup string>number [ <mnumber> ] [ <mtoken> ] if
+    ] when ;
+
 : token ( -- object )
     token-loop dup string? [
         dup string>number [ <mnumber> ] [ <mtoken> ] if
