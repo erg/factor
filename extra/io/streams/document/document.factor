@@ -162,9 +162,3 @@ M: document-stream stream-nl ( stream -- )
 
 : output>document-stream ( -- )
     output-stream [ <document-stream> ] change ;
-
-: documents>string ( documents -- string )
-    [
-        output>document-stream
-        [ texts>> [ write ] each ] each nl
-    ] with-string-writer ;
