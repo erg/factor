@@ -207,7 +207,7 @@ M: single-bind object>identifiers target>> ;
 
 M: long-string object>identifiers name>> name>> ;
 M: c-global object>identifiers name>> name>> name-and-global-setter ;
-M: parser object>identifiers name>> name>> ;
+M: mparser object>identifiers name>> name>> ;
 
 
 ! nested
