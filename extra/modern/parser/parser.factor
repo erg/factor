@@ -40,7 +40,6 @@ CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
 TUPLE: mtoken < parsed name ;
 CONSTRUCTOR: <mtoken> mtoken ( name -- comment ) ;
 
-
 SYMBOL: current-texts
 : save-current-texts ( text -- )
     dup object>> { "" CHAR: \s CHAR: \r CHAR: \n } member? [
@@ -146,13 +145,9 @@ ERROR: multiline-string-expected got ;
     "\r\n\s\"" texts-read-until {
         { [ dup "\r\n\s" member? ] [ drop [ token-loop ] when-empty ] }
         { [ dup CHAR: " = ] [
-            drop [ f ] when-empty
+            drop f like
             dup "m" = [ parse-multiline-string ] [ parse-string ] if
         ] }
-        ! { [ dup CHAR: # = ] [
-            ! drop parse-comment save-comment [ token-loop ] when-empty ] }
-        ! { [ dup CHAR: ! = ] [
-            ! drop parse-comment save-comment [ token-loop ] when-empty ] }
         [ drop ]
     } cond ;
 
