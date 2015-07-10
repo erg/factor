@@ -7,6 +7,12 @@ sequences.extras ;
 FROM: sequences => change-nth ;
 IN: modern.refactor
 
+! move word from vocab to vocab
+! - should maybe not recompile
+! rename word
+! generate text from words
+! - generate ast? generate quotation?
+
 : documents>string ( documents -- string )
     [
         output>document-stream
@@ -128,3 +134,15 @@ IN: modern.refactor
 
 : rewrite-string ( string assoc -- string' )
     [ parse-modern-string ] dip '[ _ rename-texts ] map documents>string ;
+
+: change-macro-out ( macro -- macro )
+    B ;
+
+: rewrite-macro-out ( -- )
+    all-factor-files [
+        parse-modern-file second [
+            dup mmacro? [
+                change-macro-out
+            ] when
+        ] map
+    ] keep write-modern-file ;
