@@ -227,7 +227,7 @@ CONSTRUCTOR: <mixin> mixin ( name -- mixin ) ;
 TUPLE: singleton < parsed name ;
 CONSTRUCTOR: <singleton> singleton ( name -- singleton ) ;
 : parse-singleton ( -- singleton )
-    token <singleton> ;
+    new-class <singleton> ;
 \ parse-singleton "SINGLETON:" register-parser
 
 TUPLE: singletons < parsed names ;
