@@ -114,7 +114,6 @@ M: tuple-literal-boa object>identifiers drop f ;
 
 M: signature object>identifiers drop f ;
 
-
 M: mprimitive object>identifiers name>> name>> ;
 M: mgeneric object>identifiers name>> name>> ;
 M: mgeneric# object>identifiers name>> name>> ;
