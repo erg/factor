@@ -140,9 +140,11 @@ IN: modern.refactor
 
 : rewrite-macro-out ( -- )
     all-factor-files [
-        parse-modern-file second [
-            dup mmacro? [
-                change-macro-out
-            ] when
-        ] map
-    ] keep write-modern-file ;
+        [
+            parse-modern-file second [
+                dup mmacro? [
+                    change-macro-out
+                ] when
+            ] map
+        ] keep write-modern-file
+    ] each ;
