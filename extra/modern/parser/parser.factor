@@ -32,13 +32,20 @@ CONSTRUCTOR: <comment> comment ( text -- comment ) ;
 \ parse-comment "#!" register-parser
 
 TUPLE: mnumber < parsed n ;
-CONSTRUCTOR: <mnumber> mnumber ( n -- mnumber ) ;
+CONSTRUCTOR: <mnumber> mnumber ( n -- number ) ;
 
 TUPLE: mstring < parsed class string ;
-CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
+CONSTRUCTOR: <mstring> mstring ( class string -- string ) ;
 
 TUPLE: mtoken < parsed name ;
-CONSTRUCTOR: <mtoken> mtoken ( name -- comment ) ;
+CONSTRUCTOR: <mtoken> mtoken ( name -- token ) ;
+
+TUPLE: new-class < parsed name ;
+CONSTRUCTOR: <new-class> new-class ( name -- class ) ;
+
+TUPLE: new-word < parsed name ;
+CONSTRUCTOR: <new-word> new-word ( name -- word ) ;
+
 
 SYMBOL: current-texts
 : save-current-texts ( text -- )
@@ -155,6 +162,9 @@ ERROR: multiline-string-expected got ;
     token-loop dup string? [
         dup string>number [ <mnumber> ] [ <mtoken> ] if
     ] when ;
+
+: new-class ( -- object )
+    token-loop ;
 
 : token ( -- object )
     token-loop dup string? [
