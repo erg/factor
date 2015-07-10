@@ -10,6 +10,9 @@ IN: modern.parser
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
 
+: register-parser ( parser key -- )
+    parsers get-global set-at ;
+
 SYMBOL: comment-parsers
 comment-parsers [ H{ } clone ] initialize
 
@@ -19,27 +22,23 @@ SYMBOL: comments
 
 TUPLE: parsed texts ;
 
+DEFER: token
+
+DEFER: texts-readln
+TUPLE: comment < parsed text ;
+CONSTRUCTOR: <comment> comment ( text -- comment ) ;
+: parse-comment ( -- comment ) texts-readln <comment> ;
+\ parse-comment "!" register-parser
+\ parse-comment "#!" register-parser
+
 TUPLE: mnumber < parsed n ;
 CONSTRUCTOR: <mnumber> mnumber ( n -- mnumber ) ;
 
 TUPLE: mstring < parsed class string ;
 CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
 
-TUPLE: comment < parsed text ;
-CONSTRUCTOR: <comment> comment ( text -- comment ) ;
-
 TUPLE: mtoken < parsed name ;
 CONSTRUCTOR: <mtoken> mtoken ( name -- comment ) ;
-
-TUPLE: nested-comment < parsed comment ;
-CONSTRUCTOR: <nested-comment> nested-comment ( comment -- nested-comment ) ;
-
-! Extend the parser with PARSER:, LITERAL-PARSER:
-TUPLE: parser < parsed name slots syntax-name body ;
-CONSTRUCTOR: <parser> parser ( name slots syntax-name body -- obj ) ;
-
-TUPLE: literal-parser < parsed name ;
-CONSTRUCTOR: <literal-parser> literal-parser ( name -- obj ) ;
 
 
 SYMBOL: current-texts
@@ -124,8 +123,6 @@ ERROR: multiline-string-expected got ;
     ] [
         multiline-string-expected
     ] if ;
-
-: parse-comment ( -- comment ) texts-readln <comment> ;
 
 : execute-parser ( word -- object/f )
     dup name>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
@@ -225,20 +222,7 @@ ERROR: expected expected got ;
 
 : body ( -- strings ) ";" parse-until ;
 
-: parse-parser ( -- obj )
-    token parse token ";" parse-until <parser> ;
-
-: parse-literal-parser ( -- obj )
-    token <literal-parser> ;
-
-: register-parser ( parser key -- )
-    parsers get-global set-at ;
-
-\ parse-parser "PARSER:" register-parser
-\ parse-literal-parser "LITERAL-PARSER:" register-parser
-
-: parse-metadata ( path -- data )
-    utf8 file-contents ;
+: parse-metadata ( path -- data ) utf8 file-contents ;
 
 : parse-stream ( stream -- seq comments )
     [ parse-input ] with-input-stream ; inline
