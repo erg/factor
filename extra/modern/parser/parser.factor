@@ -158,13 +158,22 @@ ERROR: multiline-string-expected got ;
         [ drop ]
     } cond ;
 
+ERROR: identifier-can't-be-number n ;
+
 : identifer ( -- object )
     token-loop dup string? [
-        dup string>number [ <mnumber> ] [ <mtoken> ] if
+        dup string>number [
+            identifier-can't-be-number
+        ] [
+            <mtoken>
+        ] if
     ] when ;
 
 : new-class ( -- object )
-    token-loop ;
+    token-loop <new-class> ;
+
+: new-word ( -- object )
+    token-loop <new-word> ;
 
 : token ( -- object )
     token-loop dup string? [
