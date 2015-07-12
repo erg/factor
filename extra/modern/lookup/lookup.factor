@@ -294,7 +294,7 @@ ERROR: not-a-source-path path ;
 
 : lookup-vocab ( vocab -- seq )
     modern-source-path
-    parse-modern-file second
+    parse-modern-file
     [ dup object>identifiers ] { } map>assoc ;
 
 : vocab>namespace ( vocab -- public private )
@@ -361,7 +361,7 @@ ERROR: not-a-source-path path ;
 
 : lookup-vocab' ( vocab -- seq )
     modern-source-path dup . flush
-    parse-modern-file second
+    parse-modern-file
     [ [ object>identifiers ] keep ] { } map>assoc
     [ drop ] assoc-filter >hashtable ;
 
@@ -402,7 +402,7 @@ ERROR: not-a-source-path path ;
     [ values flatten ] bi@ 3array ;
 
 : rewrite-modern ( path -- )
-    [ parse-modern-file second ] keep write-modern-file ;
+    [ parse-modern-file ] keep write-modern-file ;
 
 : ?rewrite-modern ( path -- )
     dup exists? [ rewrite-modern ] [ drop ] if ;
