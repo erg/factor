@@ -241,9 +241,9 @@ ERROR: expected expected got ;
 ERROR: unrecognized-factor-file path ;
 : parse-modern-file ( path -- seq )
     dup >lower {
-        { [ dup ".txt" tail? ] [ drop dup parse-metadata 2array ] }
-        { [ dup ".factor" tail? ] [ drop dup parse-source-file 2array ] }
-        { [ dup ".modern" tail? ] [ drop dup parse-source-file 2array ] }
+        { [ dup ".txt" tail? ] [ drop parse-metadata ] }
+        { [ dup ".factor" tail? ] [ drop parse-source-file ] }
+        { [ dup ".modern" tail? ] [ drop parse-source-file ] }
         [ unrecognized-factor-file ]
         ! [ drop f 2array ]
     } cond ;

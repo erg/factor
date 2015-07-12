@@ -54,10 +54,10 @@ IN: modern.parser.factor.tests
 
 : check-parsed-file ( path -- ? )
     [ utf8 file-contents ]
-    [ parse-modern-file second write-parsed-string ] bi sequence= ;
+    [ parse-modern-file write-parsed-string ] bi sequence= ;
 
 : replace-parsed-file ( path -- )
-    [ parse-modern-file second ] keep
+    [ parse-modern-file ] keep
     write-modern-file ;
 
 { t } [ "resource:core/alien/alien.factor" check-parsed-file ] unit-test

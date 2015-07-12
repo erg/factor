@@ -86,7 +86,7 @@ IN: modern.refactor
 : rename-functions-no-semi ( names -- )
     [
         [
-            parse-modern-file second
+            parse-modern-file
             [ dup c-function? [ c-function-remove-semi ] when ] map
         ] keep write-modern-file
     ] each ;
@@ -94,7 +94,7 @@ IN: modern.refactor
 : rename-functions-add-semi ( names -- )
     [
         [
-            parse-modern-file second
+            parse-modern-file
             [ dup c-function? [ c-function-add-semi ] when ] map
         ] keep write-modern-file
     ] each ;
@@ -108,7 +108,7 @@ IN: modern.refactor
 : rename-by-name ( paths assoc -- )
     '[
         [
-            parse-modern-file second [ _ rename-texts ] map
+            parse-modern-file [ _ rename-texts ] map
         ] keep write-modern-file
     ] each ;
 
@@ -117,7 +117,7 @@ IN: modern.refactor
 
 : rewrite-sbufs ( path -- )
     [
-        parse-modern-file second
+        parse-modern-file
         [
             dup block? [
                 dup body>> [
@@ -141,7 +141,7 @@ IN: modern.refactor
 : rewrite-macro-out ( -- )
     all-factor-files [
         [
-            parse-modern-file second [
+            parse-modern-file [
                 dup mmacro? [
                     change-macro-out
                 ] when
