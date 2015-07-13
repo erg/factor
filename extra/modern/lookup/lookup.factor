@@ -292,18 +292,18 @@ ERROR: not-a-source-path path ;
 : force-modern-source-path ( path -- path' )
     vocab-source-path force-modern-path ;
 
-: lookup-vocab ( vocab -- seq )
+: parse-vocab>assoc ( vocab -- seq )
     modern-source-path
     parse-modern-file
     [ dup object>identifiers ] { } map>assoc ;
 
 : vocab>namespace ( vocab -- public private )
-    lookup-vocab
+    parse-vocab>assoc
     [ first private? not ] partition
     [ values flatten ] bi@ ;
 
 : lookup-vocab-failures ( vocab -- seq )
-    lookup-vocab [ nip not ] assoc-filter ;
+    parse-vocab>assoc [ nip not ] assoc-filter ;
 
 : vocabs-from ( root -- vocabs )
     "" disk-vocabs-in-root/prefix
@@ -359,7 +359,7 @@ ERROR: not-a-source-path path ;
     diff-bad-extra-vocabs
     filter-vocabs ;
 
-: lookup-vocab' ( vocab -- seq )
+: parse-vocab>assoc' ( vocab -- seq )
     modern-source-path dup . flush
     parse-modern-file
     [ [ object>identifiers ] keep ] { } map>assoc
@@ -367,7 +367,7 @@ ERROR: not-a-source-path path ;
 
 
 : untracked-words ( vocab -- seq )
-    [ lookup-vocab' keys ]
+    [ parse-vocab>assoc' keys ]
     [
         [ vocab-words ] [ ".private" append vocab-words ] bi append
         [ name>> ] map [ flatten ] bi@ [ diff ] [ swap diff ] 2bi
@@ -398,7 +398,7 @@ ERROR: not-a-source-path path ;
 
 : load-namespace ( name -- triple )
     dup
-    lookup-vocab [ first private? not ] partition
+    parse-vocab>assoc [ first private? not ] partition
     [ values flatten ] bi@ 3array ;
 
 : rewrite-modern ( path -- )
