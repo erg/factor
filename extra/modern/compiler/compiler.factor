@@ -2,10 +2,11 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors assocs classes.mixin classes.predicate
 combinators compiler.units constructors effects fry generic
-generic.parser kernel math math.parser modern.lookup
-modern.parser modern.parser.factor namespaces nested-comments
-parser prettyprint quotations sequences sequences.extras sets
-splitting vocabs vocabs.parser words literals.private ;
+generic.parser kernel literals.private math math.parser
+modern.lookup modern.parser modern.parser.factor namespaces
+nested-comments parser prettyprint quotations sequences
+sequences.extras sets splitting strings vocabs vocabs.parser
+words ;
 IN: modern.compiler
 
 GENERIC: lookup-token ( obj -- obj' )
@@ -20,7 +21,9 @@ M: escaped lookup-token name>> <mtoken> lookup-token <wrapper> ;
 M: block lookup-token
     body>> [ lookup-token ] map >quotation ;
 
-: >modern ( name -- name' )
+: >modern ( name -- name' ) ;
+
+: >modern2 ( name -- name' )
     "-modern" ?tail drop "-modern" append ;
 
 : add-in-vocab ( name -- )
@@ -28,12 +31,16 @@ M: block lookup-token
     [ create-vocab drop ]
     [ set-current-vocab ] bi ;
 
-: precompile-word ( name -- )
+GENERIC: precompile-word ( string -- )
+
+M: string precompile-word
     [ current-vocab create-word ] keep current-vocab words>> set-at ;
 
 
 GENERIC: precompile ( obj -- )
 M: comment precompile drop ;
+M: defer precompile name>> name>> precompile-word ;
+M: mgeneric precompile name>> name>> precompile-word ;
 M: mbuiltin precompile
     name>> name>>
     [ precompile-word ]
@@ -43,9 +50,27 @@ M: mprimitive precompile name>> name>> precompile-word ;
 M: use precompile drop ;
 M: using precompile drop ;
 M: min precompile name>> name>> >modern [ add-in-vocab ] [ set-current-vocab ] bi ;
+M: private precompile
+    begin-private
+    body>> [
+        object>identifiers dup string? [
+            precompile-word
+        ] [
+            [ precompile-word ] each
+        ] if
+    ] each
+    end-private ;
+
+M: munion precompile name>> name>> precompile-word ;
+
+M: merror precompile
+    name>> name>>
+    [ precompile-word ]
+    [ "?" append precompile-word ] bi ;
 M: function precompile name>> name>> precompile-word ;
 M: mmethod precompile drop ;
 M: minline precompile drop ;
+M: mrecursive precompile drop ;
 M: instance precompile drop ;
 M: predicate precompile
     name>> name>>
@@ -75,6 +100,8 @@ M: function mcompile
     [ signature>> [ in>> ] [ out>> ] bi <effect> ] tri
     '[ @ _ _ define-declared ]  ;
 
+! M: mgeneric mcompile '[ @ _ _ define-generic ] ;
+
 M: mmethod mcompile
     [ [ class>> ] [ name>> ] bi [ lookup-token ] bi@ '[ _ _ create-method ] ]
     [ body>> [ lookup-token ] map >quotation ] bi
@@ -94,10 +121,17 @@ M: predicate mcompile
     [ body>> [ lookup-token ] map >quotation ] bi
     '[ _ _ _ define-predicate-class ] ;
 
-! M: mtuple mcompile [ 
+M: defer mcompile drop [ ] ;
+
+M: private mcompile
+    begin-private
+    body>> [ mcompile ] map [ ] concat-as
+    end-private ;
+
+! M: mtuple mcompile [
 
 : compile-modern ( seq -- )
-    "syntax" use-vocab
+    ! "syntax" use-vocab
     [
         [ [ precompile ] each ]
         [ [ mcompile ] map [ ] concat-as ] bi
@@ -106,3 +140,6 @@ M: predicate mcompile
 
 : compile-modern-string ( str -- )
     parse-modern-string compile-modern ;
+
+: compile-vocab ( name -- )
+    modern-source-path parse-modern-file compile-modern ;
