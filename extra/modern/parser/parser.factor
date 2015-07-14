@@ -15,26 +15,23 @@ parsers [ H{ } clone ] initialize
 
 TUPLE: parsed texts ;
 
-DEFER: texts-readln
+TUPLE: parsed-number < parsed n ;
+CONSTRUCTOR: <parsed-number> parsed-number ( n -- parsed-number ) ;
 
-TUPLE: mnumber < parsed n ;
-CONSTRUCTOR: <mnumber> mnumber ( n -- mnumber ) ;
+TUPLE: parsed-string < parsed class string ;
+CONSTRUCTOR: <parsed-string> parsed-string ( class string -- parsed-string ) ;
 
-TUPLE: mstring < parsed class string ;
-CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
-
-TUPLE: mtoken < parsed name ;
-CONSTRUCTOR: <mtoken> mtoken ( name -- mtoken ) ;
+TUPLE: parsed-token < parsed name ;
+CONSTRUCTOR: <parsed-token> parsed-token ( name -- parsed-token ) ;
 
 TUPLE: parsed-identifier < parsed name ;
-CONSTRUCTOR: <parsed-identifier> parsed-identifier ( name -- midentifier ) ;
+CONSTRUCTOR: <parsed-identifier> parsed-identifier ( name -- parsed-identifier ) ;
 
 TUPLE: parsed-class < parsed name ;
-CONSTRUCTOR: <parsed-class> parsed-class ( name -- new-class ) ;
+CONSTRUCTOR: <parsed-class> parsed-class ( name -- parsed-class ) ;
 
 TUPLE: parsed-word < parsed name ;
-CONSTRUCTOR: <parsed-word> parsed-word ( name -- new-word ) ;
-
+CONSTRUCTOR: <parsed-word> parsed-word ( name -- parsed-word ) ;
 
 SYMBOL: current-texts
 : text>object ( text -- obj )
@@ -63,7 +60,7 @@ ERROR: string-expected got separator ;
     } case ;
 
 : parse-string ( class -- mstring )
-    [ parse-string' ] "" make <mstring> ;
+    [ parse-string' ] "" make <parsed-string> ;
 
 : building-tail? ( string -- ? )
     [ building get ] dip {
@@ -96,7 +93,7 @@ ERROR: multiline-string-expected got ;
 ! multi"==[Lol. This string syntax...]=="
 : parse-multiline-string ( class -- mstring )
     "[" texts-read-until [
-        "]" "\"" surround multiline-string-until <mstring>
+        "]" "\"" surround multiline-string-until <parsed-string>
     ] [
         multiline-string-expected
     ] if ;
@@ -105,7 +102,7 @@ ERROR: multiline-string-expected got ;
     dup name>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
 
 : parse-action ( string -- object/f )
-    dup mtoken? [
+    dup parsed-token? [
         dup name>> empty?
         [ drop f ] [ execute-parser ] if
     ] when ;
@@ -147,7 +144,7 @@ ERROR: identifier-can't-be-number n ;
 
 : token ( -- object )
     token-loop dup string? [
-        dup string>number [ <mnumber> ] [ <mtoken> ] if
+        dup string>number [ <parsed-number> ] [ <parsed-token> ] if
     ] when ;
 
 ERROR: no-more-tokens ;
@@ -157,7 +154,7 @@ ERROR: token-expected token ;
 : parse-until ( string -- strings/f )
     '[
         _ parse [ token-expected ] unless*
-        2dup dup mtoken? [ name>> ] when = [ 2drop f ] [ nip parse-action ] if
+        2dup dup parsed-token? [ name>> ] when = [ 2drop f ] [ nip parse-action ] if
     ] loop>array ;
 
 : string-until-eol ( -- string )
