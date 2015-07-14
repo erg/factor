@@ -51,14 +51,9 @@ SYMBOL: current-texts
         f
     ] if* ;
 
-: texts-read-until ( seps -- seq sep )
-    read-until [ text>object ] bi@ ;
-
-: texts-read1 ( -- obj )
-    read1 text>object ;
-
-: texts-readln ( -- string )
-    readln text>object ;
+: texts-read-until ( seps -- seq sep ) read-until [ text>object ] bi@ ;
+: texts-read1 ( -- obj ) read1 text>object ;
+: texts-readln ( -- string ) readln text>object ;
 
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
@@ -152,14 +147,13 @@ ERROR: identifier-can't-be-number n ;
         [ drop ]
     } cond ;
 
-: strings-until ( string -- strings )
+: raw-until ( string -- strings )
     '[
         _ raw 2dup = [ 2drop f ] [ nip ] if
     ] loop>array ;
 
 ERROR: no-more-tokens ;
-: parse ( -- object/f )
-    token parse-action ;
+: parse ( -- object/f ) token parse-action ;
 
 ERROR: token-expected token ;
 : parse-until ( string -- strings/f )
