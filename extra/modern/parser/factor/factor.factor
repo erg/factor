@@ -1,7 +1,8 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors assocs combinators constructors io kernel make
-modern.parser multiline namespaces nested-comments sequences ;
+math modern.parser multiline namespaces nested-comments
+sequences ;
 IN: modern.parser.factor
 
 TUPLE: mparser < parsed name start slots body ;
@@ -17,10 +18,19 @@ CONSTRUCTOR: <literal-parser> literal-parser ( name -- obj ) ;
 
 
 
-TUPLE: mnested-comment < parsed comment ;
-CONSTRUCTOR: <mnested-comment> mnested-comment ( comment -- nested-comment ) ;
+! Doesn't look for (* inside strings, only finds it as raw
+TUPLE: mnested-comment < parsed ;
+CONSTRUCTOR: <mnested-comment> mnested-comment ( -- nested-comment ) ;
+: parse-nested-comment' ( level -- )
+    raw {
+        { [ dup "(*" = ] [ drop 1 + parse-nested-comment' ] }
+        { [ dup "*)" = ] [ drop 1 - dup zero? [ drop ] [ parse-nested-comment' ] if ] }
+        { [ dup f = ] [ "*)" expected ] }
+        [ drop parse-nested-comment' ]
+    } cond ;
+
 : parse-nested-comment ( -- nested-comment )
-    "*)" multiline-string-until <mnested-comment> ;
+    1 parse-nested-comment' <mnested-comment> ;
 \ parse-nested-comment "(*" register-parser
 
 

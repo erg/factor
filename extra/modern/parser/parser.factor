@@ -73,6 +73,7 @@ ERROR: string-expected got separator ;
         [ [ but-last-slice ] bi@ tail? ]
     } 2&& ;
 
+ERROR: expected got expected ;
 ERROR: expected-sequence expected got ;
 : multiline-string-until' ( seq -- )
     dup ?last 1array texts-read-until [
@@ -89,7 +90,6 @@ ERROR: expected-sequence expected got ;
             building get >string expected-sequence
         ] if
     ] if* ;
-
 
 : multiline-string-until ( end -- string )
     [ [ multiline-string-until' ] "" make ] keep length head* ;
@@ -165,7 +165,6 @@ ERROR: token-expected token ;
 : string-until-eol ( -- string )
     "\r\n" texts-read-until drop ;
 
-ERROR: expected expected got ;
 : expect ( string -- )
     token
     2dup dup [ name>> ] when = [ 2drop ] [ expected ] if ;
