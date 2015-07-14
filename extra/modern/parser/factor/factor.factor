@@ -481,7 +481,7 @@ CONSTRUCTOR: <mprimitive> mprimitive ( name signature -- package ) ;
 TUPLE: package < parsed name ;
 CONSTRUCTOR: <package> package ( name -- package ) ;
 : parse-package ( -- package )
-    get-string <package> ;
+    raw <package> ;
 \ parse-package "PACKAGE:" register-parser
 
 TUPLE: import < parsed name ;

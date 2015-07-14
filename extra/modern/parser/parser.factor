@@ -41,39 +41,31 @@ CONSTRUCTOR: <new-word> new-word ( name -- word ) ;
 
 
 SYMBOL: current-texts
-: save-current-texts ( text -- )
+: save-text ( text -- )
     dup object>> { "" CHAR: \s CHAR: \r CHAR: \n } member? [
         drop
     ] [
         current-texts get push
     ] if ;
 
-: with-texts ( quot -- )
-    [ V{ } clone current-texts ] dip with-variable ; inline
-
-: transfer-texts ( obj -- obj )
-    current-texts get >>texts
-    V{ } clone current-texts set ;
-
-! Call first because sep is a string in the saved texts, we want a char
+! Call read-until first because sep is a string in the saved texts, we want a char
 : texts-read-until ( seps -- seq sep )
     read-until
     dup [
-        [ [ save-current-texts ] [ object>> ] bi ] bi@
+        [ [ save-text ] [ object>> ] bi ] bi@
     ] [
         [
             dup [
-                [ save-current-texts ] [ object>> ] bi
+                [ save-text ] [ object>> ] bi
             ] when
         ] dip
     ] if ;
 
 : texts-read1 ( -- obj )
-    read1 [ save-current-texts ] [ object>> ] bi ;
+    read1 [ save-text ] [ object>> ] bi ;
 
 : texts-readln ( -- string )
-    readln
-    [ save-current-texts ] [ object>> ] bi ;
+    readln [ save-text ] [ object>> ] bi ;
 
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
@@ -153,11 +145,8 @@ ERROR: identifier-can't-be-number n ;
         ] if
     ] when ;
 
-: new-class ( -- object )
-    token-loop <new-class> ;
-
-: new-word ( -- object )
-    token-loop <new-word> ;
+: new-class ( -- object ) token-loop <new-class> ;
+: new-word ( -- object ) token-loop <new-word> ;
 
 : token ( -- object )
     token-loop dup string? [
@@ -170,25 +159,14 @@ ERROR: identifier-can't-be-number n ;
         [ drop ]
     } cond ;
 
-: get-string ( -- string/f )
-    "\r\n\s" texts-read-until {
-        { [ dup "\r\n\s" member? ] [ drop [ get-string ] when-empty ] }
-        [ drop ]
-    } cond ;
-
 : strings-until ( string -- strings )
     '[
-        _ get-string 2dup = [ 2drop f ] [ nip ] if
+        _ raw 2dup = [ 2drop f ] [ nip ] if
     ] loop>array ;
 
 ERROR: no-more-tokens ;
 : parse ( -- object/f )
     token parse-action ;
-
-: parse-input ( -- seq )
-    [
-        [ parse dup [ transfer-texts ] when ] loop>array
-    ] with-texts ;
 
 ERROR: token-expected token ;
 : parse-until ( string -- strings/f )
@@ -212,14 +190,26 @@ ERROR: expected expected got ;
 
 : parse-metadata ( path -- data ) utf8 file-contents ;
 
+: with-texts ( quot -- )
+    [ V{ } clone current-texts ] dip with-variable ; inline
+
+: transfer-texts ( obj -- obj )
+    current-texts get >>texts
+    V{ } clone current-texts set ;
+
+: parse-input-stream ( -- seq )
+    [
+        [ parse dup [ transfer-texts ] when ] loop>array
+    ] with-texts ;
+
 : parse-stream ( stream -- seq )
-    [ parse-input ] with-input-stream ; inline
+    [ parse-input-stream ] with-input-stream ; inline
 
 : parse-source-file ( path -- data )
-    utf8 [ input>document-stream parse-input ] with-file-reader ; inline
+    utf8 [ input>document-stream parse-input-stream ] with-file-reader ; inline
 
 : parse-modern-string ( string -- data )
-    [ input>document-stream parse-input ] with-string-reader ; inline
+    [ input>document-stream parse-input-stream ] with-string-reader ; inline
 
 ERROR: unrecognized-factor-file path ;
 : parse-modern-file ( path -- seq )
@@ -232,9 +222,7 @@ ERROR: unrecognized-factor-file path ;
     } cond ;
 
 : write-parsed-flat ( seq -- )
-    [
-        texts>> [ object>> write bl ] each nl
-    ] each ;
+    [ texts>> [ object>> write bl ] each nl ] each ;
 
 : write-parsed-objects ( seq -- )
     output>document-stream
@@ -243,11 +231,8 @@ ERROR: unrecognized-factor-file path ;
 : write-parsed-string ( seq -- string )
     [ write-parsed-objects ] with-string-writer ;
 
-! Add newline at end of file
 : write-modern-file ( seq path -- )
-    utf8 [
-        write-parsed-objects
-    ] with-file-writer ;
+    utf8 [ write-parsed-objects ] with-file-writer ;
 
 : load-vocab-docs ( names -- seq )
     [ vocab-docs-path ] map
