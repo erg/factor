@@ -13,13 +13,6 @@ parsers [ H{ } clone ] initialize
 : register-parser ( parser key -- )
     parsers get-global set-at ;
 
-SYMBOL: comment-parsers
-comment-parsers [ H{ } clone ] initialize
-
-SYMBOL: comments
-: save-comment ( comment -- )
-    [ comments get push ] when* ;
-
 TUPLE: parsed texts ;
 
 DEFER: token
@@ -139,15 +132,6 @@ ERROR: multiline-string-expected got ;
         [ drop f ] [ execute-parser ] if
     ] when ;
 
-: execute-comment-parser ( word -- object/f )
-    dup name>> \ comment-parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
-
-: comment-parse-action ( string -- object/f )
-    dup mtoken? [
-        dup name>> empty?
-        [ drop f ] [ execute-comment-parser ] if
-    ] when ;
-
 : token-loop ( -- string/f )
     "\r\n\s\"" texts-read-until {
         { [ dup "\r\n\s" member? ] [ drop [ token-loop ] when-empty ] }
@@ -201,12 +185,9 @@ ERROR: no-more-tokens ;
 : parse ( -- object/f )
     token parse-action ;
 
-: parse-input ( -- seq comments )
+: parse-input ( -- seq )
     [
-        V{ } clone comments [
-            [ parse dup [ transfer-texts ] when ] loop>array
-            comments get
-        ] with-variable
+        [ parse dup [ transfer-texts ] when ] loop>array
     ] with-texts ;
 
 ERROR: token-expected token ;
@@ -214,13 +195,6 @@ ERROR: token-expected token ;
     '[
         _ parse [ token-expected ] unless*
         2dup dup mtoken? [ name>> ] when = [ 2drop f ] [ nip parse-action ] if
-    ] loop>array ;
-
-ERROR: raw-expected raw ;
-: parse-comment-until ( string -- strings/f )
-    '[
-        _ raw [ raw-expected ] unless*
-        2dup = [ 2drop f ] [ nip comment-parse-action ] if
     ] loop>array ;
 
 : string-until-eol ( -- string )
@@ -238,14 +212,14 @@ ERROR: expected expected got ;
 
 : parse-metadata ( path -- data ) utf8 file-contents ;
 
-: parse-stream ( stream -- seq comments )
+: parse-stream ( stream -- seq )
     [ parse-input ] with-input-stream ; inline
 
 : parse-source-file ( path -- data )
-    utf8 [ input>document-stream parse-input ] with-file-reader drop ; inline
+    utf8 [ input>document-stream parse-input ] with-file-reader ; inline
 
 : parse-modern-string ( string -- data )
-    [ input>document-stream parse-input ] with-string-reader drop ; inline
+    [ input>document-stream parse-input ] with-string-reader ; inline
 
 ERROR: unrecognized-factor-file path ;
 : parse-modern-file ( path -- seq )
