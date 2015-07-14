@@ -40,9 +40,9 @@ IN: modern.parser.factor.tests
             }
             { elements
                 {
-                    T{ mnumber { n "1" } }
-                    T{ mnumber { n "2" } }
-                    T{ mnumber { n "3" } }
+                    T{ parsed-number { n "1" } }
+                    T{ parsed-number { n "2" } }
+                    T{ parsed-number { n "3" } }
                 }
             }
         }
@@ -102,7 +102,7 @@ ${example-indent}    ""
 ${example-indent}}]""""
 
 { t } [ tools-scaffold-string parse-modern-string length 1 = ] unit-test
-{ t } [ tools-scaffold-string parse-modern-string ?last mstring? ] unit-test
+{ t } [ tools-scaffold-string parse-modern-string ?last parsed-string? ] unit-test
 
 
 : check-parser-exact ( string -- ? )
