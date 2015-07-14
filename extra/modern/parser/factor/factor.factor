@@ -20,7 +20,7 @@ CONSTRUCTOR: <literal-parser> literal-parser ( name -- obj ) ;
 TUPLE: mnested-comment < parsed comment ;
 CONSTRUCTOR: <mnested-comment> mnested-comment ( comment -- nested-comment ) ;
 : parse-nested-comment ( -- nested-comment )
-    "*)" parse-comment-until <mnested-comment> ;
+    "*)" multiline-string-until <mnested-comment> ;
 \ parse-nested-comment "(*" register-parser
 
 
