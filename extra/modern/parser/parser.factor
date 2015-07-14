@@ -16,26 +16,24 @@ parsers [ H{ } clone ] initialize
 TUPLE: parsed texts ;
 
 DEFER: texts-readln
-TUPLE: comment < parsed text ;
-CONSTRUCTOR: <comment> comment ( text -- comment ) ;
-: parse-comment ( -- comment ) texts-readln <comment> ;
-\ parse-comment "!" register-parser
-\ parse-comment "#!" register-parser
 
 TUPLE: mnumber < parsed n ;
-CONSTRUCTOR: <mnumber> mnumber ( n -- number ) ;
+CONSTRUCTOR: <mnumber> mnumber ( n -- mnumber ) ;
 
 TUPLE: mstring < parsed class string ;
-CONSTRUCTOR: <mstring> mstring ( class string -- string ) ;
+CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
 
 TUPLE: mtoken < parsed name ;
-CONSTRUCTOR: <mtoken> mtoken ( name -- token ) ;
+CONSTRUCTOR: <mtoken> mtoken ( name -- mtoken ) ;
+
+TUPLE: new-identifier < parsed name ;
+CONSTRUCTOR: <new-identifier> new-identifier ( name -- new-identifier ) ;
 
 TUPLE: new-class < parsed name ;
-CONSTRUCTOR: <new-class> new-class ( name -- class ) ;
+CONSTRUCTOR: <new-class> new-class ( name -- new-class ) ;
 
 TUPLE: new-word < parsed name ;
-CONSTRUCTOR: <new-word> new-word ( name -- word ) ;
+CONSTRUCTOR: <new-word> new-word ( name -- new-word ) ;
 
 
 SYMBOL: current-texts
@@ -122,6 +120,17 @@ ERROR: multiline-string-expected got ;
         [ drop ]
     } cond ;
 
+: raw ( -- object )
+    "\r\n\s" texts-read-until {
+        { [ dup "\r\n\s" member? ] [ drop [ raw ] when-empty ] }
+        [ drop ]
+    } cond ;
+
+: raw-until ( string -- strings )
+    '[
+        _ raw 2dup = [ 2drop f ] [ nip ] if
+    ] loop>array ;
+
 ERROR: identifier-can't-be-number n ;
 
 : identifer ( -- object )
@@ -140,17 +149,6 @@ ERROR: identifier-can't-be-number n ;
     token-loop dup string? [
         dup string>number [ <mnumber> ] [ <mtoken> ] if
     ] when ;
-
-: raw ( -- object )
-    "\r\n\s" texts-read-until {
-        { [ dup "\r\n\s" member? ] [ drop [ raw ] when-empty ] }
-        [ drop ]
-    } cond ;
-
-: raw-until ( string -- strings )
-    '[
-        _ raw 2dup = [ 2drop f ] [ nip ] if
-    ] loop>array ;
 
 ERROR: no-more-tokens ;
 : parse ( -- object/f ) token parse-action ;

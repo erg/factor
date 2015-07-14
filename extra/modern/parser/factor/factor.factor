@@ -5,6 +5,12 @@ math modern.parser multiline namespaces nested-comments
 sequences ;
 IN: modern.parser.factor
 
+TUPLE: comment < parsed text ;
+CONSTRUCTOR: <comment> comment ( text -- comment ) ;
+: parse-comment ( -- comment ) texts-readln <comment> ;
+\ parse-comment "!" register-parser
+\ parse-comment "#!" register-parser
+
 TUPLE: mparser < parsed name start slots body ;
 CONSTRUCTOR: <mparser> mparser ( name slots start body -- mparser ) ;
 : parse-parser ( -- mparser )
