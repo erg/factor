@@ -326,6 +326,12 @@ CONSTRUCTOR: <mhashtable> mhashtable ( elements -- block ) ;
     "}" parse-until <mhashtable> ;
 \ parse-hashtable "H{" register-parser
 
+TUPLE: mtuple < parsed name body ;
+CONSTRUCTOR: <mtuple> mtuple ( name body -- tuple ) ;
+: parse-tuple ( -- mtuple )
+    new-identifier body <mtuple> ;
+\ parse-tuple "TUPLE:" register-parser
+
 TUPLE: tuple-literal-assoc < parsed name slots ;
 TUPLE: tuple-literal-boa < parsed name slots ;
 CONSTRUCTOR: <tuple-literal-assoc> tuple-literal-assoc ( name slots -- tuple-literal ) ;
@@ -465,12 +471,6 @@ CONSTRUCTOR: <constant> constant ( name object -- constant ) ;
 : parse-constant ( -- constant )
     token parse <constant> ;
 \ parse-constant "CONSTANT:" register-parser
-
-TUPLE: mtuple < parsed name body ;
-CONSTRUCTOR: <mtuple> mtuple ( name body -- tuple ) ;
-: parse-tuple ( -- mtuple )
-    token body <mtuple> ;
-\ parse-tuple "TUPLE:" register-parser
 
 TUPLE: mbuiltin < parsed name body ;
 CONSTRUCTOR: <mbuiltin> mbuiltin ( name body -- builtin ) ;
