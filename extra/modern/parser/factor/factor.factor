@@ -17,7 +17,6 @@ CONSTRUCTOR: <literal-parser> literal-parser ( name -- obj ) ;
 \ parse-literal-parser "LITERAL-PARSER:" register-parser
 
 
-
 ! Doesn't look for (* inside strings, only finds it as raw
 TUPLE: mnested-comment < parsed ;
 CONSTRUCTOR: <mnested-comment> mnested-comment ( -- nested-comment ) ;
@@ -32,7 +31,6 @@ CONSTRUCTOR: <mnested-comment> mnested-comment ( -- nested-comment ) ;
 : parse-nested-comment ( -- nested-comment )
     1 parse-nested-comment' <mnested-comment> ;
 \ parse-nested-comment "(*" register-parser
-
 
 DEFER: parse-signature(--)
 DEFER: parse-nested-signature(--)
@@ -487,12 +485,6 @@ CONSTRUCTOR: <mprimitive> mprimitive ( name signature -- package ) ;
 : parse-mprimitive ( -- mprimitive )
     parse parse-signature(--) <mprimitive> ;
 \ parse-mprimitive "PRIMITIVE:" register-parser
-
-TUPLE: package < parsed name ;
-CONSTRUCTOR: <package> package ( name -- package ) ;
-: parse-package ( -- package )
-    raw <package> ;
-\ parse-package "PACKAGE:" register-parser
 
 TUPLE: import < parsed name ;
 CONSTRUCTOR: <import> import ( name -- package ) ;
