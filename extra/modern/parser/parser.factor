@@ -39,31 +39,26 @@ CONSTRUCTOR: <new-word> new-word ( name -- word ) ;
 
 
 SYMBOL: current-texts
-: save-text ( text -- )
-    dup object>> { "" CHAR: \s CHAR: \r CHAR: \n } member? [
-        drop
+: text>object ( text -- obj )
+    [
+        dup object>> dup
+        { "" CHAR: \s CHAR: \r CHAR: \n } member? [
+            nip
+        ] [
+            [ current-texts get push ] dip
+        ] if
     ] [
-        current-texts get push
-    ] if ;
+        f
+    ] if* ;
 
-! Call read-until first because sep is a string in the saved texts, we want a char
 : texts-read-until ( seps -- seq sep )
-    read-until
-    dup [
-        [ [ save-text ] [ object>> ] bi ] bi@
-    ] [
-        [
-            dup [
-                [ save-text ] [ object>> ] bi
-            ] when
-        ] dip
-    ] if ;
+    read-until [ text>object ] bi@ ;
 
 : texts-read1 ( -- obj )
-    read1 [ save-text ] [ object>> ] bi ;
+    read1 text>object ;
 
 : texts-readln ( -- string )
-    readln [ save-text ] [ object>> ] bi ;
+    readln text>object ;
 
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
