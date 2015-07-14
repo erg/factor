@@ -11,12 +11,12 @@ IN: modern.compiler
 
 GENERIC: lookup-token ( obj -- obj' )
 
-M: mstring lookup-token string>> ;
-M: mnumber lookup-token n>> string>number ;
+M: parsed-string lookup-token string>> ;
+M: parsed-number lookup-token n>> string>number ;
 ERROR: word-not-found word ;
-M: mtoken lookup-token name>> search ;
+M: parsed-token lookup-token name>> search ;
 M: marray lookup-token elements>> [ lookup-token ] map expand-literals ;
-M: escaped lookup-token name>> <mtoken> lookup-token <wrapper> ;
+M: escaped lookup-token name>> <parsed-token> lookup-token <wrapper> ;
 
 M: block lookup-token
     body>> [ lookup-token ] map >quotation ;
