@@ -26,8 +26,8 @@ CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
 TUPLE: mtoken < parsed name ;
 CONSTRUCTOR: <mtoken> mtoken ( name -- mtoken ) ;
 
-TUPLE: new-identifier < parsed name ;
-CONSTRUCTOR: <new-identifier> new-identifier ( name -- new-identifier ) ;
+TUPLE: midentifier < parsed name ;
+CONSTRUCTOR: <midentifier> midentifier ( name -- midentifier ) ;
 
 TUPLE: new-class < parsed name ;
 CONSTRUCTOR: <new-class> new-class ( name -- new-class ) ;
@@ -133,12 +133,12 @@ ERROR: multiline-string-expected got ;
 
 ERROR: identifier-can't-be-number n ;
 
-: identifer ( -- object )
+: new-identifier ( -- object )
     token-loop dup string? [
         dup string>number [
             identifier-can't-be-number
         ] [
-            <mtoken>
+            <midentifier>
         ] if
     ] when ;
 

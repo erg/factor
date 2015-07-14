@@ -11,30 +11,30 @@ IN: modern.parser.factor.tests
         T{ marray
             { texts
                 V{
-                    T{ document-object
+                    T{ doc
                         { object "{" }
-                        { start T{ document-position { column 0 } } }
-                        { finish T{ document-position { column 1 } } }
+                        { start T{ pos { column 0 } } }
+                        { finish T{ pos { column 1 } } }
                     }
-                    T{ document-object
+                    T{ doc
                         { object "1" }
-                        { start T{ document-position { column 2 } } }
-                        { finish T{ document-position { column 3 } } }
+                        { start T{ pos { column 2 } } }
+                        { finish T{ pos { column 3 } } }
                     }
-                    T{ document-object
+                    T{ doc
                         { object "2" }
-                        { start T{ document-position { column 4 } } }
-                        { finish T{ document-position { column 5 } } }
+                        { start T{ pos { column 4 } } }
+                        { finish T{ pos { column 5 } } }
                     }
-                    T{ document-object
+                    T{ doc
                         { object "3" }
-                        { start T{ document-position { column 6 } } }
-                        { finish T{ document-position { column 7 } } }
+                        { start T{ pos { column 6 } } }
+                        { finish T{ pos { column 7 } } }
                     }
-                    T{ document-object
+                    T{ doc
                         { object "}" }
-                        { start T{ document-position { column 8 } } }
-                        { finish T{ document-position { column 9 } } }
+                        { start T{ pos { column 8 } } }
+                        { finish T{ pos { column 9 } } }
                     }
                 }
             }
