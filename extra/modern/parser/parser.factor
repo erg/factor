@@ -26,14 +26,14 @@ CONSTRUCTOR: <mstring> mstring ( class string -- mstring ) ;
 TUPLE: mtoken < parsed name ;
 CONSTRUCTOR: <mtoken> mtoken ( name -- mtoken ) ;
 
-TUPLE: midentifier < parsed name ;
-CONSTRUCTOR: <midentifier> midentifier ( name -- midentifier ) ;
+TUPLE: parsed-identifier < parsed name ;
+CONSTRUCTOR: <parsed-identifier> parsed-identifier ( name -- midentifier ) ;
 
-TUPLE: new-class < parsed name ;
-CONSTRUCTOR: <new-class> new-class ( name -- new-class ) ;
+TUPLE: parsed-class < parsed name ;
+CONSTRUCTOR: <parsed-class> parsed-class ( name -- new-class ) ;
 
-TUPLE: new-word < parsed name ;
-CONSTRUCTOR: <new-word> new-word ( name -- new-word ) ;
+TUPLE: parsed-word < parsed name ;
+CONSTRUCTOR: <parsed-word> parsed-word ( name -- new-word ) ;
 
 
 SYMBOL: current-texts
@@ -138,12 +138,12 @@ ERROR: identifier-can't-be-number n ;
         dup string>number [
             identifier-can't-be-number
         ] [
-            <midentifier>
+            <parsed-identifier>
         ] if
     ] when ;
 
-: new-class ( -- object ) token-loop <new-class> ;
-: new-word ( -- object ) token-loop <new-word> ;
+: new-class ( -- object ) token-loop <parsed-class> ;
+: new-word ( -- object ) token-loop <parsed-word> ;
 
 : token ( -- object )
     token-loop dup string? [
