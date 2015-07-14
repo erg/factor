@@ -93,7 +93,7 @@ ERROR: signature-expected position ;
     parse-signature-in' maybe-parse-out <signature> ;
 
 : c-arguments ( -- arguments )
-    "(" expect ")" strings-until ;
+    "(" expect ")" raw-until ;
 
 TUPLE: c-function < parsed return-value name arguments ;
 CONSTRUCTOR: <c-function> c-function ( return-value name arguments -- c-function ) ;
@@ -209,7 +209,7 @@ CONSTRUCTOR: <specialized-array> specialized-array ( class -- speicialized-array
 TUPLE: specialized-arrays < parsed classes ;
 CONSTRUCTOR: <specialized-arrays> specialized-arrays ( classes -- speicialized-arrays ) ;
 : parse-specialized-arrays ( -- slot )
-    ";" strings-until <specialized-arrays> ;
+    ";" raw-until <specialized-arrays> ;
 \ parse-specialized-arrays "SPECIALIZED-ARRAYS:" register-parser
 
 TUPLE: postpone < parsed  name ;
@@ -249,7 +249,7 @@ CONSTRUCTOR: <use> use ( strings -- use ) ;
 
 TUPLE: using < parsed strings ;
 CONSTRUCTOR: <using> using ( strings -- use ) ;
-: parse-using ( -- using ) ";" strings-until <using> ;
+: parse-using ( -- using ) ";" raw-until <using> ;
 \ parse-using "USING:" register-parser
 
 TUPLE: author < parsed name ;
@@ -282,7 +282,7 @@ CONSTRUCTOR: <single-bind> single-bind ( target -- bind ) ;
 CONSTRUCTOR: <multi-bind> multi-bind ( targets -- bind ) ;
 : parse-bind ( -- bind )
     raw dup "(" = [
-        drop ")" strings-until <multi-bind>
+        drop ")" raw-until <multi-bind>
     ] [
         <single-bind>
     ] if ;
@@ -431,7 +431,7 @@ CONSTRUCTOR: <private> private ( body -- private ) ;
 TUPLE: from < parsed module functions ;
 CONSTRUCTOR: <from> from ( module functions -- from ) ;
 : parse-from ( -- from )
-    token ";" strings-until <from> ;
+    token ";" raw-until <from> ;
 \ parse-from "FROM:" register-parser
 
 TUPLE: qualified < parsed name ;
@@ -493,7 +493,7 @@ CONSTRUCTOR: <import> import ( name -- package ) ;
 TUPLE: imports < parsed names ;
 CONSTRUCTOR: <imports> imports ( names -- package ) ;
 : parse-imports ( -- import )
-    ";" strings-until <imports> ;
+    ";" raw-until <imports> ;
 \ parse-imports "IMPORTS:" register-parser
 
 TUPLE: mfoldable < parsed ;
@@ -566,7 +566,7 @@ CONSTRUCTOR: <symbol> symbol ( name -- symbol ) ;
 TUPLE: symbols < parsed names ;
 CONSTRUCTOR: <symbols> symbols ( names -- symbols ) ;
 : parse-symbols ( -- symbols )
-    ";" strings-until <symbols> ;
+    ";" raw-until <symbols> ;
 \ parse-symbols "SYMBOLS:" register-parser
 
 TUPLE: compilation-unit < parsed code ;
@@ -771,7 +771,7 @@ CONSTRUCTOR: <long-string> long-string ( name text -- long-string ) ;
 TUPLE: mirc < parsed name command body ;
 CONSTRUCTOR: <mirc> mirc ( name command body -- mirc ) ;
 : parse-irc ( -- irc )
-    token parse ";" strings-until <mirc> ;
+    token parse ";" raw-until <mirc> ;
 \ parse-irc "IRC:" register-parser
 
 ! The above is enough to kind of correctly parse factor.
