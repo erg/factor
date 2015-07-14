@@ -152,7 +152,7 @@ CONSTRUCTOR: <syntax> syntax ( name body -- syntax ) ;
 TUPLE: function < parsed name signature body ;
 CONSTRUCTOR: <function> function ( name signature body -- function ) ;
 : parse-function ( -- function )
-    token
+    new-identifier
     parse-signature(--)
     body <function> ;
 \ parse-function ":" register-parser
@@ -160,7 +160,7 @@ CONSTRUCTOR: <function> function ( name signature body -- function ) ;
 TUPLE: locals-function < parsed name signature body ;
 CONSTRUCTOR: <locals-function> locals-function ( name signature body -- function ) ;
 : parse-locals-function ( -- function )
-    token
+    new-identifier
     parse-signature(--)
     body <locals-function> ;
 \ parse-locals-function "::" register-parser
@@ -168,7 +168,7 @@ CONSTRUCTOR: <locals-function> locals-function ( name signature body -- function
 TUPLE: typed < parsed name signature body ;
 CONSTRUCTOR: <typed> typed ( name signature body -- typed ) ;
 : parse-typed ( -- function )
-    token
+    new-identifier
     parse-signature(--)
     body <typed> ;
 \ parse-typed "TYPED:" register-parser
@@ -176,7 +176,7 @@ CONSTRUCTOR: <typed> typed ( name signature body -- typed ) ;
 TUPLE: locals-typed < parsed name signature body ;
 CONSTRUCTOR: <locals-typed> locals-typed ( name signature body -- typed ) ;
 : parse-locals-typed ( -- function )
-    token
+    new-identifier
     parse-signature(--)
     body <locals-typed> ;
 \ parse-locals-typed "TYPED::" register-parser
@@ -185,7 +185,7 @@ CONSTRUCTOR: <locals-typed> locals-typed ( name signature body -- typed ) ;
 TUPLE: memo < parsed name signature body ;
 CONSTRUCTOR: <memo> memo ( name signature body -- memo ) ;
 : parse-memo ( -- function )
-    token
+    new-identifier
     parse-signature(--)
     body <memo> ;
 \ parse-memo "MEMO:" register-parser
@@ -193,7 +193,7 @@ CONSTRUCTOR: <memo> memo ( name signature body -- memo ) ;
 TUPLE: locals-memo < parsed name signature body ;
 CONSTRUCTOR: <locals-memo> locals-memo ( name signature body -- memo ) ;
 : parse-locals-memo ( -- function )
-    token
+    new-identifier
     parse-signature(--)
     body <locals-memo> ;
 \ parse-locals-memo "MEMO::" register-parser
@@ -202,9 +202,9 @@ CONSTRUCTOR: <locals-memo> locals-memo ( name signature body -- memo ) ;
 TUPLE: predicate < parsed name superclass body ;
 CONSTRUCTOR: <predicate> predicate ( name superclass body -- predicate ) ;
 : parse-predicate ( -- predicate )
-    token
+    new-identifier
     "<" expect
-    token
+    existing-class
     body <predicate> ;
 \ parse-predicate "PREDICATE:" register-parser
 
@@ -265,12 +265,6 @@ TUPLE: using < parsed strings ;
 CONSTRUCTOR: <using> using ( strings -- use ) ;
 : parse-using ( -- using ) ";" raw-until <using> ;
 \ parse-using "USING:" register-parser
-
-TUPLE: author < parsed name ;
-CONSTRUCTOR: <author> author ( name -- author ) ;
-: parse-author ( -- author )
-    string-until-eol [ " " member? ] trim <author> ;
-\ parse-author "AUTHOR:" register-parser
 
 TUPLE: block < parsed body ;
 CONSTRUCTOR: <block> block ( body -- block ) ;
