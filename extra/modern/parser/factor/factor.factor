@@ -304,21 +304,21 @@ CONSTRUCTOR: <mfry> mfry ( body -- block ) ;
 
 TUPLE: marray < parsed elements ;
 CONSTRUCTOR: <marray> marray ( elements -- block ) ;
-: parse-marray ( -- block )
+: parse-array ( -- block )
     "}" parse-until <marray> ;
-\ parse-marray "{" register-parser
+\ parse-array "{" register-parser
 
 TUPLE: mvector < parsed elements ;
 CONSTRUCTOR: <mvector> mvector ( elements -- block ) ;
-: parse-mvector ( -- block )
+: parse-vector ( -- block )
     "}" parse-until <mvector> ;
-\ parse-mvector "V{" register-parser
+\ parse-vector "V{" register-parser
 
 TUPLE: mhashtable < parsed elements ;
 CONSTRUCTOR: <mhashtable> mhashtable ( elements -- block ) ;
-: parse-mhashtable ( -- block )
+: parse-hashtable ( -- block )
     "}" parse-until <mhashtable> ;
-\ parse-mhashtable "H{" register-parser
+\ parse-hashtable "H{" register-parser
 
 TUPLE: tuple-literal-assoc < parsed name slots ;
 TUPLE: tuple-literal-boa < parsed name slots ;
@@ -331,7 +331,7 @@ ERROR: malformed-tuple-literal ;
     token dup dup [ name>> ] when {
         { "f" [ drop "}" parse-until <tuple-literal-boa> ] }
         { "{" [
-                  drop parse-marray
+                  drop parse-array
                   "}" parse-until swap prefix <tuple-literal-assoc>
               ]
         }
@@ -396,9 +396,9 @@ CONSTRUCTOR: <hints> hints ( name sequence -- hints ) ;
 
 TUPLE: mgeneric < parsed name signature ;
 CONSTRUCTOR: <mgeneric> mgeneric ( name signature -- generic ) ;
-: parse-mgeneric ( -- generic )
+: parse-generic ( -- generic )
     token parse-signature(--) <mgeneric> ;
-\ parse-mgeneric "GENERIC:" register-parser
+\ parse-generic "GENERIC:" register-parser
 
 TUPLE: hook < parsed name symbol signature ;
 CONSTRUCTOR: <hook> hook ( name symbol signature -- hook ) ;
@@ -408,15 +408,15 @@ CONSTRUCTOR: <hook> hook ( name symbol signature -- hook ) ;
 
 TUPLE: mgeneric# < parsed name n signature ;
 CONSTRUCTOR: <mgeneric#> mgeneric# ( name n signature -- generic ) ;
-: parse-mgeneric# ( -- generic )
+: parse-generic# ( -- generic )
     token token parse-signature(--) <mgeneric#> ;
-\ parse-mgeneric# "GENERIC#" register-parser
+\ parse-generic# "GENERIC#" register-parser
 
 TUPLE: mmethod < parsed class name body ;
 CONSTRUCTOR: <mmethod> mmethod ( class name body -- method ) ;
-: parse-mmethod ( -- method )
+: parse-method ( -- method )
     parse token body <mmethod> ;
-\ parse-mmethod "M:" register-parser
+\ parse-method "M:" register-parser
 
 TUPLE: locals-mmethod < parsed class name body ;
 CONSTRUCTOR: <locals-mmethod> locals-mmethod ( class name body -- locals-method ) ;
@@ -462,29 +462,29 @@ CONSTRUCTOR: <constant> constant ( name object -- constant ) ;
 
 TUPLE: mtuple < parsed name body ;
 CONSTRUCTOR: <mtuple> mtuple ( name body -- tuple ) ;
-: parse-mtuple ( -- mtuple )
+: parse-tuple ( -- mtuple )
     token body <mtuple> ;
-\ parse-mtuple "TUPLE:" register-parser
+\ parse-tuple "TUPLE:" register-parser
 
 TUPLE: mbuiltin < parsed name body ;
 CONSTRUCTOR: <mbuiltin> mbuiltin ( name body -- builtin ) ;
-: parse-mbuiltin ( -- mbuiltin )
+: parse-builtin ( -- mbuiltin )
     token body <mbuiltin> ;
-\ parse-mbuiltin "BUILTIN:" register-parser
+\ parse-builtin "BUILTIN:" register-parser
 
 TUPLE: merror < parsed name body ;
 CONSTRUCTOR: <merror> merror ( name body -- error ) ;
-: parse-merror ( -- merror )
+: parse-error ( -- merror )
     token body <merror> ;
-\ parse-merror "ERROR:" register-parser
+\ parse-error "ERROR:" register-parser
 
 
 
 TUPLE: mprimitive < parsed name signature ;
 CONSTRUCTOR: <mprimitive> mprimitive ( name signature -- package ) ;
-: parse-mprimitive ( -- mprimitive )
+: parse-primitive ( -- mprimitive )
     parse parse-signature(--) <mprimitive> ;
-\ parse-mprimitive "PRIMITIVE:" register-parser
+\ parse-primitive "PRIMITIVE:" register-parser
 
 TUPLE: import < parsed name ;
 CONSTRUCTOR: <import> import ( name -- package ) ;
