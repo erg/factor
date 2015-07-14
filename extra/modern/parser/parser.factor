@@ -15,8 +15,6 @@ parsers [ H{ } clone ] initialize
 
 TUPLE: parsed texts ;
 
-DEFER: token
-
 DEFER: texts-readln
 TUPLE: comment < parsed text ;
 CONSTRUCTOR: <comment> comment ( text -- comment ) ;
