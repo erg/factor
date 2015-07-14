@@ -15,20 +15,26 @@ parsers [ H{ } clone ] initialize
 
 TUPLE: parsed texts ;
 
+TUPLE: parsed-token < parsed name ;
+CONSTRUCTOR: <parsed-token> parsed-token ( name -- parsed-token ) ;
+
 TUPLE: parsed-number < parsed n ;
 CONSTRUCTOR: <parsed-number> parsed-number ( n -- parsed-number ) ;
+
+TUPLE: parsed-syntax < parsed text ;
+CONSTRUCTOR: <parsed-syntax> parsed-syntax ( text -- parsed-syntax ) ;
 
 TUPLE: parsed-string < parsed class string ;
 CONSTRUCTOR: <parsed-string> parsed-string ( class string -- parsed-string ) ;
 
-TUPLE: parsed-token < parsed name ;
-CONSTRUCTOR: <parsed-token> parsed-token ( name -- parsed-token ) ;
-
 TUPLE: parsed-identifier < parsed name ;
 CONSTRUCTOR: <parsed-identifier> parsed-identifier ( name -- parsed-identifier ) ;
 
-TUPLE: parsed-class < parsed name ;
-CONSTRUCTOR: <parsed-class> parsed-class ( name -- parsed-class ) ;
+TUPLE: parsed-new-class < parsed name ;
+CONSTRUCTOR: <parsed-new-class> parsed-new-class ( name -- parsed-new-class ) ;
+
+TUPLE: parsed-existing-class < parsed name ;
+CONSTRUCTOR: <parsed-existing-class> parsed-existing-class ( name -- parsed-existing-class ) ;
 
 TUPLE: parsed-word < parsed name ;
 CONSTRUCTOR: <parsed-word> parsed-word ( name -- parsed-word ) ;
@@ -139,7 +145,8 @@ ERROR: identifier-can't-be-number n ;
         ] if
     ] when ;
 
-: new-class ( -- object ) token-loop <parsed-class> ;
+: new-class ( -- object ) token-loop <parsed-new-class> ;
+: existing-class ( -- object ) token-loop <parsed-existing-class> ;
 : new-word ( -- object ) token-loop <parsed-word> ;
 
 : token ( -- object )
@@ -157,15 +164,9 @@ ERROR: token-expected token ;
         2dup dup parsed-token? [ name>> ] when = [ 2drop f ] [ nip parse-action ] if
     ] loop>array ;
 
-: string-until-eol ( -- string )
-    "\r\n" texts-read-until drop ;
-
 : expect ( string -- )
     token
     2dup dup [ name>> ] when = [ 2drop ] [ expected ] if ;
-
-: expect-one ( strings -- )
-    token 2dup dup [ name>> ] when swap member? [ 2drop ] [ expected ] if ;
 
 : body ( -- strings ) ";" parse-until ;
 
