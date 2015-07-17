@@ -7,46 +7,53 @@ math.parser namespaces prettyprint sequences sequences.extras
 strings unicode.case vocabs.files vocabs.loader ;
 IN: modern.parser
 
+! goal: remove this
+SYMBOL: current-texts
+
+: with-texts ( quot -- )
+    [ V{ } clone current-texts ] dip with-variable ; inline
+
+: push-text ( text -- )
+    current-texts get push ;
+
+: last-text ( -- last/f )
+    current-texts get ?last ;
+
+! : transfer-texts ( obj -- obj )
+    ! current-texts get >>texts
+    ! V{ } clone current-texts set ;
+
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
 
 : register-parser ( parser key -- )
     parsers get-global set-at ;
 
-TUPLE: parsed texts ;
+! Testing
+: clear-parsers ( -- ) parsers get-global clear-assoc ;
 
-TUPLE: parsed-token < parsed name ;
-CONSTRUCTOR: <parsed-token> parsed-token ( name -- parsed-token ) ;
+! Base classes
+TUPLE: parsed text start finish ;
+TUPLE: parsed-sequence texts ;
 
-TUPLE: parsed-number < parsed n ;
-CONSTRUCTOR: <parsed-number> parsed-number ( n -- parsed-number ) ;
-
-TUPLE: parsed-syntax < parsed text ;
-CONSTRUCTOR: <parsed-syntax> parsed-syntax ( text -- parsed-syntax ) ;
-
-TUPLE: parsed-string < parsed class string ;
-CONSTRUCTOR: <parsed-string> parsed-string ( class string -- parsed-string ) ;
-
-TUPLE: parsed-identifier < parsed name ;
-CONSTRUCTOR: <parsed-identifier> parsed-identifier ( name -- parsed-identifier ) ;
-
+! These ARE parsed or parsed-sequences
+TUPLE: parsed-token < parsed ;
+TUPLE: parsed-number < parsed ;
+TUPLE: parsed-string < parsed-sequence ;
+TUPLE: parsed-identifier < parsed ;
 TUPLE: parsed-new-class < parsed name ;
-CONSTRUCTOR: <parsed-new-class> parsed-new-class ( name -- parsed-new-class ) ;
-
 TUPLE: parsed-existing-class < parsed name ;
-CONSTRUCTOR: <parsed-existing-class> parsed-existing-class ( name -- parsed-existing-class ) ;
-
 TUPLE: parsed-word < parsed name ;
-CONSTRUCTOR: <parsed-word> parsed-word ( name -- parsed-word ) ;
 
-SYMBOL: current-texts
+: new-parsed ( type texts -- obj' ) [ new ] dip >>text ; inline
+
 : text>object ( text -- obj )
     [
         dup object>> dup
         { "" CHAR: \s CHAR: \r CHAR: \n } member? [
             nip
         ] [
-            [ current-texts get push ] dip
+            [ push-text ] dip
         ] if
     ] [
         f
@@ -66,7 +73,8 @@ ERROR: string-expected got separator ;
     } case ;
 
 : parse-string ( class -- mstring )
-    [ parse-string' ] "" make <parsed-string> ;
+    ! [ parse-string' ] "" make <parsed-string> ;
+    [ parse-string' ] "" make 2array parsed-string swap new-parsed ;
 
 : building-tail? ( string -- ? )
     [ building get ] dip {
@@ -99,29 +107,34 @@ ERROR: multiline-string-expected got ;
 ! multi"==[Lol. This string syntax...]=="
 : parse-multiline-string ( class -- mstring )
     "[" texts-read-until [
-        "]" "\"" surround multiline-string-until <parsed-string>
+        "]" "\"" surround multiline-string-until 2array parsed-string swap new-parsed
+        ! "]" "\"" surround multiline-string-until <parsed-string>
     ] [
         multiline-string-expected
     ] if ;
 
 : execute-parser ( word -- object/f )
-    dup name>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
+    dup text>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
 
-: parse-action ( string -- object/f )
-    dup parsed-token? [
-        dup name>> empty?
-        [ drop f ] [ execute-parser ] if
-    ] when ;
+: parse-action ( string -- object/string )
+    \ parsers get ?at [ execute( -- parsed ) ] when ;
+    ! dup parsed-token? [
+        ! dup text>> empty?
+        ! [ drop f ] [ execute-parser ] if
+    ! ] when ;
 
-: token-loop ( -- string/f )
+: token-loop' ( -- string/f )
     "\r\n\s\"" texts-read-until {
-        { [ dup "\r\n\s" member? ] [ drop [ token-loop ] when-empty ] }
-        { [ dup CHAR: " = ] [
-            drop f like
-            dup "m" = [ parse-multiline-string ] [ parse-string ] if
-        ] }
+        { [ dup "\r\n\s" member? ] [ drop [ token-loop' ] when-empty ] }
+        ! { [ dup CHAR: " = ] [
+            ! drop f like
+            ! dup "m" = [ parse-multiline-string ] [ parse-string ] if
+        ! ] }
         [ drop ]
     } cond ;
+
+: token-loop ( type -- token/f )
+    token-loop' [ new-parsed ] [ drop f ] if* ;
 
 : raw ( -- object )
     "\r\n\s" texts-read-until {
@@ -134,54 +147,36 @@ ERROR: multiline-string-expected got ;
         _ raw 2dup = [ 2drop f ] [ nip ] if
     ] loop>array ;
 
-ERROR: identifier-can't-be-number n ;
+! ERROR: identifier-can't-be-number n ;
 
-: new-identifier ( -- object )
-    token-loop dup string? [
-        dup string>number [
-            identifier-can't-be-number
-        ] [
-            <parsed-identifier>
-        ] if
-    ] when ;
-
-: new-class ( -- object ) token-loop <parsed-new-class> ;
-: existing-class ( -- object ) token-loop <parsed-existing-class> ;
-: new-word ( -- object ) token-loop <parsed-word> ;
-
-: token ( -- object )
-    token-loop dup string? [
-        dup string>number [ <parsed-number> ] [ <parsed-token> ] if
-    ] when ;
-
-ERROR: no-more-tokens ;
-: parse ( -- object/f ) token parse-action ;
+: new-identifier ( -- object ) parsed-identifier token-loop ;
+: new-class ( -- object ) parsed-new-class token-loop ;
+: existing-class ( -- object ) parsed-existing-class token-loop ;
+: new-word ( -- object ) parsed-word token-loop ;
+: token ( -- object ) token-loop' ;
+: parse ( -- object/f ) token-loop' parse-action ;
 
 ERROR: token-expected token ;
+! XXX: parsing word named ";" will execute while parse-until is looking for a ; -- may never find it!
 : parse-until ( string -- strings/f )
-    '[
-        _ parse [ token-expected ] unless*
-        2dup dup parsed-token? [ name>> ] when = [ 2drop f ] [ nip parse-action ] if
+    dup '[
+        ! XXX: fix is to call token here and parse-action manually
+        parse [ _ token-expected ] unless*
+        dup _ = [ drop f ] when
     ] loop>array ;
 
 : expect ( string -- )
     token
-    2dup dup [ name>> ] when = [ 2drop ] [ expected ] if ;
+    2dup dup [ text>> ] when = [ 2drop ] [ expected ] if ;
 
 : body ( -- strings ) ";" parse-until ;
 
 : parse-metadata ( path -- data ) utf8 file-contents ;
 
-: with-texts ( quot -- )
-    [ V{ } clone current-texts ] dip with-variable ; inline
-
-: transfer-texts ( obj -- obj )
-    current-texts get >>texts
-    V{ } clone current-texts set ;
-
 : parse-input-stream ( -- seq )
     [
-        [ parse dup [ transfer-texts ] when ] loop>array
+        ! [ parse dup [ transfer-texts ] when ] loop>array
+        [ parse ] loop>array
     ] with-texts ;
 
 : parse-stream ( stream -- seq )
