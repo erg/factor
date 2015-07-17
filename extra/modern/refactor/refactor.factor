@@ -29,7 +29,7 @@ IN: modern.refactor
 
 : warn-rename-unit-test-quots ( obj -- obj )
     {
-        { [ dup { [ mtoken? ] [ name>> "1array" = ] } 1&& ] [ "1array pattern detected, try using ${ } instead" print ] }
+        { [ dup { [ parsed-token? ] [ name>> "1array" = ] } 1&& ] [ "1array pattern detected, try using ${ } instead" print ] }
         [ ]
     } cond ;
 
@@ -75,7 +75,7 @@ IN: modern.refactor
     dup texts>> dup [
         last object>> ";" = [
             [
-                dup last " ;" document-object-after suffix
+                dup last " ;" doc-after suffix
             ] change-texts
         ] unless
     ] [
@@ -121,7 +121,7 @@ IN: modern.refactor
         [
             dup block? [
                 dup body>> [
-                    dup { [ mstring? ] [ class>> "SBUF" = ] } 1&&
+                    dup { [ parsed-string? ] [ class>> "SBUF" = ] } 1&&
                     [
                         [
                             rest

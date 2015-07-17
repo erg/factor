@@ -61,7 +61,7 @@ SLOT: foo
         [ name>> name>> ]
         [ name>> name>> constructor-name ]
         [
-            slots>> [ dup mtoken? [ name>> ] [ elements>> first name>> ] if ] map
+            slots>> [ dup parsed-token? [ name>> ] [ elements>> first name>> ] if ] map
             dup [ predicate-name ] map
         ]
     } { } cleave>sequence flatten ;
@@ -101,9 +101,9 @@ M: instance object>identifiers drop f ;
 
 ! literals
 M: block object>identifiers drop f ;
-M: mstring object>identifiers drop f ;
-M: mtoken object>identifiers drop f ;
-M: mnumber object>identifiers drop f ;
+M: parsed-string object>identifiers drop f ;
+M: parsed-token object>identifiers drop f ;
+M: parsed-number object>identifiers drop f ;
 M: escaped object>identifiers drop f ;
 M: mhashtable object>identifiers drop f ;
 M: marray object>identifiers drop f ;
