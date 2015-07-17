@@ -1,15 +1,36 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors assocs combinators constructors io kernel make
-math modern.parser multiline namespaces nested-comments
-sequences ;
+USING: accessors assocs combinators combinators.smart
+constructors io kernel make math modern.parser multiline
+namespaces nested-comments sequences ;
 IN: modern.parser.factor
+
+TUPLE: literal-parser < parsed ;
+: parse-literal-parser ( -- obj ) [ token ] output>array ;
+\ parse-literal-parser "LITERAL-PARSER:" register-parser
+
+TUPLE: mtuple < parsed-sequence ;
+: parse-tuple ( -- mtuple )
+    [ new-identifier body ] output>array ;
+\ parse-tuple "TUPLE:" register-parser
+
+HEREDOC: omg
 
 TUPLE: comment < parsed text ;
 CONSTRUCTOR: <comment> comment ( text -- comment ) ;
 : parse-comment ( -- comment ) texts-readln <comment> ;
 \ parse-comment "!" register-parser
 \ parse-comment "#!" register-parser
+
+TUPLE: use < parsed strings ;
+CONSTRUCTOR: <use> use ( strings -- use ) ;
+: parse-use ( -- use ) token <use> ;
+\ parse-use "USE:" register-parser
+
+TUPLE: using < parsed strings ;
+CONSTRUCTOR: <using> using ( strings -- use ) ;
+: parse-using ( -- using ) ";" raw-until <using> ;
+\ parse-using "USING:" register-parser
 
 TUPLE: mparser < parsed name start slots body ;
 CONSTRUCTOR: <mparser> mparser ( name slots start body -- mparser ) ;
@@ -22,6 +43,13 @@ CONSTRUCTOR: <literal-parser> literal-parser ( name -- obj ) ;
 : parse-literal-parser ( -- obj ) token <literal-parser> ;
 \ parse-literal-parser "LITERAL-PARSER:" register-parser
 
+
+TUPLE: mtuple < parsed name body ;
+CONSTRUCTOR: <mtuple> mtuple ( name body -- tuple ) ;
+: parse-tuple ( -- mtuple )
+B
+    new-identifier body <mtuple> ;
+\ parse-tuple "TUPLE:" register-parser
 
 ! Doesn't look for (* inside strings, only finds it as raw
 TUPLE: mnested-comment < parsed ;
@@ -256,16 +284,6 @@ CONSTRUCTOR: <instance> instance ( class mixin -- instance ) ;
     token token <instance> ;
 \ parse-instance "INSTANCE:" register-parser
 
-TUPLE: use < parsed strings ;
-CONSTRUCTOR: <use> use ( strings -- use ) ;
-: parse-use ( -- use ) token <use> ;
-\ parse-use "USE:" register-parser
-
-TUPLE: using < parsed strings ;
-CONSTRUCTOR: <using> using ( strings -- use ) ;
-: parse-using ( -- using ) ";" raw-until <using> ;
-\ parse-using "USING:" register-parser
-
 TUPLE: block < parsed body ;
 CONSTRUCTOR: <block> block ( body -- block ) ;
 : parse-block ( -- block )
@@ -319,12 +337,6 @@ CONSTRUCTOR: <mhashtable> mhashtable ( elements -- block ) ;
 : parse-hashtable ( -- block )
     "}" parse-until <mhashtable> ;
 \ parse-hashtable "H{" register-parser
-
-TUPLE: mtuple < parsed name body ;
-CONSTRUCTOR: <mtuple> mtuple ( name body -- tuple ) ;
-: parse-tuple ( -- mtuple )
-    new-identifier body <mtuple> ;
-\ parse-tuple "TUPLE:" register-parser
 
 TUPLE: tuple-literal-assoc < parsed name slots ;
 TUPLE: tuple-literal-boa < parsed name slots ;
@@ -1032,3 +1044,6 @@ natural-sort
 "delimiter" "deprecated" "eval(" "f" "flags{" "intersection{" "maybe{" "not{"
 "shuffle(" "union{"
 *)
+*)
+omg
+drop
