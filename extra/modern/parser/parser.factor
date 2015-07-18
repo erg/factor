@@ -35,17 +35,18 @@ TUPLE: pnew-word < doc ;
 TUPLE: pexisting-word < doc ;
 
 ERROR: string-expected got separator ;
-: parse-string' ( -- )
-    "\\\"" read-until dup [ object>> ] when {
-        { CHAR: " [ % ] }
-        { CHAR: \ [ % read1 , parse-string' ] }
-        { f [ f string-expected ] }
+: parse-string' ( -- sep )
+    "\\\"" read-until
+    dup dup [ object>> ] when {
+        { CHAR: " [ swap % ] }
+        { CHAR: \ [ nip % read1 , parse-string' ] }
+        { f [ nip f string-expected ] }
         [ string-expected ]
     } case ;
 
 : parse-string ( class sep -- mstring )
-    tell-input [ parse-string' ] "" make tell-input ptoken boa
-    pick [ 3array ] [ 2array nip ] if
+    tell-input [ parse-string' ] "" make tell-input rot [ ptoken boa ] dip
+    pick [ 4array ] [ 3array nip ] if
     pstring new swap >>object ;
 
 : building-tail? ( string -- ? )
