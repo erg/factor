@@ -28,11 +28,21 @@ TUPLE: ptext < doc ;
 TUPLE: ptoken < doc ;
 TUPLE: pnumber < doc ;
 TUPLE: pstring < psequence ;
+TUPLE: pinputs < psequence ;
+TUPLE: poutputs < psequence ;
+TUPLE: pbody < psequence ;
 TUPLE: pidentifier < doc ;
 TUPLE: pnew-class < doc ;
 TUPLE: pexisting-class < doc ;
 TUPLE: pnew-word < doc ;
 TUPLE: pexisting-word < doc ;
+
+: reject-texts ( seq -- seq' ) [ ptext? ] reject ; inline
+GENERIC: remove-texts ( obj -- obj' )
+M: object remove-texts ;
+M: sequence remove-texts [ remove-texts ] map ;
+M: psequence remove-texts [ reject-texts [ remove-texts ] map ] change-object ;
+
 
 ERROR: string-expected got separator ;
 : parse-string' ( -- sep )
@@ -136,7 +146,7 @@ ERROR: token-expected token ;
     token
     2dup dup [ object>> ] when = [ nip ptext pbecome ] [ expected ] if ;
 
-: body ( -- strings last ) ";" parse-until ;
+: body ( -- strings last ) ";" parse-until [ pbody boa ] dip ;
 
 : parse-metadata ( path -- data ) utf8 file-contents ;
 
@@ -168,6 +178,8 @@ GENERIC: write-parsed ( obj -- )
 M: doc write-parsed write ;
 M: psequence write-parsed object>> [ write-parsed ] each ;
 M: sequence write-parsed [ write-parsed ] each ;
+
+
 
 GENERIC: write-pflat' ( obj -- )
 M: doc write-pflat' object>> write bl ;

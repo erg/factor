@@ -21,9 +21,20 @@ PARSER: pqualified QUALIFIED: token ;
 PARSER: pqualified-with QUALIFIED-WITH: token token ;
 PARSER: pforget FORGET: token ;
 
+: parse-pinputs ( -- inputs sep )
+    "--" raw-until [ pinputs boa ] dip ;
+
+: parse-poutputs ( -- outputs sep )
+    ")" raw-until [ poutputs boa ] dip ;
+
 : parse-open-signature ( -- in sep out sep )
-    "--" raw-until ")" raw-until ;
-PARSER: psignature ( "--" raw-until ")" raw-until ;
+    parse-pinputs parse-poutputs ;
+
+PARSER: psignature ( parse-open-signature ;
+
+! Hacky, should be able to call parse-psignature with its "(" expect
+: parse-entire-signature ( -- seq )
+    [ "(" expect parse-open-signature ] output>array psignature boa ;
 
 PARSER: pexecute( execute( parse-open-signature ;
 PARSER: pcall( call( parse-open-signature ;
@@ -41,15 +52,15 @@ PARSER: pmethod-literal M\ token token ;
 
 PARSER: pchar CHAR: raw ;
 
-PARSER: pfunction : new-identifier parse-psignature body ;
-PARSER: pfunction-locals :: new-identifier parse-psignature body ;
-PARSER: palias ALIAS: token token ;
-PARSER: ptyped TYPED: new-identifier parse-psignature body ;
-PARSER: ptyped-locals TYPED:: new-identifier parse-psignature body ;
-PARSER: pmemo MEMO: new-identifier parse-psignature body ;
-PARSER: pmemo-locals MEMO:: new-identifier parse-psignature body ;
-PARSER: pmacro MACRO: new-identifier parse-psignature body ;
-PARSER: pmacro-locals MACRO:: new-identifier parse-psignature body ;
+PARSER: pfunction : new-identifier parse-entire-signature body ;
+PARSER: pfunction-locals :: new-identifier parse-entire-signature body ;
+PARSER: palias ALIAS: new-word existing-word ;
+PARSER: ptyped TYPED: new-identifier parse-entire-signature body ;
+PARSER: ptyped-locals TYPED:: new-identifier parse-entire-signature body ;
+PARSER: pmemo MEMO: new-identifier parse-entire-signature body ;
+PARSER: pmemo-locals MEMO:: new-identifier parse-entire-signature body ;
+PARSER: pmacro MACRO: new-identifier parse-entire-signature body ;
+PARSER: pmacro-locals MACRO:: new-identifier parse-entire-signature body ;
 
 PARSER: ptuple TUPLE: new-identifier body ;
 PARSER: pstruct STRUCT: new-identifier body ;
@@ -58,8 +69,9 @@ PARSER: punion-struct UNION-STRUCT: new-identifier body ;
 PARSER: perror ERROR: new-identifier body ;
 PARSER: pslot SLOT: token ;
 PARSER: pconstructor C: token token ;
+PARSER: pconstructor-new CONSTRUCTOR: token token parse-entire-signature ";" parse-until ;
 
-PARSER: pfunctor FUNCTOR: token parse-psignature ";FUNCTOR" parse-until ;
+PARSER: pfunctor FUNCTOR: token parse-entire-signature ";FUNCTOR" parse-until ;
 PARSER: pfunctor-syntax FUNCTOR-SYNTAX: token body ;
 
 : c-arguments ( -- sep arguments sep ) "(" expect ")" raw-until ;
@@ -77,12 +89,12 @@ PARSER: pc-global C-GLOBAL token token ;
 PARSER: phints HINTS: parse body ;
 
 PARSER: pbuiltin BUILTIN: token body ;
-PARSER: pprimitive PRIMITIVE: new-word parse-psignature ;
+PARSER: pprimitive PRIMITIVE: new-word parse-entire-signature ;
 PARSER: pmain MAIN: existing-word ;
 
-PARSER: pgeneric GENERIC: new-class parse-psignature ;
-PARSER: pgeneric# GENERIC# new-class token parse-psignature ;
-PARSER: phook HOOK: new-class existing-word parse-psignature ;
+PARSER: pgeneric GENERIC: new-class parse-entire-signature ;
+PARSER: pgeneric# GENERIC# new-class token parse-entire-signature ;
+PARSER: phook HOOK: new-class existing-word parse-entire-signature ;
 PARSER: pmethod M: existing-class token body ;
 PARSER: pmethod-locals M:: existing-class token body ;
 PARSER: ppredicate PREDICATE: new-identifier "<" expect existing-class body ;
@@ -94,7 +106,7 @@ PARSER: pimport IMPORT: token ;
 PARSER: pimports IMPORTS: ";" raw-until ;
 
 PARSER: pspecial-object SPECIAL-OBJECT: token parse ;
-PARSER: pmath MATH: new-word parse-psignature ;
+PARSER: pmath MATH: new-word parse-entire-signature ;
 PARSER: punion UNION: new-class body ;
 PARSER: pintersection INTERSECTION: token ";" parse-until ;
 
@@ -169,7 +181,6 @@ PARSER: plong-string STRING: token "\n;" multiline-string-until ;
 PARSER: pnested-comment (* [ 1 parse-pnested-comment' ] { } make ;
 
 PARSER: pmirc MIRC: token parse ";" raw-until ;
-PARSER: pconstructor-new CONSTRUCTOR: token token parse-psignature ";" parse-until ;
 PARSER: pmain-window MAIN-WINDOW: token parse body ;
 PARSER: pgame GAME: token parse body ;
 PARSER: psolution SOLUTION: token ;
