@@ -160,6 +160,9 @@ ERROR: token-expected token ;
 : parse-modern-string ( string -- data )
     [ input>document-stream parse-input-stream ] with-string-reader ; inline
 
+: parse-vocab ( string -- data )
+    modern-source-path parse-source-file ;
+
 ERROR: unrecognized-factor-file path ;
 : parse-modern-file ( path -- seq )
     dup >lower {
