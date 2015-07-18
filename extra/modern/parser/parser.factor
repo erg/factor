@@ -1,80 +1,54 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays assocs combinators
-combinators.short-circuit constructors fry io io.encodings.utf8
-io.files io.streams.document io.streams.string kernel make
-math.parser namespaces prettyprint sequences sequences.extras
-strings unicode.case vocabs.files vocabs.loader ;
+USING: accessors arrays assocs bootstrap.syntax combinators
+combinators.short-circuit combinators.smart constructors fry io
+io.encodings.utf8 io.files io.streams.document io.streams.string
+kernel lexer make math math.parser namespaces parser prettyprint
+sequences sequences.extras strings unicode.case vocabs.files
+vocabs.loader words ;
 IN: modern.parser
-
-! goal: remove this
-SYMBOL: current-texts
-
-: with-texts ( quot -- )
-    [ V{ } clone current-texts ] dip with-variable ; inline
-
-: push-text ( text -- )
-    current-texts get push ;
-
-: last-text ( -- last/f )
-    current-texts get ?last ;
-
-! : transfer-texts ( obj -- obj )
-    ! current-texts get >>texts
-    ! V{ } clone current-texts set ;
 
 SYMBOL: parsers
 parsers [ H{ } clone ] initialize
-
-: register-parser ( parser key -- )
-    parsers get-global set-at ;
-
-! Testing
+: register-parser ( parser key -- ) parsers get-global set-at ;
 : clear-parsers ( -- ) parsers get-global clear-assoc ;
+
+: pbecome ( doc parser -- parser' )
+    new
+        over start>> >>start
+        over finish>> >>finish
+        swap object>> >>text
+    ; inline
+
 
 ! Base classes
 TUPLE: parsed text start finish ;
-TUPLE: parsed-sequence texts ;
+TUPLE: psequence texts ;
 
-! These ARE parsed or parsed-sequences
-TUPLE: parsed-token < parsed ;
-TUPLE: parsed-number < parsed ;
-TUPLE: parsed-string < parsed-sequence ;
-TUPLE: parsed-identifier < parsed ;
-TUPLE: parsed-new-class < parsed name ;
-TUPLE: parsed-existing-class < parsed name ;
-TUPLE: parsed-word < parsed name ;
+! These ARE parsed or psequences
+TUPLE: psyntax < parsed ;
+TUPLE: ptoken < parsed ;
+TUPLE: pnumber < parsed ;
+TUPLE: pstring < psequence ;
+TUPLE: pidentifier < parsed ;
+TUPLE: pnew-class < parsed name ;
+TUPLE: pexisting-class < parsed name ;
+TUPLE: pword < parsed name ;
 
 : new-parsed ( type texts -- obj' ) [ new ] dip >>text ; inline
 
-: text>object ( text -- obj )
-    [
-        dup object>> dup
-        { "" CHAR: \s CHAR: \r CHAR: \n } member? [
-            nip
-        ] [
-            [ push-text ] dip
-        ] if
-    ] [
-        f
-    ] if* ;
-
-: texts-read-until ( seps -- seq sep ) read-until [ text>object ] bi@ ;
-: texts-read1 ( -- obj ) read1 text>object ;
-: texts-readln ( -- string ) readln text>object ;
-
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
-    "\\\"" texts-read-until {
+    "\\\"" read-until {
         { CHAR: " [ % ] }
-        { CHAR: \ [ % texts-read1 , parse-string' ] }
+        { CHAR: \ [ % read1 , parse-string' ] }
         { f [ f string-expected ] }
         [ string-expected ]
     } case ;
 
 : parse-string ( class -- mstring )
-    ! [ parse-string' ] "" make <parsed-string> ;
-    [ parse-string' ] "" make 2array parsed-string swap new-parsed ;
+    ! [ parse-string' ] "" make <pstring> ;
+    [ parse-string' ] "" make 2array pstring swap new-parsed ;
 
 : building-tail? ( string -- ? )
     [ building get ] dip {
@@ -85,7 +59,7 @@ ERROR: string-expected got separator ;
 ERROR: expected got expected ;
 ERROR: expected-sequence expected got ;
 : multiline-string-until' ( seq -- )
-    dup ?last 1array texts-read-until [
+    dup ?last 1array read-until [
         [ % ] [ , ] bi*
         dup building-tail? [
             drop
@@ -106,9 +80,9 @@ ERROR: expected-sequence expected got ;
 ERROR: multiline-string-expected got ;
 ! multi"==[Lol. This string syntax...]=="
 : parse-multiline-string ( class -- mstring )
-    "[" texts-read-until [
-        "]" "\"" surround multiline-string-until 2array parsed-string swap new-parsed
-        ! "]" "\"" surround multiline-string-until <parsed-string>
+    "[" read-until [
+        "]" "\"" surround multiline-string-until 2array pstring swap new-parsed
+        ! "]" "\"" surround multiline-string-until <pstring>
     ] [
         multiline-string-expected
     ] if ;
@@ -116,15 +90,11 @@ ERROR: multiline-string-expected got ;
 : execute-parser ( word -- object/f )
     dup text>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
 
-: parse-action ( string -- object/string )
-    \ parsers get ?at [ execute( -- parsed ) ] when ;
-    ! dup parsed-token? [
-        ! dup text>> empty?
-        ! [ drop f ] [ execute-parser ] if
-    ! ] when ;
+: parse-action ( string -- object )
+    dup object>> \ parsers get ?at [ execute( -- parsed ) swap psyntax pbecome prefix ] [ drop ] if ;
 
 : token-loop' ( -- string/f )
-    "\r\n\s\"" texts-read-until {
+    "\r\n\s\"" read-until {
         { [ dup "\r\n\s" member? ] [ drop [ token-loop' ] when-empty ] }
         ! { [ dup CHAR: " = ] [
             ! drop f like
@@ -134,10 +104,10 @@ ERROR: multiline-string-expected got ;
     } cond ;
 
 : token-loop ( type -- token/f )
-    token-loop' [ new-parsed ] [ drop f ] if* ;
+    [ token-loop' ] dip pbecome ; ! [ new-parsed ] [ drop f ] if* ;
 
 : raw ( -- object )
-    "\r\n\s" texts-read-until {
+    "\r\n\s" read-until {
         { [ dup "\r\n\s" member? ] [ drop [ raw ] when-empty ] }
         [ drop ]
     } cond ;
@@ -149,35 +119,35 @@ ERROR: multiline-string-expected got ;
 
 ! ERROR: identifier-can't-be-number n ;
 
-: new-identifier ( -- object ) parsed-identifier token-loop ;
-: new-class ( -- object ) parsed-new-class token-loop ;
-: existing-class ( -- object ) parsed-existing-class token-loop ;
-: new-word ( -- object ) parsed-word token-loop ;
+: new-identifier ( -- object ) pidentifier token-loop ;
+: new-class ( -- object ) pnew-class token-loop ;
+: existing-class ( -- object ) pexisting-class token-loop ;
+: new-word ( -- object ) pword token-loop ;
 : token ( -- object ) token-loop' ;
-: parse ( -- object/f ) token-loop' parse-action ;
+: parse ( -- object/f ) token-loop' dup [ parse-action ] when ;
 
 ERROR: token-expected token ;
+: cut-last ( seq -- before last )
+    dup length 1 - cut first ;
+
 ! XXX: parsing word named ";" will execute while parse-until is looking for a ; -- may never find it!
-: parse-until ( string -- strings/f )
+! XXX: fix is to call token here and parse-action manually
+: parse-until ( string -- strings sep )
     dup '[
-        ! XXX: fix is to call token here and parse-action manually
         parse [ _ token-expected ] unless*
-        dup _ = [ drop f ] when
-    ] loop>array ;
+        dup object>> _ = [ , f ] when
+        dup doc? [ ptoken pbecome ] when
+    ] loop>array cut-last psyntax pbecome ;
 
 : expect ( string -- )
     token
     2dup dup [ text>> ] when = [ 2drop ] [ expected ] if ;
 
-: body ( -- strings ) ";" parse-until ;
+: body ( -- strings last ) ";" parse-until ;
 
 : parse-metadata ( path -- data ) utf8 file-contents ;
 
-: parse-input-stream ( -- seq )
-    [
-        ! [ parse dup [ transfer-texts ] when ] loop>array
-        [ parse ] loop>array
-    ] with-texts ;
+: parse-input-stream ( -- seq ) [ parse ] loop>array ;
 
 : parse-stream ( stream -- seq )
     [ parse-input-stream ] with-input-stream ; inline
@@ -198,18 +168,26 @@ ERROR: unrecognized-factor-file path ;
         ! [ drop f 2array ]
     } cond ;
 
-: write-parsed-flat ( seq -- )
-    [ texts>> [ object>> write bl ] each nl ] each ;
+GENERIC: write-parsed ( obj -- )
+M: parsed write-parsed text>> write ;
+M: psequence write-parsed texts>> [ write-parsed ] each ;
 
-: write-parsed-objects ( seq -- )
+GENERIC: write-pflat' ( obj -- )
+M: parsed write-pflat' text>> write bl ;
+M: psequence write-pflat' texts>> [ write-parsed ] each ;
+
+: write-pflat ( seq -- )
+    [ write-pflat ] each nl ;
+
+: write-pobjects ( seq -- )
     output>document-stream
-    [ texts>> [ write ] each ] each nl ;
+    [ write-parsed ] each nl ;
 
-: write-parsed-string ( seq -- string )
-    [ write-parsed-objects ] with-string-writer ;
+: write-pstring ( seq -- string )
+    [ write-pobjects ] with-string-writer ;
 
 : write-modern-file ( seq path -- )
-    utf8 [ write-parsed-objects ] with-file-writer ;
+    utf8 [ write-pobjects ] with-file-writer ;
 
 : load-vocab-docs ( names -- seq )
     [ vocab-docs-path ] map
@@ -220,3 +198,14 @@ ERROR: unrecognized-factor-file path ;
     [ vocab-tests-path ] map
     [ exists? ] filter
     [ dup . flush parse-modern-file ] map ;
+
+<<
+: define-parser ( word token quot -- )
+    [ drop register-parser ]
+    [ nip '[ _ output>array ] ( -- obj ) define-declared ] 3bi ;
+>>
+
+SYNTAX: PARSER:
+    scan-new-word mark-top-level-syntax
+    scan-token
+    parse-definition define-parser ;

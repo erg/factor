@@ -9,12 +9,20 @@ TUPLE: literal-parser < parsed ;
 : parse-literal-parser ( -- obj ) [ token ] output>array ;
 \ parse-literal-parser "LITERAL-PARSER:" register-parser
 
-TUPLE: mtuple < parsed-sequence ;
-: parse-tuple ( -- mtuple )
-    [ new-identifier body ] output>array ;
-\ parse-tuple "TUPLE:" register-parser
+! TUPLE: mtuple < psequence ;
+! : parse-tuple ( -- mtuple )
+    ! [ new-identifier body ] output>array ;
+! \ parse-tuple "TUPLE:" register-parser
+
+PARSER: ptuple TUPLE: new-identifier body ;
+
 
 HEREDOC: omg
+
+
+
+! { id body } "TUPLE"
+
 
 TUPLE: comment < parsed text ;
 CONSTRUCTOR: <comment> comment ( text -- comment ) ;
