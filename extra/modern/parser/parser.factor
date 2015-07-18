@@ -2,11 +2,11 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs bootstrap.syntax classes.parser
 classes.tuple combinators combinators.short-circuit
-combinators.smart constructors fry io io.encodings.utf8 io.files
-io.streams.document io.streams.string kernel lexer make math
-math.parser modern.paths namespaces nested-comments parser
-prettyprint sequences sequences.extras strings unicode.case
-vocabs.files vocabs.loader words ;
+combinators.smart constructors fry generalizations io
+io.encodings.utf8 io.files io.streams.document io.streams.string
+kernel lexer make math math.parser modern.paths namespaces
+nested-comments parser prettyprint sequences sequences.extras
+strings unicode.case vocabs.files vocabs.loader words ;
 IN: modern.parser
 
 SYMBOL: parsers
@@ -45,8 +45,8 @@ ERROR: string-expected got separator ;
     } case ;
 
 : parse-string ( class sep -- mstring )
-    tell-input [ parse-string' ] "" make tell-input rot [ ptoken boa ] dip
-    pick [ 4array ] [ 3array nip ] if
+    tell-input [ parse-string' ] "" make tell-input [ 1 - ] change-column rot [ ptoken boa ] dip
+    4 npick [ 4array ] [ 3array nip ] if
     pstring new swap >>object ;
 
 : building-tail? ( string -- ? )

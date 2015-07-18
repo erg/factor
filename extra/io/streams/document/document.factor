@@ -120,8 +120,9 @@ M: document-stream stream-tell
 : write-newlines ( pos stream -- )
     [ line>> CHAR: \n <string> ] [ stream>> ] bi* stream-write ;
 
+ERROR: negative-offset n ;
 : write-spaces ( pos stream -- )
-    [ column>> CHAR: \s <string> ] [ stream>> ] bi* stream-write ;
+    [ column>> dup 0 < [ negative-offset ] when CHAR: \s <string> ] [ stream>> ] bi* stream-write ;
 
 : write-object ( doc stream -- )
     [ object>> ] [ stream>> ] bi*
