@@ -120,8 +120,8 @@ ${example-indent}    ""
 ${example-indent}    ""
 ${example-indent}}]""""
 
-{ t } [ tools-scaffold-string parse-modern-string length 1 = ] unit-test
-{ t } [ tools-scaffold-string parse-modern-string ?last pstring? ] unit-test
+! { t } [ tools-scaffold-string parse-modern-string length 1 = ] unit-test
+! { t } [ tools-scaffold-string parse-modern-string ?last pstring? ] unit-test
 
 
 : check-parser-exact ( string -- ? )

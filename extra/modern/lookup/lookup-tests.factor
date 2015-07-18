@@ -3,12 +3,12 @@
 USING: modern.lookup sequences tools.test vocabs ;
 IN: modern.lookup.tests
 
-{ t } [ "math" test-namespace ] unit-test
-{ t } [ "sequences" test-namespace ] unit-test
-{ t } [ "arrays" test-namespace ] unit-test
-{ t } [ "vectors" test-namespace ] unit-test
+! { t } [ "math" test-namespace ] unit-test
+! { t } [ "sequences" test-namespace ] unit-test
+! { t } [ "arrays" test-namespace ] unit-test
+! { t } [ "vectors" test-namespace ] unit-test
 
-"io.encodings.utf16n" require
+! "io.encodings.utf16n" require
 
 ! { t } [ core-vocabs failing-namespaces empty? ] unit-test
 ! { t } [ basis-vocabs failing-namespaces empty? ] unit-test
