@@ -39,7 +39,7 @@ ERROR: string-expected got separator ;
     "\\\"" read-until
     dup dup [ object>> ] when {
         { CHAR: " [ swap % ] }
-        { CHAR: \ [ nip object>> , read1 , parse-string' ] }
+        { CHAR: \ [ [ % ] [ , ] bi* read1 , parse-string' ] }
         { f [ nip f string-expected ] }
         [ string-expected ]
     } case ;
