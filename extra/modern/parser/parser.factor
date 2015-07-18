@@ -4,9 +4,9 @@ USING: accessors arrays assocs bootstrap.syntax classes.parser
 classes.tuple combinators combinators.short-circuit
 combinators.smart constructors fry io io.encodings.utf8 io.files
 io.streams.document io.streams.string kernel lexer make math
-math.parser namespaces parser prettyprint sequences
-sequences.extras strings unicode.case vocabs.files vocabs.loader
-words ;
+math.parser modern.paths namespaces nested-comments parser
+prettyprint sequences sequences.extras strings unicode.case
+vocabs.files vocabs.loader words ;
 IN: modern.parser
 
 SYMBOL: parsers
@@ -15,7 +15,7 @@ parsers [ H{ } clone ] initialize
 : clear-parsers ( -- ) parsers get-global clear-assoc ;
 
 ! Base classes
-TUPLE: parsed object start finish ;
+TUPLE: parsed start object finish ;
 TUPLE: psequence object ;
 
 : pbecome ( doc parser -- parser' )
@@ -30,26 +30,24 @@ TUPLE: ptoken < parsed ;
 TUPLE: pnumber < parsed ;
 TUPLE: pstring < psequence ;
 TUPLE: pidentifier < parsed ;
-TUPLE: pnew-class < parsed name ;
-TUPLE: pexisting-class < parsed name ;
-TUPLE: pnew-word < parsed name ;
-TUPLE: pexisting-word < parsed name ;
-
-: new-parsed ( type texts -- obj' ) [ new ] dip >>object ; inline
+TUPLE: pnew-class < parsed ;
+TUPLE: pexisting-class < parsed ;
+TUPLE: pnew-word < parsed ;
+TUPLE: pexisting-word < parsed ;
 
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
-    "\\\"" read-until object>> {
+    "\\\"" read-until dup [ object>> ] when {
         { CHAR: " [ % ] }
         { CHAR: \ [ % read1 , parse-string' ] }
         { f [ f string-expected ] }
         [ string-expected ]
     } case ;
 
-: parse-string ( class -- mstring )
-    ! [ parse-string' ] "" make <pstring> ;
-B
-    [ parse-string' ] "" make 2array pstring swap new-parsed ;
+: parse-string ( class sep -- mstring )
+    tell-input [ parse-string' ] "" make tell-input ptoken boa
+    pick [ 3array ] [ 2array nip ] if
+    pstring new swap >>object ;
 
 : building-tail? ( string -- ? )
     [ building get ] dip {
@@ -78,38 +76,25 @@ ERROR: expected-sequence expected got ;
 : multiline-string-until ( end -- string )
     [ [ multiline-string-until' ] "" make ] keep length head* ;
 
-ERROR: multiline-string-expected got ;
-! multi"==[Lol. This string syntax...]=="
-: parse-multiline-string ( class -- mstring )
-    "[" read-until [
-        "]" "\"" surround multiline-string-until 2array pstring swap new-parsed
-        ! "]" "\"" surround multiline-string-until <pstring>
-    ] [
-        multiline-string-expected
-    ] if ;
-
 : execute-parser ( word -- object/f )
     dup object>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
 
 : parse-action ( string -- object )
-    dup object>> \ parsers get ?at [
+    dup dup [ object>> ] when \ parsers get ?at [
         execute( -- parsed ) [ swap ptext pbecome prefix ] change-object
     ] [ drop ] if ;
 
 : token-loop' ( -- string/f )
     "\r\n\s\"" read-until {
-        { [ dup f = ] [ drop ] } ! must be above object>>
+        { [ dup f = ] [ drop ] }
         { [ dup object>> "\r\n\s" member? ] [ drop [ token-loop' ] when-empty ] }
         { [ dup object>> CHAR: " = ] [
-B
-            drop f like
-            dup "m" = [ parse-multiline-string ] [ parse-string ] if
+            [ f like ] dip parse-string
         ] }
-        ! [ dup . flush B drop ]
     } cond ;
 
 : token-loop ( type -- token/f )
-    [ token-loop' ] dip pbecome ; ! [ new-parsed ] [ drop f ] if* ;
+    [ token-loop' ] dip pbecome ;
 
 : raw ( -- object )
     "\r\n\s" read-until {
@@ -224,3 +209,17 @@ SYNTAX: PARSER:
     scan-new-class
     scan-token
     parse-definition define-parser ;
+
+(*
+
+ERROR: multiline-string-expected got ;
+! multi"==[Lol. This string syntax...]=="
+: parse-multiline-string ( class -- mstring )
+    "[" read-until [
+        "]" "\"" surround multiline-string-until 2array pstring new swap >>object
+        ! "]" "\"" surround multiline-string-until <pstring>
+    ] [
+        multiline-string-expected
+    ] if ;
+
+*)
