@@ -1,11 +1,12 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays assocs bootstrap.syntax combinators
-combinators.short-circuit combinators.smart constructors fry io
-io.encodings.utf8 io.files io.streams.document io.streams.string
-kernel lexer make math math.parser namespaces parser prettyprint
-sequences sequences.extras strings unicode.case vocabs.files
-vocabs.loader words ;
+USING: accessors arrays assocs bootstrap.syntax classes.parser
+classes.tuple combinators combinators.short-circuit
+combinators.smart constructors fry io io.encodings.utf8 io.files
+io.streams.document io.streams.string kernel lexer make math
+math.parser namespaces parser prettyprint sequences
+sequences.extras strings unicode.case vocabs.files vocabs.loader
+words ;
 IN: modern.parser
 
 SYMBOL: parsers
@@ -13,17 +14,15 @@ parsers [ H{ } clone ] initialize
 : register-parser ( parser key -- ) parsers get-global set-at ;
 : clear-parsers ( -- ) parsers get-global clear-assoc ;
 
+! Base classes
+TUPLE: parsed object start finish ;
+TUPLE: psequence object ;
+
 : pbecome ( doc parser -- parser' )
     new
         over start>> >>start
         over finish>> >>finish
-        swap object>> >>text
-    ; inline
-
-
-! Base classes
-TUPLE: parsed text start finish ;
-TUPLE: psequence texts ;
+        swap object>> >>object ; inline
 
 ! These ARE parsed or psequences
 TUPLE: psyntax < parsed ;
@@ -35,7 +34,7 @@ TUPLE: pnew-class < parsed name ;
 TUPLE: pexisting-class < parsed name ;
 TUPLE: pword < parsed name ;
 
-: new-parsed ( type texts -- obj' ) [ new ] dip >>text ; inline
+: new-parsed ( type texts -- obj' ) [ new ] dip >>object ; inline
 
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
@@ -88,19 +87,22 @@ ERROR: multiline-string-expected got ;
     ] if ;
 
 : execute-parser ( word -- object/f )
-    dup text>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
+    dup object>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
 
 : parse-action ( string -- object )
-    dup object>> \ parsers get ?at [ execute( -- parsed ) swap psyntax pbecome prefix ] [ drop ] if ;
+    dup object>> \ parsers get ?at [
+        execute( -- parsed ) [ swap psyntax pbecome prefix ] change-object
+    ] [ drop ] if ;
 
 : token-loop' ( -- string/f )
     "\r\n\s\"" read-until {
-        { [ dup "\r\n\s" member? ] [ drop [ token-loop' ] when-empty ] }
+        { [ dup f = ] [ drop ] } ! must be above object>>
+        { [ dup object>> "\r\n\s" member? ] [ drop [ token-loop' ] when-empty ] }
         ! { [ dup CHAR: " = ] [
             ! drop f like
             ! dup "m" = [ parse-multiline-string ] [ parse-string ] if
         ! ] }
-        [ drop ]
+        ! [ drop ]
     } cond ;
 
 : token-loop ( type -- token/f )
@@ -108,14 +110,18 @@ ERROR: multiline-string-expected got ;
 
 : raw ( -- object )
     "\r\n\s" read-until {
-        { [ dup "\r\n\s" member? ] [ drop [ raw ] when-empty ] }
-        [ drop ]
+        { [ dup f = ] [ drop ] }
+        { [ dup object>> "\r\n\s" member? ] [ drop [ raw ] when-empty ] }
     } cond ;
 
-: raw-until ( string -- strings )
-    '[
-        _ raw 2dup = [ 2drop f ] [ nip ] if
-    ] loop>array ;
+: cut-last ( seq -- before last )
+    dup length 1 - cut first ;
+
+ERROR: token-expected token ;
+: raw-until ( string -- strings sep )
+    dup '[
+        raw [ dup object>> _ = [ psyntax pbecome , f ] when ] [ _ token-expected ] if*
+    ] loop>array cut-last ;
 
 ! ERROR: identifier-can't-be-number n ;
 
@@ -126,22 +132,18 @@ ERROR: multiline-string-expected got ;
 : token ( -- object ) token-loop' ;
 : parse ( -- object/f ) token-loop' dup [ parse-action ] when ;
 
-ERROR: token-expected token ;
-: cut-last ( seq -- before last )
-    dup length 1 - cut first ;
-
 ! XXX: parsing word named ";" will execute while parse-until is looking for a ; -- may never find it!
 ! XXX: fix is to call token here and parse-action manually
 : parse-until ( string -- strings sep )
     dup '[
         parse [ _ token-expected ] unless*
         dup object>> _ = [ , f ] when
-        dup doc? [ ptoken pbecome ] when
+        ! dup doc? [ ptoken pbecome ] when
     ] loop>array cut-last psyntax pbecome ;
 
-: expect ( string -- )
+: expect ( string -- string )
     token
-    2dup dup [ text>> ] when = [ 2drop ] [ expected ] if ;
+    2dup dup [ object>> ] when = [ nip psyntax pbecome ] [ expected ] if ;
 
 : body ( -- strings last ) ";" parse-until ;
 
@@ -169,12 +171,12 @@ ERROR: unrecognized-factor-file path ;
     } cond ;
 
 GENERIC: write-parsed ( obj -- )
-M: parsed write-parsed text>> write ;
-M: psequence write-parsed texts>> [ write-parsed ] each ;
+M: parsed write-parsed object>> write ;
+M: psequence write-parsed object>> [ write-parsed ] each ;
 
 GENERIC: write-pflat' ( obj -- )
-M: parsed write-pflat' text>> write bl ;
-M: psequence write-pflat' texts>> [ write-parsed ] each ;
+M: parsed write-pflat' object>> write bl ;
+M: psequence write-pflat' object>> [ write-parsed ] each ;
 
 : write-pflat ( seq -- )
     [ write-pflat ] each nl ;
@@ -200,12 +202,18 @@ M: psequence write-pflat' texts>> [ write-parsed ] each ;
     [ dup . flush parse-modern-file ] map ;
 
 <<
-: define-parser ( word token quot -- )
-    [ drop register-parser ]
-    [ nip '[ _ output>array ] ( -- obj ) define-declared ] 3bi ;
+: define-parser ( class token quot -- )
+    [ 2drop psequence { } define-tuple-class ]
+    [
+        [ [ name>> "parse-" prepend create-word-in mark-top-level-syntax ] keep ] 2dip
+        {
+            [ nip swap '[ _ output>array _ boa ] ( -- obj ) define-declared ]
+            [ drop nip register-parser ]
+        } 4cleave
+    ] 3bi ;
 >>
 
 SYNTAX: PARSER:
-    scan-new-word mark-top-level-syntax
+    scan-new-class
     scan-token
     parse-definition define-parser ;

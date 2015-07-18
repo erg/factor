@@ -5,59 +5,25 @@ constructors io kernel make math modern.parser multiline
 namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
-TUPLE: literal-parser < parsed ;
-: parse-literal-parser ( -- obj ) [ token ] output>array ;
-\ parse-literal-parser "LITERAL-PARSER:" register-parser
-
-! TUPLE: mtuple < psequence ;
-! : parse-tuple ( -- mtuple )
-    ! [ new-identifier body ] output>array ;
-! \ parse-tuple "TUPLE:" register-parser
-
+PARSER: pparser PARSER: new-class raw body ;
+PARSER: pcomment ! readln ;
+PARSER: pshell-comment #! readln ;
+PARSER: puse USE: token ;
+PARSER: pusing USING: ";" raw-until ;
+PARSER: pin IN: token ;
+PARSER: psignature ( "--" raw-until ")" raw-until ;
+PARSER: pfunction : new-identifier body ;
 PARSER: ptuple TUPLE: new-identifier body ;
 
+: c-arguments ( -- sep arguments sep ) "(" expect ")" raw-until ;
+PARSER: pc-function FUNCTION: token new-identifier c-arguments ";" expect ;
+PARSER: pfunction-alias FUNCTION-ALIAS: token token new-identifier c-arguments ";" expect ;
+PARSER: px-function X-FUNCTION: token new-identifier c-arguments ";" expect ;
+PARSER: pgl-function GL-FUNCTION: token new-identifier c-arguments ";" expect ;
 
 HEREDOC: omg
 
-
-
-! { id body } "TUPLE"
-
-
-TUPLE: comment < parsed text ;
-CONSTRUCTOR: <comment> comment ( text -- comment ) ;
-: parse-comment ( -- comment ) texts-readln <comment> ;
-\ parse-comment "!" register-parser
-\ parse-comment "#!" register-parser
-
-TUPLE: use < parsed strings ;
-CONSTRUCTOR: <use> use ( strings -- use ) ;
-: parse-use ( -- use ) token <use> ;
-\ parse-use "USE:" register-parser
-
-TUPLE: using < parsed strings ;
-CONSTRUCTOR: <using> using ( strings -- use ) ;
-: parse-using ( -- using ) ";" raw-until <using> ;
-\ parse-using "USING:" register-parser
-
-TUPLE: mparser < parsed name start slots body ;
-CONSTRUCTOR: <mparser> mparser ( name slots start body -- mparser ) ;
-: parse-parser ( -- mparser )
-    raw parse raw body <mparser> ;
-\ parse-parser "PARSER:" register-parser
-
-TUPLE: literal-parser < parsed name ;
-CONSTRUCTOR: <literal-parser> literal-parser ( name -- obj ) ;
-: parse-literal-parser ( -- obj ) token <literal-parser> ;
-\ parse-literal-parser "LITERAL-PARSER:" register-parser
-
-
-TUPLE: mtuple < parsed name body ;
-CONSTRUCTOR: <mtuple> mtuple ( name body -- tuple ) ;
-: parse-tuple ( -- mtuple )
-B
-    new-identifier body <mtuple> ;
-\ parse-tuple "TUPLE:" register-parser
+! PARSER: pparser LITERAL-PARSER: new-class raw body ;
 
 ! Doesn't look for (* inside strings, only finds it as raw
 TUPLE: mnested-comment < parsed ;
@@ -74,82 +40,6 @@ CONSTRUCTOR: <mnested-comment> mnested-comment ( -- nested-comment ) ;
     1 parse-nested-comment' <mnested-comment> ;
 \ parse-nested-comment "(*" register-parser
 
-DEFER: parse-signature(--)
-DEFER: parse-nested-signature(--)
-DEFER: parse-signature--)
-DEFER: parse-signature-in
-DEFER: parse-signature-in'
-
-TUPLE: stack-effect < parsed in out ;
-CONSTRUCTOR: <stack-effect> stack-effect ( in out -- obj ) ;
-: parse-stack-effect ( -- stack-effect )
-    parse-signature--) ;
-\ parse-stack-effect "(" register-parser
-
-TUPLE: typed-argument < parsed name signature ;
-CONSTRUCTOR: <typed-argument> typed-argument ( name signature -- typed ) ;
-
-TUPLE: signature < parsed in out ;
-CONSTRUCTOR: <signature> signature ( in out -- signature ) ;
-
-ERROR: signature-expected position ;
-: parse-signature-in'' ( -- parse-out? )
-    raw [ tell-input signature-expected ] unless*
-    dup ":" tail? [
-        parse-nested-signature(--) <typed-argument> ,
-        parse-signature-in''
-    ] [
-        {
-            { "--" [ t ] }
-            { ")" [ f ] }
-            [ , parse-signature-in'' ]
-        } case
-    ] if ;
-
-: parse-signature-in' ( -- in parse-out? )
-    [ parse-signature-in'' ] { } make swap ;
-
-: parse-signature-in ( -- in ? )
-    "(" expect parse-signature-in' ;
-
-: parse-signature-out' ( -- )
-    raw dup ":" tail? [
-        parse-nested-signature(--) <typed-argument> ,
-        parse-signature-out'
-    ] [
-        dup ")" = [
-            drop
-        ] [
-            , parse-signature-out'
-        ] if
-    ] if ;
-
-: parse-signature-out ( -- out )
-    [ parse-signature-out' ] { } make ;
-
-: maybe-parse-out ( ? -- out/f )
-    [ parse-signature-out ] [ f ] if ;
-
-: parse-nested-signature(--) ( -- signature )
-    raw dup "(" = [
-        drop
-        parse-signature-in' maybe-parse-out <signature>
-    ] when ;
-
-: parse-signature(--) ( -- signature )
-    parse-signature-in maybe-parse-out <signature> ;
-
-: parse-signature--) ( -- signature )
-    parse-signature-in' maybe-parse-out <signature> ;
-
-: c-arguments ( -- arguments )
-    "(" expect ")" raw-until ;
-
-TUPLE: c-function < parsed return-value name arguments ;
-CONSTRUCTOR: <c-function> c-function ( return-value name arguments -- c-function ) ;
-: parse-c-function ( -- c-function )
-    token token c-arguments ";" expect <c-function> ;
-\ parse-c-function "FUNCTION:" register-parser
 
 TUPLE: x-function < parsed return-value name arguments ;
 CONSTRUCTOR: <x-function> x-function ( return-value name arguments -- c-function ) ;
@@ -163,11 +53,6 @@ CONSTRUCTOR: <c-function-alias> c-function-alias ( aliased-name return-value nam
     token token token c-arguments ";" expect <c-function-alias> ;
 \ parse-c-function-alias "FUNCTION-ALIAS:" register-parser
 
-TUPLE: gl-function < parsed return-value name ptrs arguments ;
-CONSTRUCTOR: <gl-function> gl-function ( return-value name ptrs arguments -- gl-function ) ;
-: parse-gl-function ( -- gl-function )
-    token token parse c-arguments ";" expect <gl-function> ;
-\ parse-gl-function "GL-FUNCTION:" register-parser
 
 
 TUPLE: subroutine < parsed name arguments ;
