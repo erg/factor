@@ -2,10 +2,10 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators.short-circuit
 combinators.smart fry hashtables io io.files kernel macros
-modern.parser modern.parser.factor namespaces nested-comments
-prettyprint sequences sequences.deep sets splitting strings
-vocabs vocabs.files vocabs.hierarchy vocabs.loader
-vocabs.metadata sorting ;
+modern.parser modern.parser.factor multiline namespaces
+nested-comments parser prettyprint sequences sequences.deep sets
+sorting splitting strings vocabs vocabs.files vocabs.hierarchy
+vocabs.loader vocabs.metadata ;
 IN: modern.lookup
 
 
@@ -61,7 +61,7 @@ SLOT: foo
         [ name>> name>> ]
         [ name>> name>> constructor-name ]
         [
-            slots>> [ dup parsed-token? [ name>> ] [ elements>> first name>> ] if ] map
+            slots>> [ dup ptoken? [ name>> ] [ elements>> first name>> ] if ] map
             dup [ predicate-name ] map
         ]
     } { } cleave>sequence flatten ;
@@ -71,6 +71,8 @@ GENERIC: object>identifiers ( object -- string )
 
 M: sequence object>identifiers
     [ object>identifiers ] { } map-as sift ;
+
+HEREDOC: LOOOOOOOL
 
 ! Any
 ! M: object object>identifiers drop f ;
@@ -102,8 +104,8 @@ M: instance object>identifiers drop f ;
 ! literals
 M: block object>identifiers drop f ;
 M: parsed-string object>identifiers drop f ;
-M: parsed-token object>identifiers drop f ;
-M: parsed-number object>identifiers drop f ;
+M: ptoken object>identifiers drop f ;
+M: pnumber object>identifiers drop f ;
 M: escaped object>identifiers drop f ;
 M: mhashtable object>identifiers drop f ;
 M: marray object>identifiers drop f ;
@@ -255,6 +257,9 @@ M: unicode-category-not object>identifiers name>> name>> name-and-predicate ;
 M: main-window object>identifiers name>> name>> ;
 M: solution object>identifiers name>> name>> append-main ;
 M: game object>identifiers name>> name>> name-and-attributes ;
+
+LOOOOOOOL
+drop
 
 
 MACRO: any-predicate? ( words -- quot )
