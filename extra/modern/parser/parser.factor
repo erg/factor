@@ -15,7 +15,6 @@ parsers [ H{ } clone ] initialize
 : clear-parsers ( -- ) parsers get-global clear-assoc ;
 
 ! Base classes
-TUPLE: parsed start object finish ;
 TUPLE: psequence object ;
 
 : pbecome ( doc parser -- parser' )
@@ -25,15 +24,15 @@ TUPLE: psequence object ;
         swap object>> >>object ; inline
 
 ! These ARE parsed or psequences
-TUPLE: ptext < parsed ;
-TUPLE: ptoken < parsed ;
-TUPLE: pnumber < parsed ;
+TUPLE: ptext < doc ;
+TUPLE: ptoken < doc ;
+TUPLE: pnumber < doc ;
 TUPLE: pstring < psequence ;
-TUPLE: pidentifier < parsed ;
-TUPLE: pnew-class < parsed ;
-TUPLE: pexisting-class < parsed ;
-TUPLE: pnew-word < parsed ;
-TUPLE: pexisting-word < parsed ;
+TUPLE: pidentifier < doc ;
+TUPLE: pnew-class < doc ;
+TUPLE: pexisting-class < doc ;
+TUPLE: pnew-word < doc ;
+TUPLE: pexisting-word < doc ;
 
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
@@ -163,13 +162,12 @@ ERROR: unrecognized-factor-file path ;
     } cond ;
 
 GENERIC: write-parsed ( obj -- )
-M: parsed write-parsed object>> write ;
-M: doc write-parsed object>> write ;
+M: doc write-parsed write ;
 M: psequence write-parsed object>> [ write-parsed ] each ;
 M: sequence write-parsed [ write-parsed ] each ;
 
 GENERIC: write-pflat' ( obj -- )
-M: parsed write-pflat' object>> write bl ;
+M: doc write-pflat' object>> write bl ;
 M: psequence write-pflat' object>> [ write-parsed ] each ;
 
 : write-pflat ( seq -- )
