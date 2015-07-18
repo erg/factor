@@ -164,7 +164,9 @@ ERROR: unrecognized-factor-file path ;
 
 GENERIC: write-parsed ( obj -- )
 M: parsed write-parsed object>> write ;
+M: doc write-parsed object>> write ;
 M: psequence write-parsed object>> [ write-parsed ] each ;
+M: sequence write-parsed [ write-parsed ] each ;
 
 GENERIC: write-pflat' ( obj -- )
 M: parsed write-pflat' object>> write bl ;

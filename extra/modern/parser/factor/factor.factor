@@ -129,7 +129,10 @@ PARSER: pblock-eval $[ "]" parse-until ;
 PARSER: pblock-locals [| "]" parse-until ;
 PARSER: parray { "}" parse-until ;
 PARSER: pvector V{ "}" parse-until ;
+PARSER: pbyte-array B{ "}" parse-until ;
+PARSER: pbyte-vector BV{ "}" parse-until ;
 PARSER: phashtable H{ "}" parse-until ;
+PARSER: phash-set HS{ "}" parse-until ;
 PARSER: ptuple-literal T{ "}" parse-until ;
 
 PARSER: pregisters REGISTERS: ";" parse-until ;
