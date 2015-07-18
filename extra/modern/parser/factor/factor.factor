@@ -45,11 +45,11 @@ PARSER: pfunction : new-identifier parse-psignature body ;
 PARSER: pfunction-locals :: new-identifier parse-psignature body ;
 PARSER: palias ALIAS: token token ;
 PARSER: ptyped TYPED: new-identifier parse-psignature body ;
-PARSER: ptyped-locals TYPED:: new-identifier body ;
-PARSER: pmemo MEMO: new-identifier body ;
-PARSER: pmemo-locals MEMO:: new-identifier body ;
-PARSER: pmacro MACRO: new-identifier body ;
-PARSER: pmacro-locals MACRO:: new-identifier body ;
+PARSER: ptyped-locals TYPED:: new-identifier parse-psignature body ;
+PARSER: pmemo MEMO: new-identifier parse-psignature body ;
+PARSER: pmemo-locals MEMO:: new-identifier parse-psignature body ;
+PARSER: pmacro MACRO: new-identifier parse-psignature body ;
+PARSER: pmacro-locals MACRO:: new-identifier parse-psignature body ;
 
 PARSER: ptuple TUPLE: new-identifier body ;
 PARSER: pstruct STRUCT: new-identifier body ;
