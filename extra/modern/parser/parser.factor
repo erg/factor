@@ -74,7 +74,9 @@ ERROR: expected-sequence expected got ;
     ] if* ;
 
 : multiline-string-until ( end -- string )
-    [ [ multiline-string-until' ] "" make ] keep length head* ;
+    [ tell-input ] dip
+    [ multiline-string-until' ] "" make tell-input doc boa ;
+    ! [ [ multiline-string-until' ] "" make ] keep length head* ;
 
 : execute-parser ( word -- object/f )
     dup object>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
