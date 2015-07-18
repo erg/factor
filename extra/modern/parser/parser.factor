@@ -177,7 +177,7 @@ M: psequence write-pflat' object>> [ write-parsed ] each ;
     output>document-stream
     [ write-parsed ] each nl ;
 
-: write-pstring ( seq -- string )
+: write-modern-string ( seq -- string )
     [ write-pobjects ] with-string-writer ;
 
 : write-modern-file ( seq path -- )
