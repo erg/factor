@@ -1,48 +1,42 @@
 ! Copyright (C) 2014 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: ascii io.encodings.utf8 io.files io.streams.document
-kernel modern.parser modern.parser.factor multiline sequences
-sets tools.test vocabs.hierarchy vocabs.loader modern.lookup
-assocs ;
+USING: ascii assocs io.encodings.utf8 io.files
+io.streams.document kernel modern.lookup modern.parser
+modern.parser.factor modern.paths multiline sequences sets
+tools.test vocabs.hierarchy vocabs.loader ;
 IN: modern.parser.factor.tests
 
 {
     {
-        T{ marray
-            { texts
-                V{
-                    T{ doc
+        T{ parray
+            { object
+                {
+                    T{ ptext
                         { object "{" }
-                        { start T{ pos { column 0 } } }
                         { finish T{ pos { column 1 } } }
                     }
-                    T{ doc
-                        { object "1" }
-                        { start T{ pos { column 2 } } }
-                        { finish T{ pos { column 3 } } }
+                    {
+                        T{ doc
+                            { start T{ pos { column 2 } } }
+                            { object "1" }
+                            { finish T{ pos { column 3 } } }
+                        }
+                        T{ doc
+                            { start T{ pos { column 4 } } }
+                            { object "2" }
+                            { finish T{ pos { column 5 } } }
+                        }
+                        T{ doc
+                            { start T{ pos { column 6 } } }
+                            { object "3" }
+                            { finish T{ pos { column 7 } } }
+                        }
                     }
-                    T{ doc
-                        { object "2" }
-                        { start T{ pos { column 4 } } }
-                        { finish T{ pos { column 5 } } }
-                    }
-                    T{ doc
-                        { object "3" }
-                        { start T{ pos { column 6 } } }
-                        { finish T{ pos { column 7 } } }
-                    }
-                    T{ doc
-                        { object "}" }
+                    T{ ptext
                         { start T{ pos { column 8 } } }
+                        { object "}" }
                         { finish T{ pos { column 9 } } }
                     }
-                }
-            }
-            { elements
-                {
-                    T{ parsed-number { n "1" } }
-                    T{ parsed-number { n "2" } }
-                    T{ parsed-number { n "3" } }
                 }
             }
         }
@@ -50,11 +44,11 @@ IN: modern.parser.factor.tests
 } [ "{ 1 2 3 }" parse-modern-string ] unit-test
 
 : check-parsed-string ( string -- ? )
-    dup parse-modern-string write-parsed-string sequence= ;
+    dup parse-modern-string write-modern-string sequence= ;
 
 : check-parsed-file ( path -- ? )
     [ utf8 file-contents ]
-    [ parse-modern-file write-parsed-string ] bi sequence= ;
+    [ parse-modern-file write-modern-string ] bi sequence= ;
 
 : replace-parsed-file ( path -- )
     [ parse-modern-file ] keep
@@ -102,14 +96,14 @@ ${example-indent}    ""
 ${example-indent}}]""""
 
 { t } [ tools-scaffold-string parse-modern-string length 1 = ] unit-test
-{ t } [ tools-scaffold-string parse-modern-string ?last parsed-string? ] unit-test
+{ t } [ tools-scaffold-string parse-modern-string ?last pstring? ] unit-test
 
 
 : check-parser-exact ( string -- ? )
-    [ parse-modern-string write-parsed-string ] keep = ;
+    [ parse-modern-string write-modern-string ] keep = ;
 
 : check-parsed-exact ( string -- ? )
-    parse-modern-string [ write-parsed-string parse-modern-string ] keep = ;
+    parse-modern-string [ write-modern-string parse-modern-string ] keep = ;
 
 { { } } [
     all-source-paths [ dup check-parsed-file ] { } map>assoc [ nip ] assoc-reject
