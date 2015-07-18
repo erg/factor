@@ -2,10 +2,10 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators.short-circuit
 combinators.smart fry hashtables io io.files kernel macros
-modern.parser modern.parser.factor multiline namespaces
-nested-comments parser prettyprint sequences sequences.deep sets
-sorting splitting strings vocabs vocabs.files vocabs.hierarchy
-vocabs.loader vocabs.metadata ;
+modern.parser modern.parser.factor modern.paths multiline
+namespaces nested-comments parser prettyprint sequences
+sequences.deep sets sorting splitting strings vocabs
+vocabs.files vocabs.hierarchy vocabs.loader vocabs.metadata ;
 IN: modern.lookup
 
 
@@ -262,41 +262,6 @@ LOOOOOOOL
 drop
 
 
-MACRO: any-predicate? ( words -- quot )
-    [ '[ _ execute ] ] map
-    [ [ ] ] [ '[ _ 1|| ] ] if-empty ;
-
-: modern-if-available ( path -- path' )
-    dup ".factor" ?tail [
-        ".modern" append
-        dup exists? [
-            nip
-        ] [
-            drop
-        ] if
-    ] [
-        drop
-    ] if ;
-
-ERROR: not-a-source-path path ;
-: force-modern-path ( path -- path' )
-    ".factor" ?tail [ ".modern" append ] [ not-a-source-path ] if ;
-: modern-docs-path ( path -- path' )
-    vocab-docs-path modern-if-available ;
-: modern-tests-path ( path -- path' )
-    vocab-tests-path modern-if-available ;
-: modern-source-path ( path -- path' )
-    vocab-source-path modern-if-available ;
-: modern-syntax-path ( path -- path' )
-    vocab-source-path ".factor" ?tail drop "-syntax.modern" append ;
-
-: force-modern-docs-path ( path -- path' )
-    vocab-docs-path force-modern-path ;
-: force-modern-tests-path ( path -- path' )
-    vocab-tests-path force-modern-path ;
-: force-modern-source-path ( path -- path' )
-    vocab-source-path force-modern-path ;
-
 : parse-vocab>assoc ( vocab -- seq )
     modern-source-path
     parse-modern-file
@@ -310,40 +275,8 @@ ERROR: not-a-source-path path ;
 : lookup-vocab-failures ( vocab -- seq )
     parse-vocab>assoc [ nip not ] assoc-filter ;
 
-: vocabs-from ( root -- vocabs )
-    "" disk-vocabs-in-root/prefix
-    [ don't-load? not ] filter no-prefixes
-    [ name>> ] map ;
-
 : filter-vocabs ( seq -- seq )
     [ lookup-vocab-failures ] map harvest ;
-
-: core-vocabs ( -- seq ) "resource:core" vocabs-from ;
-: basis-vocabs ( -- seq ) "resource:basis" vocabs-from ;
-: extra-vocabs ( -- seq ) "resource:extra" vocabs-from ;
-: all-vocabs ( -- seq )
-    [
-        core-vocabs
-        basis-vocabs
-        extra-vocabs
-    ] { } append-outputs-as ;
-
-: filter-exists ( seq -- seq' ) [ exists? ] filter ;
-
-: all-syntax-paths ( -- seq )
-    all-vocabs [ modern-syntax-path ] map filter-exists ;
-
-: all-source-paths ( -- seq )
-    all-vocabs [ modern-source-path ] map filter-exists ;
-
-: all-docs-paths ( -- seq )
-    all-vocabs [ modern-docs-path ] map filter-exists ;
-
-: all-tests-paths ( -- seq )
-    all-vocabs [ modern-tests-path ] map filter-exists ;
-
-: all-factor-files ( -- seq )
-    [ all-syntax-paths all-source-paths all-docs-paths all-tests-paths ] { } append-outputs-as ;
 
 : diff-bad-basis-vocabs ( seq -- seq' )
     { } diff ;
@@ -389,17 +322,6 @@ ERROR: not-a-source-path path ;
 
 : extra-untracked-words ( -- seq )
     extra-vocabs diff-bad-extra-vocabs vocabs-untracked-words ;
-
-: vocab-names>syntax ( strings -- seq )
-    [ modern-syntax-path ] map [ exists? ] filter ;
-
-: core-syntax-files ( -- seq ) core-vocabs vocab-names>syntax ;
-: basis-syntax-files ( -- seq ) basis-vocabs vocab-names>syntax ;
-: extra-syntax-files ( -- seq ) extra-vocabs vocab-names>syntax ;
-
-: load-core-syntax ( -- seq ) core-syntax-files [ parse-modern-file ] map ;
-: load-basis-syntax ( -- seq ) basis-syntax-files [ parse-modern-file ] map ;
-: load-extra-syntax ( -- seq ) extra-syntax-files [ parse-modern-file ] map ;
 
 : load-namespace ( name -- triple )
     dup
@@ -469,3 +391,9 @@ ERROR: not-a-source-path path ;
 : failing-namespaces2 ( names -- names' )
     [ dup test-namespace2 ] { } map>assoc
     [ second ] reject keys ;
+
+: load-core-syntax ( -- seq ) core-syntax-files [ parse-modern-file ] map ;
+: load-basis-syntax ( -- seq ) basis-syntax-files [ parse-modern-file ] map ;
+: load-extra-syntax ( -- seq ) extra-syntax-files [ parse-modern-file ] map ;
+
+

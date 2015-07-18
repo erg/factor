@@ -5,15 +5,53 @@ constructors io kernel make math modern.parser multiline
 namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
+PARSER: psyntax SYNTAX: raw body ;
 PARSER: pparser PARSER: new-class raw body ;
 PARSER: pcomment ! readln ;
 PARSER: pshell-comment #! readln ;
+PARSER: heredoc HEREDOC: token dup name>> multiline-string-until ;
+
+PARSER: pin IN: token ;
 PARSER: puse USE: token ;
 PARSER: pusing USING: ";" raw-until ;
-PARSER: pin IN: token ;
+PARSER: pfrom FROM: token "=>" expect ";" parse-until ;
+PARSER: pexclude EXCLUDE: token "=>" expect ";" parse-until ;
+PARSER: prename RENAME: token "=>" expect token ;
+PARSER: pqualified QUALIFIED: token ;
+PARSER: pqualified-with QUALIFIED-WITH: token token ;
+
+: parse-open-signature ( -- in sep out sep )
+    "--" raw-until ")" raw-until ;
 PARSER: psignature ( "--" raw-until ")" raw-until ;
+
+PARSER: pexecute( execute( parse-open-signature ;
+PARSER: pcall( call( parse-open-signature ;
+PARSER: pdata-map( data-map( parse-open-signature ;
+PARSER: pdata-map!( data-map!( parse-open-signature ;
+
+PARSER: pconstant CONSTANT: token parse ;
+PARSER: psymbol SYMBOL: token ;
+PARSER: psymbols SYMBOLS: ";" raw-until ;
+PARSER: ppostpone POSTPONE: token ;
+PARSER: pdefer DEFER: token ;
+
+PARSER: pescaped \ raw ;
+PARSER: pmethod-literal M\ token token ;
+
+PARSER: pchar CHAR: raw ;
+
 PARSER: pfunction : new-identifier body ;
+PARSER: pfunction-locals :: new-identifier body ;
+PARSER: ptyped TYPED: new-identifier body ;
+PARSER: ptyped-locals TYPED:: new-identifier body ;
+PARSER: pmemo MEMO: new-identifier body ;
+PARSER: pmemo-locals MEMO:: new-identifier body ;
+
 PARSER: ptuple TUPLE: new-identifier body ;
+PARSER: pstruct STRUCT: new-identifier body ;
+PARSER: perror ERROR: new-identifier body ;
+PARSER: pslot SLOT: token ;
+PARSER: pconstructor C: token token ;
 
 : c-arguments ( -- sep arguments sep ) "(" expect ")" raw-until ;
 PARSER: pc-function FUNCTION: token new-identifier c-arguments ";" expect ;
@@ -21,10 +59,60 @@ PARSER: pfunction-alias FUNCTION-ALIAS: token token new-identifier c-arguments "
 PARSER: px-function X-FUNCTION: token new-identifier c-arguments ";" expect ;
 PARSER: pgl-function GL-FUNCTION: token new-identifier c-arguments ";" expect ;
 
+PARSER: phints HINTS: parse body ;
+
+PARSER: pbuiltin BUILTIN: token body ;
+PARSER: pprimitive PRIMITIVE: new-word parse-psignature ;
+PARSER: pmain MAIN: existing-word ;
+
+PARSER: pgeneric GENERIC: new-class parse-psignature ;
+PARSER: pgeneric# GENERIC# new-class token parse-psignature ;
+PARSER: phook HOOK: new-class existing-word parse-psignature ;
+PARSER: pmethod M: existing-class token body ;
+PARSER: pmethod-locals M:: existing-class token body ;
+PARSER: ppredicate PREDICATE: new-identifier "<" expect existing-class body ;
+PARSER: pmixin MIXIN: new-class ;
+PARSER: pinstance INSTANCE: existing-class existing-class ;
+PARSER: psingleton SINGLETON: new-class ;
+PARSER: psingletons SINGLETONS: body ;
+PARSER: pimport IMPORT: token ;
+PARSER: pimports IMPORTS: ";" raw-until ;
+
+PARSER: pmath MATH: new-word parse-psignature ;
+PARSER: punion UNION: new-class body ;
+PARSER: pcolor COLOR: token ;
+
+PARSER: pspecialized-array SPECIALIZED-ARRAY: token ;
+PARSER: pspecialized-arrays SPECIALIZED-ARRAYS: ";" raw-until ;
+
+PARSER: pglsl-shader GLSL-SHADER: token token "\n;" multiline-string-until ;
+PARSER: pglsl-program GLSL-PROGRAM: token ";" parse-until ;
+PARSER: puniform-tuple UNIFORM-TUPLE: token ";" parse-until ;
+
+PARSER: pebnf EBNF: token ";ENBF" multiline-string-until ;
+PARSER: pebnf-acute <EBNF token "EBNF>" multiline-string-until ;
+PARSER: pebnf-bracket [EBNF token "EBNF>" multiline-string-until ;
+
+PARSER: pslots-quot slots[ "]" parse-until ;
+PARSER: pslots-array slots{ "}" parse-until ;
+PARSER: pset-slots-quot set-slots[ "]" parse-until ;
+PARSER: pset-slots-array set-slots{ "}" parse-until ;
+PARSER: pcopy-slots-array copy-slots{ "}" parse-until ;
+PARSER: pset-quot set[ "]" parse-until ;
+PARSER: pset-array set{ "}" parse-until ;
+PARSER: pget-quot get[ "]" parse-until ;
+PARSER: pget-array get{ "}" parse-until ;
+
+PARSER: pblock [ "]" parse-until ;
+PARSER: pfry '[ "]" parse-until ;
+PARSER: pblock-eval $[ "]" parse-until ;
+PARSER: pblock-locals [| "]" parse-until ;
+PARSER: parray { "}" parse-until ;
+PARSER: pvector V{ "}" parse-until ;
+PARSER: phashtable H{ "}" parse-until ;
+
 HEREDOC: omg
-
 ! PARSER: pparser LITERAL-PARSER: new-class raw body ;
-
 ! Doesn't look for (* inside strings, only finds it as raw
 TUPLE: mnested-comment < parsed ;
 CONSTRUCTOR: <mnested-comment> mnested-comment ( -- nested-comment ) ;
@@ -41,159 +129,6 @@ CONSTRUCTOR: <mnested-comment> mnested-comment ( -- nested-comment ) ;
 \ parse-nested-comment "(*" register-parser
 
 
-TUPLE: x-function < parsed return-value name arguments ;
-CONSTRUCTOR: <x-function> x-function ( return-value name arguments -- c-function ) ;
-: parse-x-function ( -- c-function )
-    token token c-arguments ";" expect <x-function> ;
-\ parse-x-function "X-FUNCTION:" register-parser
-
-TUPLE: c-function-alias < parsed aliased-name return-value name arguments ;
-CONSTRUCTOR: <c-function-alias> c-function-alias ( aliased-name return-value name arguments -- c-function ) ;
-: parse-c-function-alias ( -- c-function )
-    token token token c-arguments ";" expect <c-function-alias> ;
-\ parse-c-function-alias "FUNCTION-ALIAS:" register-parser
-
-
-
-TUPLE: subroutine < parsed name arguments ;
-CONSTRUCTOR: <subroutine> subroutine ( name arguments -- subroutine ) ;
-: parse-subroutine ( -- subroutine )
-    token c-arguments ";" expect <subroutine> ;
-\ parse-subroutine "SUBROUTINE:" register-parser
-
-
-
-
-TUPLE: syntax < parsed name body ;
-CONSTRUCTOR: <syntax> syntax ( name body -- syntax ) ;
-: parse-syntax ( -- syntax )
-    raw body <syntax> ;
-\ parse-syntax "SYNTAX:" register-parser
-
-TUPLE: function < parsed name signature body ;
-CONSTRUCTOR: <function> function ( name signature body -- function ) ;
-: parse-function ( -- function )
-    new-identifier
-    parse-signature(--)
-    body <function> ;
-\ parse-function ":" register-parser
-
-TUPLE: locals-function < parsed name signature body ;
-CONSTRUCTOR: <locals-function> locals-function ( name signature body -- function ) ;
-: parse-locals-function ( -- function )
-    new-identifier
-    parse-signature(--)
-    body <locals-function> ;
-\ parse-locals-function "::" register-parser
-
-TUPLE: typed < parsed name signature body ;
-CONSTRUCTOR: <typed> typed ( name signature body -- typed ) ;
-: parse-typed ( -- function )
-    new-identifier
-    parse-signature(--)
-    body <typed> ;
-\ parse-typed "TYPED:" register-parser
-
-TUPLE: locals-typed < parsed name signature body ;
-CONSTRUCTOR: <locals-typed> locals-typed ( name signature body -- typed ) ;
-: parse-locals-typed ( -- function )
-    new-identifier
-    parse-signature(--)
-    body <locals-typed> ;
-\ parse-locals-typed "TYPED::" register-parser
-
-
-TUPLE: memo < parsed name signature body ;
-CONSTRUCTOR: <memo> memo ( name signature body -- memo ) ;
-: parse-memo ( -- function )
-    new-identifier
-    parse-signature(--)
-    body <memo> ;
-\ parse-memo "MEMO:" register-parser
-
-TUPLE: locals-memo < parsed name signature body ;
-CONSTRUCTOR: <locals-memo> locals-memo ( name signature body -- memo ) ;
-: parse-locals-memo ( -- function )
-    new-identifier
-    parse-signature(--)
-    body <locals-memo> ;
-\ parse-locals-memo "MEMO::" register-parser
-
-
-TUPLE: predicate < parsed name superclass body ;
-CONSTRUCTOR: <predicate> predicate ( name superclass body -- predicate ) ;
-: parse-predicate ( -- predicate )
-    new-identifier
-    "<" expect
-    existing-class
-    body <predicate> ;
-\ parse-predicate "PREDICATE:" register-parser
-
-TUPLE: slot < parsed name ;
-CONSTRUCTOR: <slot> slot ( name -- slot ) ;
-: parse-slot ( -- slot )
-    token <slot> ;
-\ parse-slot "SLOT:" register-parser
-
-TUPLE: specialized-array < parsed class ;
-CONSTRUCTOR: <specialized-array> specialized-array ( class -- speicialized-array ) ;
-: parse-specialized-array ( -- slot )
-    token <specialized-array> ;
-\ parse-specialized-array "SPECIALIZED-ARRAY:" register-parser
-
-TUPLE: specialized-arrays < parsed classes ;
-CONSTRUCTOR: <specialized-arrays> specialized-arrays ( classes -- speicialized-arrays ) ;
-: parse-specialized-arrays ( -- slot )
-    ";" raw-until <specialized-arrays> ;
-\ parse-specialized-arrays "SPECIALIZED-ARRAYS:" register-parser
-
-TUPLE: postpone < parsed  name ;
-CONSTRUCTOR: <postpone> postpone ( name -- postpone ) ;
-: parse-postpone ( -- postpone )
-    raw <postpone> ;
-\ parse-postpone "POSTPONE:" register-parser
-
-TUPLE: mixin < parsed  name ;
-CONSTRUCTOR: <mixin> mixin ( name -- mixin ) ;
-: parse-mixin ( -- mixin )
-    token <mixin> ;
-\ parse-mixin "MIXIN:" register-parser
-
-TUPLE: singleton < parsed name ;
-CONSTRUCTOR: <singleton> singleton ( name -- singleton ) ;
-: parse-singleton ( -- singleton )
-    new-class <singleton> ;
-\ parse-singleton "SINGLETON:" register-parser
-
-TUPLE: singletons < parsed names ;
-CONSTRUCTOR: <singletons> singletons ( names -- singletons ) ;
-: parse-singletons ( -- singletons )
-    body <singletons> ;
-\ parse-singletons "SINGLETONS:" register-parser
-
-TUPLE: instance < parsed class mixin ;
-CONSTRUCTOR: <instance> instance ( class mixin -- instance ) ;
-: parse-instance ( -- instance )
-    token token <instance> ;
-\ parse-instance "INSTANCE:" register-parser
-
-TUPLE: block < parsed body ;
-CONSTRUCTOR: <block> block ( body -- block ) ;
-: parse-block ( -- block )
-    "]" parse-until <block> ;
-\ parse-block "[" register-parser
-
-TUPLE: parsetime-block < parsed body ;
-CONSTRUCTOR: <parsetime-block> parsetime-block ( body -- parsetime-block ) ;
-: parse-parsetime-block ( -- block )
-    "]" parse-until <parsetime-block> ;
-\ parse-parsetime-block "$[" register-parser
-
-TUPLE: locals-block < parsed body ;
-CONSTRUCTOR: <locals-block> locals-block ( body -- block ) ;
-: parse-locals-block ( -- block )
-    "]" parse-until <locals-block> ;
-\ parse-locals-block "[|" register-parser
 
 TUPLE: single-bind < parsed target ;
 TUPLE: multi-bind < parsed targets ;
@@ -207,29 +142,6 @@ CONSTRUCTOR: <multi-bind> multi-bind ( targets -- bind ) ;
     ] if ;
 \ parse-bind ":>" register-parser
 
-TUPLE: mfry < parsed body ;
-CONSTRUCTOR: <mfry> mfry ( body -- block ) ;
-: parse-fry ( -- block )
-    "]" parse-until <mfry> ;
-\ parse-fry "'[" register-parser
-
-TUPLE: marray < parsed elements ;
-CONSTRUCTOR: <marray> marray ( elements -- block ) ;
-: parse-array ( -- block )
-    "}" parse-until <marray> ;
-\ parse-array "{" register-parser
-
-TUPLE: mvector < parsed elements ;
-CONSTRUCTOR: <mvector> mvector ( elements -- block ) ;
-: parse-vector ( -- block )
-    "}" parse-until <mvector> ;
-\ parse-vector "V{" register-parser
-
-TUPLE: mhashtable < parsed elements ;
-CONSTRUCTOR: <mhashtable> mhashtable ( elements -- block ) ;
-: parse-hashtable ( -- block )
-    "}" parse-until <mhashtable> ;
-\ parse-hashtable "H{" register-parser
 
 TUPLE: tuple-literal-assoc < parsed name slots ;
 TUPLE: tuple-literal-boa < parsed name slots ;
@@ -251,194 +163,7 @@ ERROR: malformed-tuple-literal ;
     } case ;
 \ parse-tuple-literal "T{" register-parser
 
-TUPLE: char < parsed n ;
-CONSTRUCTOR: <char> char ( n -- char ) ;
-: parse-char ( -- char )
-    raw <char> ;
-\ parse-char "CHAR:" register-parser
 
-TUPLE: min < parsed name ;
-CONSTRUCTOR: <min> min ( name -- in ) ;
-: parse-in ( -- in )
-    token <min> ;
-\ parse-in "IN:" register-parser
-
-TUPLE: main < parsed name ;
-CONSTRUCTOR: <main> main ( name -- main ) ;
-: parse-main ( -- main )
-    token <main> ;
-\ parse-main "MAIN:" register-parser
-
-TUPLE: escaped < parsed name ;
-CONSTRUCTOR: <escaped> escaped ( name -- escaped ) ;
-: parse-escaped ( -- escaped )
-    raw <escaped> ;
-\ parse-escaped "\\" register-parser
-
-TUPLE: mexecute( < parsed signature ;
-CONSTRUCTOR: <mexecute(> mexecute( ( signature -- execute ) ;
-: parse-execute( ( -- execute( )
-    parse-signature--) <mexecute(> ;
-\ parse-execute( "execute(" register-parser
-
-TUPLE: mcall( < parsed signature ;
-CONSTRUCTOR: <mcall(> mcall( ( signature -- call ) ;
-: parse-call( ( -- call( )
-    parse-signature--) <mcall(> ;
-\ parse-call( "call(" register-parser
-
-TUPLE: mdata-map( < parsed signature ;
-CONSTRUCTOR: <mdata-map(> mdata-map( ( signature -- data-map ) ;
-: parse-data-map( ( -- obj )
-    parse-signature--) <mdata-map(> ;
-\ parse-data-map( "data-map(" register-parser
-
-TUPLE: mdata-map!( < parsed signature ;
-CONSTRUCTOR: <mdata-map!(> mdata-map!( ( signature -- data-map! ) ;
-: parse-data-map!( ( -- obj )
-    parse-signature--) <mdata-map!(> ;
-\ parse-data-map!( "data-map!(" register-parser
-
-TUPLE: hints < parsed name sequence ;
-CONSTRUCTOR: <hints> hints ( name sequence -- hints ) ;
-: parse-hints ( -- generic )
-    parse body <hints> ;
-\ parse-hints "HINTS:" register-parser
-
-TUPLE: mgeneric < parsed name signature ;
-CONSTRUCTOR: <mgeneric> mgeneric ( name signature -- generic ) ;
-: parse-generic ( -- generic )
-    token parse-signature(--) <mgeneric> ;
-\ parse-generic "GENERIC:" register-parser
-
-TUPLE: hook < parsed name symbol signature ;
-CONSTRUCTOR: <hook> hook ( name symbol signature -- hook ) ;
-: parse-hook ( -- hook )
-    token token parse-signature(--) <hook> ;
-\ parse-hook "HOOK:" register-parser
-
-TUPLE: mgeneric# < parsed name n signature ;
-CONSTRUCTOR: <mgeneric#> mgeneric# ( name n signature -- generic ) ;
-: parse-generic# ( -- generic )
-    token token parse-signature(--) <mgeneric#> ;
-\ parse-generic# "GENERIC#" register-parser
-
-TUPLE: mmethod < parsed class name body ;
-CONSTRUCTOR: <mmethod> mmethod ( class name body -- method ) ;
-: parse-method ( -- method )
-    parse token body <mmethod> ;
-\ parse-method "M:" register-parser
-
-TUPLE: locals-mmethod < parsed class name body ;
-CONSTRUCTOR: <locals-mmethod> locals-mmethod ( class name body -- locals-method ) ;
-: parse-locals-mmethod ( -- method )
-    parse token body <locals-mmethod> ;
-\ parse-locals-mmethod "M::" register-parser
-
-TUPLE: constructor < parsed name class ;
-CONSTRUCTOR: <constructor> constructor ( name class -- constructor ) ;
-: parse-constructor ( -- constructor )
-    token token <constructor> ;
-\ parse-constructor "C:" register-parser
-
-TUPLE: private < parsed body ;
-CONSTRUCTOR: <private> private ( body -- private ) ;
-: parse-private ( -- private )
-    "PRIVATE>" parse-until <private> ;
-\ parse-private "<PRIVATE" register-parser
-
-TUPLE: from < parsed module functions ;
-CONSTRUCTOR: <from> from ( module functions -- from ) ;
-: parse-from ( -- from )
-    token ";" raw-until <from> ;
-\ parse-from "FROM:" register-parser
-
-TUPLE: qualified < parsed name ;
-CONSTRUCTOR: <qualified> qualified ( name -- qualified ) ;
-: parse-qualified ( -- qualified )
-    token <qualified> ;
-\ parse-qualified "QUALIFIED:" register-parser
-
-TUPLE: qualified-with < parsed name prefix ;
-CONSTRUCTOR: <qualified-with> qualified-with ( name prefix -- qualified-with ) ;
-: parse-qualified-with ( -- qualified-with )
-    token token <qualified-with> ;
-\ parse-qualified-with "QUALIFIED-WITH:" register-parser
-
-TUPLE: constant < parsed name object ;
-CONSTRUCTOR: <constant> constant ( name object -- constant ) ;
-: parse-constant ( -- constant )
-    token parse <constant> ;
-\ parse-constant "CONSTANT:" register-parser
-
-TUPLE: mbuiltin < parsed name body ;
-CONSTRUCTOR: <mbuiltin> mbuiltin ( name body -- builtin ) ;
-: parse-builtin ( -- mbuiltin )
-    token body <mbuiltin> ;
-\ parse-builtin "BUILTIN:" register-parser
-
-TUPLE: merror < parsed name body ;
-CONSTRUCTOR: <merror> merror ( name body -- error ) ;
-: parse-error ( -- merror )
-    token body <merror> ;
-\ parse-error "ERROR:" register-parser
-
-
-
-TUPLE: mprimitive < parsed name signature ;
-CONSTRUCTOR: <mprimitive> mprimitive ( name signature -- package ) ;
-: parse-primitive ( -- mprimitive )
-    parse parse-signature(--) <mprimitive> ;
-\ parse-primitive "PRIMITIVE:" register-parser
-
-TUPLE: import < parsed name ;
-CONSTRUCTOR: <import> import ( name -- package ) ;
-: parse-import ( -- import )
-    token <import> ;
-\ parse-import "IMPORT:" register-parser
-
-TUPLE: imports < parsed names ;
-CONSTRUCTOR: <imports> imports ( names -- package ) ;
-: parse-imports ( -- import )
-    ";" raw-until <imports> ;
-\ parse-imports "IMPORTS:" register-parser
-
-TUPLE: mfoldable < parsed ;
-CONSTRUCTOR: <mfoldable> mfoldable ( -- obj ) ;
-: parse-foldable ( -- mfoldable ) <mfoldable> ;
-\ parse-foldable "foldable" register-parser
-
-TUPLE: mflushable < parsed ;
-CONSTRUCTOR: <mflushable> mflushable ( -- obj ) ;
-: parse-flushable ( -- mflushable ) <mflushable> ;
-\ parse-flushable "flushable" register-parser
-
-TUPLE: minline < parsed ;
-CONSTRUCTOR: <minline> minline ( -- obj ) ;
-: parse-inline ( -- minline ) <minline> ;
-\ parse-inline "inline" register-parser
-
-TUPLE: mfinal < parsed ;
-CONSTRUCTOR: <mfinal> mfinal ( -- obj ) ;
-: parse-final ( -- mfinal ) <mfinal> ;
-\ parse-final "final" register-parser
-
-TUPLE: mrecursive < parsed ;
-CONSTRUCTOR: <mrecursive> mrecursive ( -- obj ) ;
-: parse-recursive ( -- mrecursive ) <mrecursive> ;
-\ parse-recursive "recursive" register-parser
-
-TUPLE: munion < parsed name strings ;
-CONSTRUCTOR: <munion> munion ( name strings -- obj ) ;
-: parse-union ( -- recursive )
-    token body <munion> ;
-\ parse-union "UNION:" register-parser
-
-TUPLE: math < parsed name body ;
-CONSTRUCTOR: <math> math ( name body -- obj ) ;
-: parse-math ( -- builtin )
-    token parse-signature(--) <math> ;
-\ parse-math "MATH:" register-parser
 
 TUPLE: functor < parsed name signature definitions ;
 CONSTRUCTOR: <functor> functor ( name signature definitions -- functor ) ;
@@ -458,35 +183,12 @@ CONSTRUCTOR: <name> name ( name target -- object ) ;
     token token <name> ;
 \ parse-name "NAME:" register-parser
 
-TUPLE: defer < parsed name ;
-CONSTRUCTOR: <defer> defer ( name -- defer ) ;
-: parse-defer ( -- defer )
-    token <defer> ;
-\ parse-defer "DEFER:" register-parser
-
-TUPLE: symbol < parsed name ;
-CONSTRUCTOR: <symbol> symbol ( name -- symbol ) ;
-: parse-symbol ( -- symbol )
-    token <symbol> ;
-\ parse-symbol "SYMBOL:" register-parser
-
-TUPLE: symbols < parsed names ;
-CONSTRUCTOR: <symbols> symbols ( names -- symbols ) ;
-: parse-symbols ( -- symbols )
-    ";" raw-until <symbols> ;
-\ parse-symbols "SYMBOLS:" register-parser
-
 TUPLE: compilation-unit < parsed code ;
 CONSTRUCTOR: <compilation-unit> compilation-unit ( code -- compilation-unit ) ;
 : parse-compilation-unit ( -- compilation-unit )
     ">>" parse-until <compilation-unit> ;
 \ parse-compilation-unit "<<" register-parser
 
-TUPLE: rename < parsed function module name ;
-CONSTRUCTOR: <rename> rename ( function module name -- rename ) ;
-: parse-rename ( -- renamed )
-    token token "=>" expect token <rename> ;
-\ parse-rename "RENAME:" register-parser
 
 TUPLE: typedef < parsed old new ;
 CONSTRUCTOR: <typedef> typedef ( old new -- typedef ) ;
@@ -517,12 +219,6 @@ CONSTRUCTOR: <locals-macro> locals-macro ( name signature body -- macro ) ;
 : parse-locals-macro ( -- macro )
     token parse-signature(--) ";" parse-until <locals-macro> ;
 \ parse-locals-macro "MACRO::" register-parser
-
-TUPLE: struct < parsed name slots ;
-CONSTRUCTOR: <struct> struct ( name slots -- struct ) ;
-: parse-struct ( -- struct )
-    token ";" parse-until <struct> ;
-\ parse-struct "STRUCT:" register-parser
 
 TUPLE: packed-struct < parsed name slots ;
 CONSTRUCTOR: <packed-struct> packed-struct ( name slots -- packed-struct ) ;
@@ -577,12 +273,6 @@ CONSTRUCTOR: <protocol> protocol ( name functions -- obj ) ;
 : parse-protocol ( -- obj )
     token ";" parse-until <protocol> ;
 \ parse-protocol "PROTOCOL:" register-parser
-
-TUPLE: exclude < parsed name body ;
-CONSTRUCTOR: <exclude> exclude ( name body -- obj ) ;
-: parse-exclude ( -- obj )
-    token "=>" expect ";" parse-until <exclude> ;
-\ parse-exclude "EXCLUDE:" register-parser
 
 TUPLE: mfoldable-insn < parsed name body ;
 CONSTRUCTOR: <mfoldable-insn> mfoldable-insn ( name body -- obj ) ;
@@ -719,11 +409,6 @@ CONSTRUCTOR: <new-constructor> new-constructor ( name class signature body -- ob
     token token parse-signature(--) ";" parse-until <new-constructor> ;
 \ parse-new-constructor "CONSTRUCTOR:" register-parser
 
-TUPLE: method-literal < parsed class generic ;
-CONSTRUCTOR: <method-literal> method-literal ( class generic -- obj ) ;
-: parse-method-literal ( -- obj )
-    token token <method-literal> ;
-\ parse-method-literal "M\\" register-parser
 
 TUPLE: unicode-category < parsed name body ;
 CONSTRUCTOR: <unicode-category> unicode-category ( name body -- obj ) ;
@@ -769,65 +454,12 @@ CONSTRUCTOR: <8-bit> 8-bit ( name encoding1 encoding2 -- 8-bit ) ;
 \ parse-8-bit "8-BIT:" register-parser
 
 
-TUPLE: munit-test < parsed ;
-CONSTRUCTOR: <munit-test> munit-test ( -- obj ) ;
-: parse-unit-test ( -- munit-test ) <munit-test> ;
-\ parse-unit-test "unit-test" register-parser
+! TUPLE: munit-test < parsed ;
+! CONSTRUCTOR: <munit-test> munit-test ( -- obj ) ;
+! : parse-unit-test ( -- munit-test ) <munit-test> ;
+! \ parse-unit-test "unit-test" register-parser
 
 
-TUPLE: slots-quot < parsed body ;
-CONSTRUCTOR: <slots-quot> slots-quot ( body -- block ) ;
-: parse-slots-quot ( -- block )
-    "]" parse-until <slots-quot> ;
-\ parse-slots-quot "slots[" register-parser
-
-TUPLE: slots-array < parsed body ;
-CONSTRUCTOR: <slots-array> slots-array ( body -- obj ) ;
-: parse-slots-array ( -- array )
-    "}" parse-until <slots-array> ;
-\ parse-slots-array "slots{" register-parser
-
-TUPLE: set-slots-array < parsed body ;
-CONSTRUCTOR: <set-slots-array> set-slots-array ( body -- obj ) ;
-: parse-set-slots-array ( -- array )
-    "}" parse-until <set-slots-array> ;
-\ parse-set-slots-array "set-slots{" register-parser
-
-TUPLE: set-slots-quot < parsed body ;
-CONSTRUCTOR: <set-slots-quot> set-slots-quot ( body -- obj ) ;
-: parse-set-slots-quot ( -- obj )
-    "]" parse-until <set-slots-quot> ;
-\ parse-set-slots-quot "set-slots[" register-parser
-
-TUPLE: copy-slots-array < parsed body ;
-CONSTRUCTOR: <copy-slots-array> copy-slots-array ( body -- obj ) ;
-: parse-copy-slots-array ( -- array )
-    "}" parse-until <copy-slots-array> ;
-\ parse-copy-slots-array "copy-slots{" register-parser
-
-TUPLE: set-array < parsed body ;
-CONSTRUCTOR: <set-array> set-array ( body -- obj ) ;
-: parse-set-array ( -- obj )
-    "}" parse-until <set-array> ;
-\ parse-set-array "set{" register-parser
-
-TUPLE: set-quot < parsed body ;
-CONSTRUCTOR: <set-quot> set-quot ( body -- obj ) ;
-: parse-set-quot ( -- obj )
-    "}" parse-until <set-quot> ;
-\ parse-set-quot "set[" register-parser
-
-TUPLE: get-array < parsed body ;
-CONSTRUCTOR: <get-array> get-array ( body -- obj ) ;
-: parse-get-array ( -- obj )
-    "}" parse-until <get-array> ;
-\ parse-get-array "get{" register-parser
-
-TUPLE: get-quot < parsed body ;
-CONSTRUCTOR: <get-quot> get-quot ( body -- obj ) ;
-: parse-get-quot ( -- obj )
-    "}" parse-until <get-quot> ;
-\ parse-get-quot "get[" register-parser
 
 
 
@@ -836,57 +468,6 @@ CONSTRUCTOR: <let-block> let-block ( body -- block ) ;
 : parse-let-block ( -- let-block )
     "]" parse-until <let-block> ;
 \ parse-let-block "[let" register-parser
-
-
-TUPLE: heredoc < parsed name string ;
-CONSTRUCTOR: <heredoc> heredoc ( name string -- heredoc ) ;
-: parse-heredoc ( -- heredoc )
-    token
-    dup name>> multiline-string-until <heredoc> ;
-\ parse-heredoc "HEREDOC:" register-parser
-
-TUPLE: color < parsed name ;
-CONSTRUCTOR: <color> color ( name -- color ) ;
-: parse-color ( -- color )
-    token <color> ;
-\ parse-color "COLOR:" register-parser
-
-
-TUPLE: ebnf < parsed name text ;
-CONSTRUCTOR: <ebnf> ebnf ( name text -- ebnf ) ;
-: parse-ebnf ( -- ebnf )
-    token
-    ";EBNF" multiline-string-until <ebnf> ;
-\ parse-ebnf "EBNF:" register-parser
-
-: parse-ebnf-acute ( -- ebnf )
-    token
-    "EBNF>" multiline-string-until <ebnf> ;
-\ parse-ebnf-acute "<EBNF" register-parser
-
-: parse-ebnf-bracket ( -- ebnf-bracket )
-    token
-    "EBNF]" multiline-string-until <ebnf> ;
-\ parse-ebnf-bracket "[EBNF" register-parser
-
-
-TUPLE: glsl-shader < parsed name class string ;
-CONSTRUCTOR: <glsl-shader> glsl-shader ( name class string -- glsl ) ;
-: parse-glsl-shader ( -- heredoc )
-    token token "\n;" multiline-string-until <glsl-shader> ;
-\ parse-glsl-shader "GLSL-SHADER:" register-parser
-
-TUPLE: glsl-program < parsed name words ;
-CONSTRUCTOR: <glsl-program> glsl-program ( name words -- glsl ) ;
-: parse-glsl-program ( -- heredoc )
-    token ";" parse-until <glsl-program> ;
-\ parse-glsl-program "GLSL-PROGRAM:" register-parser
-
-TUPLE: uniform-tuple < parsed name slots ;
-CONSTRUCTOR: <uniform-tuple> uniform-tuple ( name slots -- uniform-tuple ) ;
-: parse-uniform-tuple ( -- uniform-tuple )
-    token ";" parse-until <uniform-tuple> ;
-\ parse-uniform-tuple "UNIFORM-TUPLE:" register-parser
 
 
 /*

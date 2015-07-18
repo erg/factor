@@ -25,20 +25,21 @@ TUPLE: psequence object ;
         swap object>> >>object ; inline
 
 ! These ARE parsed or psequences
-TUPLE: psyntax < parsed ;
+TUPLE: ptext < parsed ;
 TUPLE: ptoken < parsed ;
 TUPLE: pnumber < parsed ;
 TUPLE: pstring < psequence ;
 TUPLE: pidentifier < parsed ;
 TUPLE: pnew-class < parsed name ;
 TUPLE: pexisting-class < parsed name ;
-TUPLE: pword < parsed name ;
+TUPLE: pnew-word < parsed name ;
+TUPLE: pexisting-word < parsed name ;
 
 : new-parsed ( type texts -- obj' ) [ new ] dip >>object ; inline
 
 ERROR: string-expected got separator ;
 : parse-string' ( -- )
-    "\\\"" read-until {
+    "\\\"" read-until object>> {
         { CHAR: " [ % ] }
         { CHAR: \ [ % read1 , parse-string' ] }
         { f [ f string-expected ] }
@@ -47,6 +48,7 @@ ERROR: string-expected got separator ;
 
 : parse-string ( class -- mstring )
     ! [ parse-string' ] "" make <pstring> ;
+B
     [ parse-string' ] "" make 2array pstring swap new-parsed ;
 
 : building-tail? ( string -- ? )
@@ -91,18 +93,19 @@ ERROR: multiline-string-expected got ;
 
 : parse-action ( string -- object )
     dup object>> \ parsers get ?at [
-        execute( -- parsed ) [ swap psyntax pbecome prefix ] change-object
+        execute( -- parsed ) [ swap ptext pbecome prefix ] change-object
     ] [ drop ] if ;
 
 : token-loop' ( -- string/f )
     "\r\n\s\"" read-until {
         { [ dup f = ] [ drop ] } ! must be above object>>
         { [ dup object>> "\r\n\s" member? ] [ drop [ token-loop' ] when-empty ] }
-        ! { [ dup CHAR: " = ] [
-            ! drop f like
-            ! dup "m" = [ parse-multiline-string ] [ parse-string ] if
-        ! ] }
-        ! [ drop ]
+        { [ dup object>> CHAR: " = ] [
+B
+            drop f like
+            dup "m" = [ parse-multiline-string ] [ parse-string ] if
+        ] }
+        ! [ dup . flush B drop ]
     } cond ;
 
 : token-loop ( type -- token/f )
@@ -120,7 +123,7 @@ ERROR: multiline-string-expected got ;
 ERROR: token-expected token ;
 : raw-until ( string -- strings sep )
     dup '[
-        raw [ dup object>> _ = [ psyntax pbecome , f ] when ] [ _ token-expected ] if*
+        raw [ dup object>> _ = [ ptext pbecome , f ] when ] [ _ token-expected ] if*
     ] loop>array cut-last ;
 
 ! ERROR: identifier-can't-be-number n ;
@@ -128,7 +131,8 @@ ERROR: token-expected token ;
 : new-identifier ( -- object ) pidentifier token-loop ;
 : new-class ( -- object ) pnew-class token-loop ;
 : existing-class ( -- object ) pexisting-class token-loop ;
-: new-word ( -- object ) pword token-loop ;
+: new-word ( -- object ) pnew-word token-loop ;
+: existing-word ( -- object ) pexisting-word token-loop ;
 : token ( -- object ) token-loop' ;
 : parse ( -- object/f ) token-loop' dup [ parse-action ] when ;
 
@@ -139,11 +143,11 @@ ERROR: token-expected token ;
         parse [ _ token-expected ] unless*
         dup object>> _ = [ , f ] when
         ! dup doc? [ ptoken pbecome ] when
-    ] loop>array cut-last psyntax pbecome ;
+    ] loop>array cut-last ptext pbecome ;
 
 : expect ( string -- string )
     token
-    2dup dup [ object>> ] when = [ nip psyntax pbecome ] [ expected ] if ;
+    2dup dup [ object>> ] when = [ nip ptext pbecome ] [ expected ] if ;
 
 : body ( -- strings last ) ";" parse-until ;
 
