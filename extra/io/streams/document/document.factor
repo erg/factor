@@ -24,7 +24,7 @@ TUPLE: document-stream < position-stream
 : find-last-newline ( string -- n/f ) [ CHAR: \n = ] find-last drop ;
 : count-trailing ( string -- n ) [ length ] [ find-last-newline ] bi [ - ] when* ;
 
-TUPLE: doc object { start pos } { finish pos } ;
+TUPLE: doc { start pos } object { finish pos } ;
 CONSTRUCTOR: <doc> doc ( start object finish -- doc ) ;
 
 M: doc length object>> length ;
