@@ -43,6 +43,31 @@ IN: modern.parser.factor.tests
     }
 } [ "{ 1 2 3 }" parse-modern-string ] unit-test
 
+{
+    {
+        T{ pstring
+            { object
+                {
+                    T{ doc
+                        { object 34 }
+                        { finish T{ pos { column 1 } } }
+                    }
+                    T{ ptoken
+                        { start T{ pos { column 1 } } }
+                        { object "Added \\\"" }
+                        { finish T{ pos { column 9 } } }
+                    }
+                    T{ doc
+                        { start T{ pos { column 9 } } }
+                        { object 34 }
+                        { finish T{ pos { column 10 } } }
+                    }
+                }
+            }
+        }
+    }
+} [ "\"Added \\\"\"" parse-modern-string ] unit-test
+
 : check-parsed-string ( string -- ? )
     dup parse-modern-string write-modern-string sequence= ;
 

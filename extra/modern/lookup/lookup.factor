@@ -395,5 +395,3 @@ drop
 : load-core-syntax ( -- seq ) core-syntax-files [ parse-modern-file ] map ;
 : load-basis-syntax ( -- seq ) basis-syntax-files [ parse-modern-file ] map ;
 : load-extra-syntax ( -- seq ) extra-syntax-files [ parse-modern-file ] map ;
-
-
