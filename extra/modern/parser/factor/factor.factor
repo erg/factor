@@ -6,7 +6,7 @@ namespaces nested-comments sequences ;
 IN: modern.parser.factor
 
 PARSER: psyntax SYNTAX: raw body ;
-PARSER: pparser PARSER: new-class raw body ;
+PARSER: pparser PARSER: raw raw body ;
 PARSER: pcomment ! readln ;
 PARSER: pshell-comment #! readln ;
 PARSER: heredoc HEREDOC: token dup object>> multiline-string-until ;
@@ -254,6 +254,7 @@ PARSER: pcfstring CFSTRING: new-word parse ;
 PARSER: pframework FRAMEWORK: parse ;
 ! PARSER: pcocoa-selector -> token ;
 ! PARSER: psuper-selector SUPER-> token ;
+
 
 PARSER: pdestructor DESTRUCTOR: existing-word ;
 PARSER: picon ICON: new-word token ;
