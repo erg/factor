@@ -32,14 +32,18 @@ M: psequence refactor'
     [ [ object>> ] dip '[ _ refactor' ] each ] 2bi ;
 M: sequence refactor' '[ _ refactor' ] each ;
 
-: refactor ( seq quot -- seq' )
-    [ refactor' ] 2keep drop ; inline
+: refactor ( seq pred quot -- seq' )
+    [
+        [ parsed-objects ] 2dip
+        [ filter ] dip
+        '[ @ drop ] each
+    ] 3keep 2drop ; inline
 
-: refactor-path ( path quot -- )
-    '[ parse-modern-file _ refactor ] keep write-modern-file ; inline
+: refactor-path ( path pred quot -- )
+    '[ parse-modern-file _ _ refactor ] keep write-modern-file ; inline
 
-: refactor-codebase ( quot -- )
-    [ all-factor-files [ ".modern" tail? ] reject ] dip '[ _ refactor-path ] each ; inline
+: refactor-codebase ( pred quot -- )
+    [ all-factor-files [ ".modern" tail? ] reject ] 2dip '[ _ _ refactor-path ] each ; inline
 
 
 : refactor-out ( obj -- obj' )
