@@ -1,9 +1,10 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors assocs combinators combinators.short-circuit
-fry io io.files io.streams.document io.streams.string kernel
-math modern.lookup modern.parser modern.parser.factor
-modern.paths multiline sequences sequences.extras ;
+USING: accessors arrays assocs combinators
+combinators.short-circuit fry io io.files io.streams.document
+io.streams.string kernel math modern.lookup modern.parser
+modern.parser.factor modern.paths multiline sequences
+sequences.extras sequences.deep ;
 FROM: sequences => change-nth ;
 IN: modern.refactor
 
@@ -13,9 +14,16 @@ IN: modern.refactor
 ! generate text from words
 ! - generate ast? generate quotation?
 
-! GENERIC# change-each-parsed 1 ( obj quot -- obj' )
-! M: sequence change-each-parsed each ;
-! M: psequence change-each-parsed '[ _ change-each-parsed ] each ;
+! GENERIC# refactor' 1 ( obj pred: ( obj -- ? ) quot: ( obj -- obj' ) -- )
+
+GENERIC: parsed-objects ( obj -- obj )
+M: object parsed-objects ;
+M: psequence parsed-objects
+    [ object>> [ parsed-objects ] map ] [ prefix ] bi ;
+M: sequence parsed-objects
+    [ parsed-objects ] map flatten ;
+
+
 
 GENERIC# refactor' 1 ( obj quot: ( obj -- obj' ) -- )
 M: object refactor' call( obj -- obj ) drop ;
@@ -34,12 +42,11 @@ M: sequence refactor' '[ _ refactor' ] each ;
     [ all-factor-files [ ".modern" tail? ] reject ] dip '[ _ refactor-path ] each ; inline
 
 
-: refactor-macro-out ( obj -- obj' )
+: refactor-out ( obj -- obj' )
+    object>> third object>> fourth
     dup poutputs? [
         [
-            dup length 1 = [
-                "quot" <spaced-reldoc> prefix
-            ] unless
+            [ "quot" <spaced-reldoc> 1array ] when-empty
         ] change-object
     ] when ;
 
@@ -63,26 +70,6 @@ write-modern-string print
 
 ! : refactor-macro-out ( seq -- ) ;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-: documents>string ( documents -- string )
-    [
-        output>document-stream
-        [ object>> [ write ] each ] each nl
-    ] with-string-writer ;
 
 ! Renames "[" "]" to "{" "}"
 : block>array ( block -- array )
@@ -127,7 +114,6 @@ write-modern-string print
     ] if ;
 
 : rewrite-all-tests ( -- ) all-vocabs [ rename-unit-test-quots ] each ;
-*/
 
 ! Rewrite FUNCTION: to not have a trailing ;
 
@@ -215,3 +201,4 @@ write-modern-string print
             ] map
         ] keep write-modern-file
     ] each ;
+*/
