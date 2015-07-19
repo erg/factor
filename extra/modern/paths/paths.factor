@@ -52,14 +52,21 @@ ERROR: not-a-source-path path ;
 : all-syntax-paths ( -- seq )
     all-vocabs [ modern-syntax-path ] map filter-exists ;
 
+: modern-source-paths ( names -- paths )
+    [ modern-source-path ] map filter-exists ;
+: modern-docs-paths ( names -- paths )
+    [ modern-docs-path ] map filter-exists ;
+: modern-tests-paths ( names -- paths )
+    [ modern-tests-path ] map filter-exists ;
+
 : all-source-paths ( -- seq )
-    all-vocabs [ modern-source-path ] map filter-exists ;
+    all-vocabs modern-source-paths ;
 
 : all-docs-paths ( -- seq )
-    all-vocabs [ modern-docs-path ] map filter-exists ;
+    all-vocabs modern-docs-paths ;
 
 : all-tests-paths ( -- seq )
-    all-vocabs [ modern-tests-path ] map filter-exists ;
+    all-vocabs modern-tests-paths ;
 
 : all-factor-files ( -- seq )
     [
@@ -72,3 +79,7 @@ ERROR: not-a-source-path path ;
 : core-syntax-files ( -- seq ) core-vocabs vocab-names>syntax ;
 : basis-syntax-files ( -- seq ) basis-vocabs vocab-names>syntax ;
 : extra-syntax-files ( -- seq ) extra-vocabs vocab-names>syntax ;
+
+: core-source-files ( -- seq ) core-vocabs modern-source-paths ;
+: basis-source-files ( -- seq ) basis-vocabs modern-source-paths ;
+: extra-source-files ( -- seq ) extra-vocabs modern-source-paths ;
