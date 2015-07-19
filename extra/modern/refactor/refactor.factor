@@ -31,7 +31,7 @@ M: sequence refactor' '[ _ refactor' ] each ;
     '[ parse-modern-file _ refactor ] keep write-modern-file ; inline
 
 : refactor-codebase ( quot -- )
-    [ all-factor-files ] dip '[ _ refactor-path ] each ; inline
+    [ all-factor-files [ ".modern" tail? ] reject ] dip '[ _ refactor-path ] each ; inline
 
 
 : refactor-macro-out ( obj -- obj' )
