@@ -32,7 +32,8 @@ PARSER: pforget FORGET: token ;
 : parse-open-signature ( -- in sep out sep )
     parse-pinputs parse-poutputs ;
 
-PARSER: psignature ( parse-open-signature ;
+! PARSER: psignature ( parse-open-signature ;
+TUPLE: psignature < psequence ;
 
 ! Hacky, should be able to call parse-psignature with its "(" expect
 : parse-entire-signature ( -- seq )
@@ -87,6 +88,7 @@ PARSER: px-function X-FUNCTION: token new-identifier c-arguments ";" expect ;
 PARSER: pgl-function GL-FUNCTION: token new-identifier parse c-arguments ";" expect ;
 PARSER: pc-callback CALLBACK: token token c-arguments ";" expect ;
 PARSER: psubroutine SUBROUTINE: token c-arguments ";" expect ;
+PARSER: pcom-interface COM-INTERFACE: token new-word parse ";" parse-until ;
 PARSER: ptypedef TYPEDEF: token token ;
 PARSER: plibrary LIBRARY: token ;
 PARSER: pc-type C-TYPE: token ;
