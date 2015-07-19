@@ -60,7 +60,27 @@ M: sequence refactor' '[ _ refactor' ] each ;
     [ { [ pcomment? ] [ pshell-comment? ] } 1|| ]
     [ trim-trailing-comment-whitespace ] refactor-codebase ;
 
+: boa-tuple-literal? ( obj -- ? )
+    {
+        [ ptuple-literal? ]
+        [ object>> length 3 > ]
+        [ object>> third first object>> "f" = ]
+    } 1&& ;
+
+: rename-boa-tuple ( obj -- obj' )
+    [
+        {
+            [ first [ drop "T[" ] change-object drop ]
+            [ 2 over [ rest ] change-nth drop ]
+            [ last [ drop "]" ] change-object drop ]
+            [ ]
+        } cleave
+    ] change-object ;
+
 /*
+
+"resource:extra/fjsc/fjsc-tests.factor" parse-modern-file
+parsed-objects [ ptuple-literal? ] filter
 
 "MACRO: nover ( n -- quot )
     dup 1 + '[ _ npick ] n*quot ;" parse-modern-string
