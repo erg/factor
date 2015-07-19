@@ -56,6 +56,10 @@ M: sequence refactor' '[ _ refactor' ] each ;
         [ blank? ] trim-tail
     ] change-object ;
 
+: refactor-comment-whitespace ( -- )
+    [ { [ pcomment? ] [ pshell-comment? ] } 1|| ]
+    [ trim-trailing-comment-whitespace ] refactor-codebase ;
+
 /*
 
 "MACRO: nover ( n -- quot )
