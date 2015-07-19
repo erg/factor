@@ -8,22 +8,12 @@ sequences.extras sequences.deep ;
 FROM: sequences => change-nth ;
 IN: modern.refactor
 
-! move word from vocab to vocab
-! - should maybe not recompile
-! rename word
-! generate text from words
-! - generate ast? generate quotation?
-
-! GENERIC# refactor' 1 ( obj pred: ( obj -- ? ) quot: ( obj -- obj' ) -- )
-
 GENERIC: parsed-objects ( obj -- obj )
 M: object parsed-objects ;
 M: psequence parsed-objects
     [ object>> [ parsed-objects ] map ] [ prefix ] bi ;
 M: sequence parsed-objects
     [ parsed-objects ] map flatten ;
-
-
 
 GENERIC# refactor' 1 ( obj quot: ( obj -- obj' ) -- )
 M: object refactor' call( obj -- obj ) drop ;
@@ -42,11 +32,13 @@ M: sequence refactor' '[ _ refactor' ] each ;
 : refactor-path ( path pred quot -- )
     '[ parse-modern-file _ _ refactor ] keep write-modern-file ; inline
 
+: refactor-vocab ( path pred quot -- )
+    [ modern-source-path ] 2dip refactor-path ; inline
+
 : refactor-codebase ( pred quot -- )
     [ all-factor-files [ ".modern" tail? ] reject ] 2dip '[ _ _ refactor-path ] each ; inline
 
-
-: refactor-out ( obj -- obj' )
+: refactor-macro-out ( obj -- obj' )
     object>> third object>> fourth
     dup poutputs? [
         [
@@ -205,4 +197,10 @@ write-modern-string print
             ] map
         ] keep write-modern-file
     ] each ;
+
+! move word from vocab to vocab
+! - should maybe not recompile
+! rename word
+! generate text from words
+! - generate ast? generate quotation?
 */
