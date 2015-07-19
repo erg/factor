@@ -249,11 +249,11 @@ PARSER: pbroadcast BROADCAST: existing-word existing-class parse ;
 PARSER: pconsult CONSULT: new-word existing-class body ;
 
 PARSER: pcfstring CFSTRING: new-word parse ;
-PARSER: pclass CLASS: new-class "<" expect existing-class parse ;
-PARSER: pcocoa-method METHOD: "[" parse-until "]" parse-until ;
+! PARSER: pclass CLASS: new-class "<" expect existing-class parse ;
+! PARSER: pcocoa-method METHOD: "[" parse-until "]" parse-until ;
 PARSER: pframework FRAMEWORK: parse ;
-PARSER: pcocoa-selector -> token ;
-PARSER: psuper-selector SUPER-> token ;
+! PARSER: pcocoa-selector -> token ;
+! PARSER: psuper-selector SUPER-> token ;
 
 PARSER: pdestructor DESTRUCTOR: existing-word ;
 PARSER: picon ICON: new-word token ;
