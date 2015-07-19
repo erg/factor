@@ -46,6 +46,10 @@ M: sequence refactor' '[ _ refactor' ] each ;
         ] change-object
     ] when ;
 
+: rename-comment ( obj -- obj' )
+    object>> first [
+        drop "//"
+    ] change-object ;
 
 /*
 
