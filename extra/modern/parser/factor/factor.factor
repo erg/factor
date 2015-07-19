@@ -168,7 +168,7 @@ PARSER: pc-array{ c-array{ "}" parse-until ;
 PARSER: pwrapper-literal W{ "}" parse-until ;
 PARSER: pstruct-literal S{ "}" parse-until ;
 PARSER: pstruct-literal-at S@ token parse ;
-PARSER: pinterpolate I[ "]" parse-until ;
+PARSER: pinterpolate I[ "]I" multiline-string-until ;
 PARSER: pidentity-hash-set IHS{ "}" parse-until ;
 PARSER: pidentity-hashtable IH{ "}" parse-until ;
 
