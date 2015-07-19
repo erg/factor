@@ -9,6 +9,9 @@ IN: io.streams.document
 TUPLE: pos { line integer } { column integer } ;
 CONSTRUCTOR: <pos> pos ( line column -- pos ) ;
 
+TUPLE: relpos < pos ;
+CONSTRUCTOR: <relpos> relpos ( line column -- relpos ) ;
+
 TUPLE: document-stream < position-stream
     { line integer } { column integer }
     { diff maybe{ pos } }
@@ -26,6 +29,12 @@ TUPLE: document-stream < position-stream
 
 TUPLE: doc { start pos } object { finish pos } ;
 CONSTRUCTOR: <doc> doc ( start object finish -- doc ) ;
+
+TUPLE: reldoc { start relpos } object { finish relpos } ;
+! CONSTRUCTOR: <reldoc> reldoc ( object -- reldoc ) ;
+CONSTRUCTOR: <spaced-reldoc> reldoc ( object -- reldoc )
+    0 1 <relpos> >>start
+    0 0 <relpos> >>finish ;
 
 M: doc length object>> length ;
 M: doc nth object>> nth ;
@@ -142,7 +151,9 @@ ERROR: negative-offset n ;
     [ finish>> ] dip last-finish<< ;
 
 ! Writing
-M: document-stream stream-write ( doc stream -- )
+GENERIC# stream-write-doc 1 ( doc stream -- )
+
+M: doc stream-write-doc ( doc stream -- )
     {
         [
             [ [ start>> ] [ last-finish>> ] bi* [ docpos- ] when* ] keep
@@ -152,6 +163,18 @@ M: document-stream stream-write ( doc stream -- )
         [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ]
         [ save-finish ]
     } 2cleave ;
+
+M: reldoc stream-write-doc ( doc stream -- )
+    {
+        [ [ start>> ] dip write-diff-spacing ]
+        [ write-object ]
+        [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ]
+        [ [ finish>> ] dip write-diff-spacing ]
+        ! [ save-finish ]
+    } 2cleave ;
+
+M: document-stream stream-write ( doc stream -- )
+    stream-write-doc ;
 
 M: document-stream stream-nl ( stream -- )
     stream>> stream-nl ;

@@ -176,10 +176,10 @@ ERROR: unrecognized-factor-file path ;
 
 GENERIC: write-parsed ( obj -- )
 M: doc write-parsed write ;
+M: reldoc write-parsed write ;
 M: psequence write-parsed object>> [ write-parsed ] each ;
+M: string write-parsed <spaced-reldoc> write ;
 M: sequence write-parsed [ write-parsed ] each ;
-
-
 
 GENERIC: write-pflat' ( obj -- )
 M: doc write-pflat' object>> write bl ;
