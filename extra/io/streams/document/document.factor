@@ -31,7 +31,6 @@ TUPLE: doc { start pos } object { finish pos } ;
 CONSTRUCTOR: <doc> doc ( start object finish -- doc ) ;
 
 TUPLE: reldoc { start relpos } object { finish relpos } ;
-! CONSTRUCTOR: <reldoc> reldoc ( object -- reldoc ) ;
 CONSTRUCTOR: <spaced-reldoc> reldoc ( object -- reldoc )
     0 1 <relpos> >>start
     0 0 <relpos> >>finish ;
@@ -170,7 +169,6 @@ M: reldoc stream-write-doc ( doc stream -- )
         [ write-object ]
         [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ]
         [ [ finish>> ] dip write-diff-spacing ]
-        ! [ save-finish ]
     } 2cleave ;
 
 M: document-stream stream-write ( doc stream -- )
