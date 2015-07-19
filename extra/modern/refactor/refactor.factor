@@ -13,6 +13,65 @@ IN: modern.refactor
 ! generate text from words
 ! - generate ast? generate quotation?
 
+! GENERIC# change-each-parsed 1 ( obj quot -- obj' )
+! M: sequence change-each-parsed each ;
+! M: psequence change-each-parsed '[ _ change-each-parsed ] each ;
+
+GENERIC# refactor' 1 ( obj quot: ( obj -- obj' ) -- )
+M: object refactor' call( obj -- obj ) drop ;
+M: psequence refactor'
+    [ call( obj -- obj ) drop ]
+    [ [ object>> ] dip '[ _ refactor' ] each ] 2bi ;
+M: sequence refactor' '[ _ refactor' ] each ;
+
+: refactor ( seq quot -- seq' )
+    [ refactor' ] 2keep drop ;
+
+: refactor-macro-out ( seq -- seq' )
+    [
+        dup poutputs? [
+            [
+                dup length 1 = [
+                    "quot" <spaced-reldoc> prefix
+                ] unless
+            ] change-object
+        ] when
+    ] refactor ;
+
+/*
+
+"MACRO: nover ( n -- quot )
+    dup 1 + '[ _ npick ] n*quot ;" parse-modern-string
+[ "hi" print . ] doit
+
+
+"MACRO: nover ( n -- quot )
+    dup 1 + '[ _ npick ] n*quot ;" parse-modern-string
+dup
+first object>> [ psignature? ] filter
+first object>> [ poutputs? ] filter
+first [ dup length 1 = [ "quot" <spaced-reldoc> prefix ] unless ] change-object drop
+write-modern-string print
+*/
+
+
+! : refactor-macro-out ( seq -- ) ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 : documents>string ( documents -- string )
     [
         output>document-stream
