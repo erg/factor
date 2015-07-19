@@ -180,7 +180,7 @@ PARSER: plong-string STRING: token "\n;" multiline-string-until ;
     } cond ;
 PARSER: pnested-comment (* [ 1 parse-pnested-comment' ] { } make ;
 
-PARSER: pmirc MIRC: token parse ";" raw-until ;
+PARSER: pmirc IRC: token parse ";" raw-until ;
 PARSER: pmain-window MAIN-WINDOW: token parse body ;
 PARSER: pgame GAME: token parse body ;
 PARSER: psolution SOLUTION: token ;
