@@ -48,7 +48,8 @@ M: sequence refactor' '[ _ refactor' ] each ;
     ] when ;
 
 : refactor-codebase-macro-out ( -- )
-    [ pmacro? ] [ refactor-macro-out ] refactor-codebase ;
+    [ { [ pmacro? ] [ pmacro-locals? ] } 1|| ]
+    [ refactor-macro-out ] refactor-codebase ;
 
 
 
