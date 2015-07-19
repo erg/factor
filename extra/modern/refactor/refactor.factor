@@ -94,6 +94,24 @@ M: sequence refactor' '[ _ refactor' ] each ;
     [ boa-tuple-literal? ] [ rename-boa-tuple ] refactor-codebase ;
 
 
+: c-function-declaration? ( obj -- ? )
+    {
+        [ pc-function? ]
+        [ pfunction-alias? ]
+        [ px-function? ]
+        [ pgl-function? ]
+        [ pc-callback? ]
+        [ psubroutine? ]
+    } 1|| ;
+
+: rename-function-no-semi ( obj -- obj )
+    [
+        last [ drop f ] change-object
+    ] change-object ;
+
+: rename-function-no-semi-codebase ( -- )
+    [ c-function-declaration? ] [ rename-function-no-semi ] refactor-codebase ;
+
 /*
 ! Renames "[" "]" to "{" "}"
 : block>array ( block -- array )
