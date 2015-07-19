@@ -38,6 +38,7 @@ M: sequence refactor' '[ _ refactor' ] each ;
 : refactor-codebase ( pred quot -- )
     [ all-factor-files [ ".modern" tail? ] reject ] 2dip '[ _ _ refactor-path ] each ; inline
 
+
 : refactor-macro-out ( obj -- obj' )
     object>> third object>> fourth
     dup poutputs? [
@@ -46,10 +47,20 @@ M: sequence refactor' '[ _ refactor' ] each ;
         ] change-object
     ] when ;
 
-: rename-comment ( obj -- obj' )
-    object>> first [
-        drop "//"
-    ] change-object ;
+: refactor-codebase-macro-out ( -- )
+    [ pmacro? ] [ refactor-macro-out ] refactor-codebase ;
+
+
+
+: rename-comment ( obj comment -- obj' )
+    [ object>> first ] dip '[ drop _ ] change-object ;
+
+: rename-comment-codebase ( str -- )
+    [ { [ pcomment? ] [ pshell-comment? ] } 1|| ] swap
+    '[ _ rename-comment ] refactor-codebase ;
+
+: rename-c-comment ( -- ) "//" rename-comment-codebase ;
+
 
 : trim-trailing-comment-whitespace ( obj -- obj' )
     object>> second [
@@ -59,6 +70,7 @@ M: sequence refactor' '[ _ refactor' ] each ;
 : refactor-comment-whitespace ( -- )
     [ { [ pcomment? ] [ pshell-comment? ] } 1|| ]
     [ trim-trailing-comment-whitespace ] refactor-codebase ;
+
 
 : boa-tuple-literal? ( obj -- ? )
     {
@@ -77,29 +89,11 @@ M: sequence refactor' '[ _ refactor' ] each ;
         } cleave
     ] change-object ;
 
+: rename-boa-tuple-literal-codebase ( -- )
+    [ boa-tuple-literal? ] [ rename-boa-tuple ] refactor-codebase ;
+
+
 /*
-
-"resource:extra/fjsc/fjsc-tests.factor" parse-modern-file
-parsed-objects [ ptuple-literal? ] filter
-
-"MACRO: nover ( n -- quot )
-    dup 1 + '[ _ npick ] n*quot ;" parse-modern-string
-[ "hi" print . ] doit
-
-
-"MACRO: nover ( n -- quot )
-    dup 1 + '[ _ npick ] n*quot ;" parse-modern-string
-dup
-first object>> [ psignature? ] filter
-first object>> [ poutputs? ] filter
-first [ dup length 1 = [ "quot" <spaced-reldoc> prefix ] unless ] change-object drop
-write-modern-string print
-*/
-
-
-! : refactor-macro-out ( seq -- ) ;
-
-
 ! Renames "[" "]" to "{" "}"
 : block>array ( block -- array )
     dup pblock? [
@@ -114,7 +108,6 @@ write-modern-string print
         [ ]
     } cond ;
 
-/*
 : rename-unit-test-quots ( vocab -- )
     modern-tests-path
     dup exists? [
@@ -217,19 +210,7 @@ write-modern-string print
 : rewrite-string ( string assoc -- string' )
     [ parse-modern-string ] dip '[ _ rename-texts ] map documents>string ;
 
-: change-macro-out ( macro -- macro )
-    B ;
 
-: rewrite-macro-out ( -- )
-    all-factor-files [
-        [
-            parse-modern-file [
-                dup pmacro? [
-                    change-macro-out
-                ] when
-            ] map
-        ] keep write-modern-file
-    ] each ;
 
 ! move word from vocab to vocab
 ! - should maybe not recompile
