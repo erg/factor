@@ -152,11 +152,16 @@ ERROR: negative-offset n ;
 ! Writing
 GENERIC# stream-write-doc 1 ( doc stream -- )
 
+! Only write spaces if object is not empty/f, but still advance stream as if we wrote
 M: doc stream-write-doc ( doc stream -- )
     {
         [
-            [ [ start>> ] [ last-finish>> ] bi* [ docpos- ] when* ] keep
-            write-diff-spacing
+            over object>> [
+                [ [ start>> ] [ last-finish>> ] bi* [ docpos- ] when* ] keep
+                write-diff-spacing
+            ] [
+                2drop
+            ] if
         ]
         [ write-object ]
         [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ]

@@ -71,7 +71,7 @@ M: sequence refactor' '[ _ refactor' ] each ;
     [
         {
             [ first [ drop "T[" ] change-object drop ]
-            [ 2 over [ rest ] change-nth drop ]
+            [ third first [ drop f ] change-object drop ]
             [ last [ drop "]" ] change-object drop ]
             [ ]
         } cleave
