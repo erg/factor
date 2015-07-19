@@ -76,7 +76,7 @@ M: sequence refactor' '[ _ refactor' ] each ;
     {
         [ ptuple-literal? ]
         [ object>> length 3 > ]
-        [ object>> third first object>> "f" = ]
+        [ object>> third ?first [ object>> "f" = ] [ f ] if* ]
     } 1&& ;
 
 : rename-boa-tuple ( obj -- obj' )
