@@ -105,9 +105,7 @@ M: sequence refactor' '[ _ refactor' ] each ;
     } 1|| ;
 
 : rename-function-no-semi ( obj -- obj )
-    [
-        last [ drop f ] change-object
-    ] change-object ;
+    object>> last [ drop f ] change-object ;
 
 : rename-function-no-semi-codebase ( -- )
     [ c-function-declaration? ] [ rename-function-no-semi ] refactor-codebase ;
