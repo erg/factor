@@ -4,7 +4,7 @@ USING: accessors arrays assocs combinators
 combinators.short-circuit fry io io.files io.streams.document
 io.streams.string kernel math modern.lookup modern.parser
 modern.parser.factor modern.paths multiline sequences
-sequences.extras sequences.deep ;
+sequences.extras sequences.deep unicode.categories ;
 FROM: sequences => change-nth ;
 IN: modern.refactor
 
@@ -49,6 +49,11 @@ M: sequence refactor' '[ _ refactor' ] each ;
 : rename-comment ( obj -- obj' )
     object>> first [
         drop "//"
+    ] change-object ;
+
+: trim-trailing-comment-whitespace ( obj -- obj' )
+    object>> second [
+        [ blank? ] trim-tail
     ] change-object ;
 
 /*
