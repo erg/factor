@@ -2,8 +2,8 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors assocs combinators combinators.short-circuit
 fry io io.files io.streams.document io.streams.string kernel
-math modern.lookup modern.parser modern.parser.factor sequences
-sequences.extras ;
+math modern.lookup modern.parser modern.parser.factor
+modern.paths multiline sequences sequences.extras ;
 FROM: sequences => change-nth ;
 IN: modern.refactor
 
@@ -16,13 +16,13 @@ IN: modern.refactor
 : documents>string ( documents -- string )
     [
         output>document-stream
-        [ texts>> [ write ] each ] each nl
+        [ object>> [ write ] each ] each nl
     ] with-string-writer ;
 
 ! Renames "[" "]" to "{" "}"
 : block>array ( block -- array )
-    dup block? [
-        dup texts>>
+    dup pblock? [
+        dup object>>
         [ first "{" >>object drop ]
         [ last "}" >>object drop ] bi
     ] when ;
@@ -33,19 +33,20 @@ IN: modern.refactor
         [ ]
     } cond ;
 
+/*
 : rename-unit-test-quots ( vocab -- )
     modern-tests-path
     dup exists? [
         dup print flush
         parse-modern-file [
             second
-            dup [ munit-test? ] find-all keys
+            dup [ unit-test? ] find-all keys
             ! Make sure [ ] unit-test
             [ 1 - ] map
-            over '[ _ nth block? ] filter
+            over '[ _ nth pblock? ] filter
             [ 1 - ] map
             ! Make sure looks like [ ] [ ] unit-test
-            over '[ _ nth block? ] filter
+            over '[ _ nth pblock? ] filter
             over
             '[
                 _ [
@@ -61,22 +62,23 @@ IN: modern.refactor
     ] if ;
 
 : rewrite-all-tests ( -- ) all-vocabs [ rename-unit-test-quots ] each ;
+*/
 
 ! Rewrite FUNCTION: to not have a trailing ;
 
 : c-function-remove-semi ( obj -- obj )
-    dup texts>> dup [
-        last object>> ";" = [ [ but-last ] change-texts ] when
+    dup object>> dup [
+        last object>> ";" = [ [ but-last ] change-object ] when
     ] [
         drop
     ] if ;
 
 : c-function-add-semi ( obj -- obj )
-    dup texts>> dup [
+    dup object>> dup [
         last object>> ";" = [
             [
                 dup last " ;" doc-after suffix
-            ] change-texts
+            ] change-object
         ] unless
     ] [
         drop
@@ -87,7 +89,7 @@ IN: modern.refactor
     [
         [
             parse-modern-file
-            [ dup c-function? [ c-function-remove-semi ] when ] map
+            [ dup pc-function? [ c-function-remove-semi ] when ] map
         ] keep write-modern-file
     ] each ;
 
@@ -95,7 +97,7 @@ IN: modern.refactor
     [
         [
             parse-modern-file
-            [ dup c-function? [ c-function-add-semi ] when ] map
+            [ dup pc-function? [ c-function-add-semi ] when ] map
         ] keep write-modern-file
     ] each ;
 
@@ -103,7 +105,7 @@ IN: modern.refactor
 : rename-texts ( object assoc -- object )
     '[
         [ [ _ ?at drop ] change-object ] map
-    ] change-texts ;
+    ] change-object ;
 
 : rename-by-name ( paths assoc -- )
     '[
@@ -119,7 +121,7 @@ IN: modern.refactor
     [
         parse-modern-file
         [
-            dup block? [
+            dup pblock? [
                 dup body>> [
                     dup { [ pstring? ] [ class>> "SBUF" = ] } 1&&
                     [
@@ -142,7 +144,7 @@ IN: modern.refactor
     all-factor-files [
         [
             parse-modern-file [
-                dup mmacro? [
+                dup pmacro? [
                     change-macro-out
                 ] when
             ] map
