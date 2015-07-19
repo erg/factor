@@ -25,18 +25,24 @@ M: psequence refactor'
 M: sequence refactor' '[ _ refactor' ] each ;
 
 : refactor ( seq quot -- seq' )
-    [ refactor' ] 2keep drop ;
+    [ refactor' ] 2keep drop ; inline
 
-: refactor-macro-out ( seq -- seq' )
-    [
-        dup poutputs? [
-            [
-                dup length 1 = [
-                    "quot" <spaced-reldoc> prefix
-                ] unless
-            ] change-object
-        ] when
-    ] refactor ;
+: refactor-path ( path quot -- )
+    '[ parse-modern-file _ refactor ] keep write-modern-file ; inline
+
+: refactor-codebase ( quot -- )
+    [ all-factor-files ] dip '[ _ refactor-path ] each ; inline
+
+
+: refactor-macro-out ( obj -- obj' )
+    dup poutputs? [
+        [
+            dup length 1 = [
+                "quot" <spaced-reldoc> prefix
+            ] unless
+        ] change-object
+    ] when ;
+
 
 /*
 
