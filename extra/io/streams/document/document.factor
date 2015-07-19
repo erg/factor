@@ -152,7 +152,7 @@ ERROR: negative-offset n ;
 ! Writing
 GENERIC# stream-write-doc 1 ( doc stream -- )
 
-! Only write spaces if object is not empty/f, but still advance stream as if we wrote
+! If object is f then it was deleted. Only need to save-finish in this case.
 M: doc stream-write-doc ( doc stream -- )
     over object>> [
         {
