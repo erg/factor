@@ -154,19 +154,19 @@ GENERIC# stream-write-doc 1 ( doc stream -- )
 
 ! Only write spaces if object is not empty/f, but still advance stream as if we wrote
 M: doc stream-write-doc ( doc stream -- )
-    {
-        [
-            over object>> [
+    over object>> [
+        {
+            [
                 [ [ start>> ] [ last-finish>> ] bi* [ docpos- ] when* ] keep
                 write-diff-spacing
-            ] [
-                2drop
-            ] if
-        ]
-        [ write-object ]
-        [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ]
-        [ save-finish ]
-    } 2cleave ;
+            ]
+            [ write-object ]
+            [ [ object>> ] dip over integer? [ swap advance-1 ] [ advance-string ] if ]
+            [ save-finish ]
+        } 2cleave
+    ] [
+        save-finish
+    ] if ;
 
 M: reldoc stream-write-doc ( doc stream -- )
     {
