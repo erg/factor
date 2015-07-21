@@ -56,10 +56,14 @@ PARSER: pset-quot set[ "]" parse-until ;
 PARSER: pget-quot get[ "]" parse-until ;
 PARSER: pslots-quot slots[ "]" parse-until ;
 PARSER: pset-slots-quot set-slots[ "]" parse-until ;
+PARSER: pmemo-block MEMO[ "]" parse-until ;
 
 ! words[ funky
 PARSER: plet-block [let "]" parse-until ;
 PARSER: pinterpolate I[ "]I" multiline-string-until ;
+! "[MORSE"
+! "[XML"
+! "[infix"
 
 ! words{
 PARSER: parray { "}" parse-until ;
@@ -93,7 +97,6 @@ PARSER: pc-array c-array{ "}" parse-until ;
 ! "sa{"
 ! "VA{"
 ! "VL{"
-! "V{{"
 ! "NHS{"
 ! "NH{"
 ! "N{"
@@ -147,8 +150,12 @@ PARSER: pc-function FUNCTION: token new-identifier c-arguments ;
 PARSER: pfunction-alias FUNCTION-ALIAS: token token new-identifier c-arguments ;
 PARSER: px-function X-FUNCTION: token new-identifier c-arguments ;
 PARSER: pgl-function GL-FUNCTION: token new-identifier parse c-arguments ;
+PARSER: pcuda-function CUDA-FUNCTION: token new-identifier c-arguments ;
+PARSER: pcuda-global CUDA-GLOBAL: new-word ;
+PARSER: pcuda-library CUDA-LIBRARY: new-word existing-class token ; ! XXX: token might have spaces...
 PARSER: pc-callback CALLBACK: token token c-arguments ;
 PARSER: psubroutine SUBROUTINE: token c-arguments ;
+
 PARSER: pcom-interface COM-INTERFACE: token new-word parse ";" parse-until ;
 PARSER: ptypedef TYPEDEF: token token ;
 PARSER: plibrary LIBRARY: token ;
@@ -183,15 +190,19 @@ PARSER: punicode-category CATEGORY: token token ;
 PARSER: punicode-category-not CATEGORY-NOT: token token ;
 PARSER: pspecialized-array SPECIALIZED-ARRAY: token ;
 PARSER: pspecialized-arrays SPECIALIZED-ARRAYS: ";" raw-until ;
+PARSER: pspecialized-vector SPECIALIZED-VECTOR: token ;
+PARSER: pspecialized-vectors SPECIALIZED-VECTORS: ";" raw-until ;
 PARSER: pglsl-shader GLSL-SHADER: token token "\n;" multiline-string-until ;
 PARSER: pglsl-program GLSL-PROGRAM: token body ;
 PARSER: puniform-tuple UNIFORM-TUPLE: token body ;
 PARSER: pebnf EBNF: token ";EBNF" multiline-string-until ;
 
+PARSER: ptest TEST: token ;
 PARSER: pregisters REGISTERS: body ;
 PARSER: phi-registers HI-REGISTERS: body ;
 PARSER: pcolor COLOR: token ;
-PARSER: ptest TEST: token ;
+PARSER: phexcolor HEXCOLOR: token ;
+PARSER: pflexhexcolor FLEXHEXCOLOR: token ;
 
 PARSER: pabout ABOUT: token ;
 PARSER: particle ARTICLE: token body ;
@@ -247,6 +258,14 @@ PARSER: ptip TIP: ";" parse-until ;
 PARSER: ptokenizer TOKENIZER: existing-word ; ! hmm
 PARSER: px509 X509_V_: new-word token ;
 
+PARSER: ptags TAGS: new-word parse-entire-signature ;
+PARSER: ptag TAG: token existing-word body ;
+
+PARSER: pglobal GLOBAL: new-word ;
+PARSER: pvar VAR: new-word ;
+PARSER: ptyped-global TYPED-GLOBAL: new-word parse ;
+PARSER: ptyped-var TYPED-VAR: new-word parse ;
+
 ! funky
 
 : parse-bind ( -- seq )
@@ -276,6 +295,10 @@ PARSER: pd-register D ;
 PARSER: pr-register R ;
 PARSER: pbreakpoint B ;
 PARSER: call-next-method call-next-method ;
+PARSER: pno-compile no-compile ;
+PARSER: pcycles cycles ;
+PARSER: popcode opcode ;
+PARSER: pspecialized specialized ;
 
 ! paired singleton parsing words
 PARSER: pprivate-begin <PRIVATE ;
@@ -337,10 +360,6 @@ all-words [ "syntax" word-prop ] filter
 natural-sort
 [ . ] each
 
-"[MORSE"
-"[XML"
-"[["
-"[infix"
 
 "SA{"
 "TREE{"
@@ -348,11 +367,9 @@ natural-sort
 "SH{"
 "SPLAY{"
 "qw{"
-"{{"
 "?V{"
 "AVL{"
 "F{"
-"H{{"
 "HAND{"
 "HEX{"
 
@@ -363,92 +380,70 @@ natural-sort
 "<XML"
 "=>"
 
-"AFTER:"
-"BEFORE:"
-"APPLESCRIPT:"
-"CHLOE:"
-"CLASS:"
-"COMPONENT:"
-"CUDA-FUNCTION:"
-"CUDA-GLOBAL:"
-"CUDA-LIBRARY:"
-"D:"
-"DECIMAL:"
-"DELIMITED:"
-"DERIVATIVE:"
-"DESCRIPTIVE:"
-"DESCRIPTIVE::"
-"EUC:"
-"EXEC:"
-"EXEC::"
-"FLEXHEXCOLOR:"
-"FONT:"
-"FOREIGN-ATOMIC-TYPE:"
-"FOREIGN-ENUM-TYPE:"
-"FOREIGN-RECORD-TYPE:"
-"GIR:"
-"GLOBAL:"
-"GLSL-SHADER-FILE:"
-"GML:"
-"GML::"
-"HEXCOLOR:"
-"HOLIDAY-NAME:"
-"HOLIDAY:"
-"IMPLEMENT-STRUCTS:"
-"INFIX::"
-"INSTRUCTION:"
-"LAZY:"
-"LE-PACKED-STRUCT:"
-"LE-STRUCT:"
-"BE-PACKED-STRUCT:"
-"BE-STRUCT:"
-"LOG-GML:"
-"MDBTUPLE:"
-"MEMO["
-"METHOD:"
-"PAIR-GENERIC:"
-"PAIR-M:"
-"POOL:"
-"PY-FROM:"
-"PY-METHODS:"
-"PY-QUALIFIED-FROM:"
-"REGISTER:"
-"RENAMING:"
-"ROLE:"
-"ROLL:"
-"ROMAN-OP:"
-"ROMAN:"
-"RULE:"
-"SBUF\""
-"SELECTOR:"
-"SINGLETONS-UNION:"
-"SPECIALIZED-VECTOR:"
-"SPECIALIZED-VECTORS:"
-"STORAGE:"
-"STORED-TUPLE:"
-"STRIP-TEASE:"
-"SUPER->"
-"TAG:"
-"TAGS:"
-"TUPLE-ARRAY:"
-"TYPED-GLOBAL:"
-"TYPED-VAR:"
-"USE-REV:"
-"VAR:"
-"VARIANT-MEMBER:"
-"VARIANT:"
-"VECTORED-STRUCT:"
-"VERTEX-FORMAT:"
-"VERTEX-STRUCT:"
-"XKCD:"
-"XML-ERROR:"
-"XML-NS:"
-"set:"
-"feedback-format:"
-"geometry-shader-vertices-out:"
-"no-compile"
-"cycles"
-"opcode"
-"specialized"
+PARSER: pafter AFTER: existing-class existing-word body ;
+PARSER: pbefore BEFORE: existing-class existing-word body ;
+PARSER: papplescript APPLESCRIPT: scan-new-word ";APPLESCRIPT" multiline-string-until ;
+PARSER: pchloe CHLOE: new-word body ;
+PARSER: pcomponent COMPONENT: token ;
+PARSER: pd D:
+PARSER: pdecimal DECIMAL:
+PARSER: pdelimited DELIMITED:
+PARSER: pderivative DERIVATIVE:
+PARSER: pdescriptive DESCRIPTIVE:
+PARSER: pdescriptive-locals DESCRIPTIVE::
+PARSER: peuc EUC:
+PARSER: pexec EXEC:
+PARSER: pexec-locals EXEC::
+PARSER: pfont FONT:
+PARSER: pforeign-atomic-type FOREIGN-ATOMIC-TYPE:
+PARSER: pforeign-enum-type FOREIGN-ENUM-TYPE:
+PARSER: pforeign-record-type FOREIGN-RECORD-TYPE:
+PARSER: pgif GIR:
+PARSER: pglsl-shader-file GLSL-SHADER-FILE:
+PARSER: pgml GML:
+PARSER: pgml-locals GML::
+PARSER: pholiday-name HOLIDAY-NAME:
+PARSER: pholiday HOLIDAY:
+PARSER: pimplement-structs IMPLEMENT-STRUCTS:
+PARSER: pinfix-locals INFIX::
+PARSER: pisntruction INSTRUCTION:
+PARSER: plazy LAZY:
+PARSER: ple-packed-struct LE-PACKED-STRUCT:
+PARSER: pbe-packed-struct BE-PACKED-STRUCT:
+PARSER: ple-struct LE-STRUCT:
+PARSER: pbe-struct BE-STRUCT:
+PARSER: plog-gml LOG-GML:
+PARSER: pmdbtuple MDBTUPLE:
+PARSER: ppair-generic PAIR-GENERIC:
+PARSER: ppair-m PAIR-M:
+PARSER: ppool POOL:
+PARSER: ppy-from PY-FROM:
+PARSER: ppy-methods PY-METHODS:
+PARSER: ppy-qualified-from PY-QUALIFIED-FROM:
+PARSER: pregister REGISTER:
+PARSER: prenaming RENAMING:
+PARSER: prole ROLE:
+PARSER: proll ROLL:
+PARSER: proman-op ROMAN-OP:
+PARSER: proman ROMAN:
+PARSER: prule RULE:
+PARSER: pselector SELECTOR:
+PARSER: psingletons-union SINGLETONS-UNION:
+PARSER: pstorage STORAGE:
+PARSER: pstored-tuple STORED-TUPLE:
+PARSER: pstrip-tease STRIP-TEASE:
+PARSER: ptuple-array TUPLE-ARRAY:
+PARSER: puse-rev USE-REV:
+PARSER: pvariant-member VARIANT-MEMBER:
+PARSER: pvariant VARIANT:
+PARSER: pvectored-struct VECTORED-STRUCT:
+PARSER: pvertext-format VERTEX-FORMAT:
+PARSER: pvertext-struct VERTEX-STRUCT:
+PARSER: pxkcd XKCD:
+PARSER: pxml-error XML-ERROR:
+PARSER: pxml-ns XML-NS:
+PARSER: pset set:
+PARSER: pfeedback-format feedback-format:
+PARSER: pgeometry-shader-vertices-out geometry-shader-vertices-out:
 "`"
 */
