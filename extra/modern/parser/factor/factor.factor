@@ -45,6 +45,7 @@ TUPLE: psignature < psequence ;
 ! PARSER: URL" URL" ;
 ! PARSER: SBUF" SBUF" ;
 ! PARSER: DLL" DLL" ;
+! exec"
 
 ! words[
 PARSER: pblock [ "]" parse-until ;
@@ -88,6 +89,16 @@ PARSER: pintersection-array intersection{ "}" parse-until ;
 PARSER: pmaybe maybe{ "}" parse-until ;
 PARSER: pnot not{ "}" parse-until ;
 PARSER: pc-array c-array{ "}" parse-until ;
+
+! "sa{"
+! "VA{"
+! "VL{"
+! "V{{"
+! "NHS{"
+! "NH{"
+! "N{"
+! "PH{"
+! "PV{"
 
 ! words@
 PARSER: pstruct-literal-at S@ token parse ; ! [[ ]]
@@ -296,6 +307,11 @@ PARSER: pebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
 PARSER: pnested-comment (* [ 1 parse-pnested-comment' ] { } make ;
 
 /*
+"%\""
+"%>"
+".."
+"..."
+
 ! PARSER: /* /* ;
 ! PARSER: <<<<<< <<<<<< ;
 ! PARSER: <<<<<<< <<<<<<< ;
@@ -315,16 +331,124 @@ PARSER: pnested-comment (* [ 1 parse-pnested-comment' ] { } make ;
 ! PARSER: RESET RESET ;
 
 
-! regexp
-! PARSER: R! R! ;
-! PARSER: R" R" ;
-! PARSER: R# R# ;
-! PARSER: R' R' ;
-! PARSER: R( R( ;
-! PARSER: R/ R/ ;
-! PARSER: R@ R@ ;
-! PARSER: R[ R[ ;
-! PARSER: R` R` ;
-! PARSER: R{ R{ ;
-! PARSER: R| R| ;
+parsers get-global keys
+all-words [ "syntax" word-prop ] filter
+[ name>> ] map swap diff
+natural-sort
+[ . ] each
+
+"[MORSE"
+"[XML"
+"[["
+"[infix"
+
+"SA{"
+"TREE{"
+"SHS{"
+"SH{"
+"SPLAY{"
+"qw{"
+"{{"
+"?V{"
+"AVL{"
+"F{"
+"H{{"
+"HAND{"
+"HEX{"
+
+"ESC"
+"GB"
+
+"<LITERATE"
+"<XML"
+"=>"
+
+"AFTER:"
+"BEFORE:"
+"APPLESCRIPT:"
+"CHLOE:"
+"CLASS:"
+"COMPONENT:"
+"CUDA-FUNCTION:"
+"CUDA-GLOBAL:"
+"CUDA-LIBRARY:"
+"D:"
+"DECIMAL:"
+"DELIMITED:"
+"DERIVATIVE:"
+"DESCRIPTIVE:"
+"DESCRIPTIVE::"
+"EUC:"
+"EXEC:"
+"EXEC::"
+"FLEXHEXCOLOR:"
+"FONT:"
+"FOREIGN-ATOMIC-TYPE:"
+"FOREIGN-ENUM-TYPE:"
+"FOREIGN-RECORD-TYPE:"
+"GIR:"
+"GLOBAL:"
+"GLSL-SHADER-FILE:"
+"GML:"
+"GML::"
+"HEXCOLOR:"
+"HOLIDAY-NAME:"
+"HOLIDAY:"
+"IMPLEMENT-STRUCTS:"
+"INFIX::"
+"INSTRUCTION:"
+"LAZY:"
+"LE-PACKED-STRUCT:"
+"LE-STRUCT:"
+"BE-PACKED-STRUCT:"
+"BE-STRUCT:"
+"LOG-GML:"
+"MDBTUPLE:"
+"MEMO["
+"METHOD:"
+"PAIR-GENERIC:"
+"PAIR-M:"
+"POOL:"
+"PY-FROM:"
+"PY-METHODS:"
+"PY-QUALIFIED-FROM:"
+"REGISTER:"
+"RENAMING:"
+"ROLE:"
+"ROLL:"
+"ROMAN-OP:"
+"ROMAN:"
+"RULE:"
+"SBUF\""
+"SELECTOR:"
+"SINGLETONS-UNION:"
+"SPECIALIZED-VECTOR:"
+"SPECIALIZED-VECTORS:"
+"STORAGE:"
+"STORED-TUPLE:"
+"STRIP-TEASE:"
+"SUPER->"
+"TAG:"
+"TAGS:"
+"TUPLE-ARRAY:"
+"TYPED-GLOBAL:"
+"TYPED-VAR:"
+"USE-REV:"
+"VAR:"
+"VARIANT-MEMBER:"
+"VARIANT:"
+"VECTORED-STRUCT:"
+"VERTEX-FORMAT:"
+"VERTEX-STRUCT:"
+"XKCD:"
+"XML-ERROR:"
+"XML-NS:"
+"set:"
+"feedback-format:"
+"geometry-shader-vertices-out:"
+"no-compile"
+"cycles"
+"opcode"
+"specialized"
+"`"
 */
