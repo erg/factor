@@ -48,9 +48,6 @@ ERROR: not-a-source-path path ;
 
 : filter-exists ( seq -- seq' ) [ exists? ] filter ;
 
-: all-syntax-paths ( -- seq )
-    all-vocabs [ modern-syntax-path ] map filter-exists ;
-
 ! These paths have syntax errors on purpose...
 : reject-some-paths ( seq -- seq' )
     {
@@ -77,6 +74,9 @@ ERROR: not-a-source-path path ;
 
 : all-tests-paths ( -- seq )
     all-vocabs modern-tests-paths ;
+
+: all-syntax-paths ( -- seq )
+    all-vocabs [ modern-syntax-path ] map filter-exists reject-some-paths ;
 
 : all-factor-files ( -- seq )
     [
