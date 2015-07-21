@@ -45,7 +45,7 @@ FUNCTOR: define-tuple-array ( CLASS -- )
 ALIAS: CLASS ${CLASS}
 
 ALIAS: CLASS-array ${CLASS}-array
-ALIAS: CLASS-array? ${CLASS-array}?
+ALIAS: CLASS-array? ${CLASS}-array?
 
 ALIAS: <CLASS-array> <${CLASS}-array>
 ALIAS: >CLASS-array >${CLASS}-array
