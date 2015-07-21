@@ -3,13 +3,13 @@
 USING: accessors arrays assocs combinators.short-circuit
 combinators.smart fry hashtables io io.files kernel macros
 modern.parser modern.parser.factor modern.paths multiline
-namespaces nested-comments parser prettyprint sequences
+namespaces parser prettyprint sequences
 sequences.deep sets sorting splitting strings vocabs
 vocabs.files vocabs.hierarchy vocabs.loader vocabs.metadata ;
 IN: modern.lookup
 
 
-(*
+/*
 SPECIALIZED-ARRAY: uint
 SLOT: foo
 "syntax", "accessors"
@@ -36,7 +36,7 @@ SLOT: foo
     "null"
     "object"
 }
-*)
+*/
 
 ! functors
 ! GENERATED NAMES generated names
