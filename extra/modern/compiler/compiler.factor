@@ -4,7 +4,7 @@ USING: accessors assocs classes.mixin classes.predicate
 combinators compiler.units constructors effects fry generic
 generic.parser kernel literals.private math math.parser
 modern.lookup modern.parser modern.parser.factor modern.paths
-multiline namespaces nested-comments parser prettyprint
+multiline namespaces parser prettyprint
 quotations sequences sequences.extras sets splitting strings
 vocabs vocabs.parser words ;
 IN: modern.compiler
