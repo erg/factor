@@ -1,7 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: pair-methods.syntax
-
-PARSER: pair-generic { } PAIR-GENERIC:  ;
-PARSER: pair-m { } PAIR-M:  ;

@@ -1,8 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: math.vectors.simd.cords.syntax
-
-<PRIVATE
-PARSER: simd-128-cord { name1 name2 } SIMD-128-CORD: token token ;
-PRIVATE>

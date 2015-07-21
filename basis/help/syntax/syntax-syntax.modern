@@ -1,8 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: help.syntax.syntax
-
-PARSER: about { name } ABOUT: token ;
-PARSER: article { name body } ARTICLE: token ; parse-until ;
-PARSER: help { name body } HELP: token ; parse-until ;

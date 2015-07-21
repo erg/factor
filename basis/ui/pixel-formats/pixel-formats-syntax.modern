@@ -1,8 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: ui.pixel-formats.syntax
-
-<PRIVATE
-PARSER: pixel-format-attribute-table { } PIXEL-FORMAT-ATTRIBUTE-TABLE:  ;
-PRIVATE>

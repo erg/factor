@@ -1,8 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: alien.fortran.syntax
-
-PARSER: function { return-value name arguments } FUNCTION: token token ; parse-until ;
-PARSER: library { name } LIBRARY: token ;
-PARSER: subroutine { } SUBROUTINE:  ;

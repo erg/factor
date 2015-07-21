@@ -1,8 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: cuda.syntax.syntax
-
-PARSER: cuda-function { } CUDA-FUNCTION:  ;
-PARSER: cuda-global { } CUDA-GLOBAL:  ;
-PARSER: cuda-library { } CUDA-LIBRARY:  ;

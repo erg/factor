@@ -1,8 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: cpu.8080.emulator.syntax
-
-PARSER: instruction { } INSTRUCTION:  ;
-PARSER: cycles { } cycles  ;
-PARSER: opcode { } opcode  ;

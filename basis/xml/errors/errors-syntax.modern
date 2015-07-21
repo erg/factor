@@ -1,6 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: xml.errors.syntax
-
-PARSER: xml-error { } XML-ERROR:  ;
