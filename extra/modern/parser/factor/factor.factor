@@ -10,7 +10,6 @@ PARSER: pparser PARSER: raw raw body ;
 PARSER: pcomment ! readln ;
 PARSER: pshell-comment #! readln ;
 PARSER: heredoc HEREDOC: token dup object>> multiline-string-until ;
-! PARSER: pdelimited DELIMITED: ;
 
 PARSER: pin IN: token ;
 PARSER: puse USE: token ;
@@ -94,14 +93,24 @@ PARSER: pmaybe maybe{ "}" parse-until ;
 PARSER: pnot not{ "}" parse-until ;
 PARSER: pc-array c-array{ "}" parse-until ;
 
-! "sa{"
-! "VA{"
-! "VL{"
-! "NHS{"
-! "NH{"
-! "N{"
-! "PH{"
-! "PV{"
+PARSER: pshaped-array sa{ "}" parse-until ;
+PARSER: pavl AVL{ "}" parse-until ;
+PARSER: psplay SPLAY{ "}" parse-until ;
+PARSER: ptree TREE{ "}" parse-until ;
+PARSER: psuffix-array SA{ "}" parse-until ;
+PARSER: pvalist VA{ "}" parse-until ;
+PARSER: pvlist VL{ "}" parse-until ;
+PARSER: pnumber-hash-set NHS{ "}" parse-until ;
+PARSER: pnumber-hashtable NH{ "}" parse-until ;
+PARSER: pnibble-array N{ "}" parse-until ;
+PARSER: ppersistent-hashtable PH{ "}" parse-until ;
+PARSER: ppersistent-vector PV{ "}" parse-until ;
+PARSER: psequence-hash-set SHS{ "}" parse-until ;
+PARSER: psequence-hashtable SH{ "}" parse-until ;
+PARSER: pquote-word qw{ "}" parse-until ;
+PARSER: pbit-vector ?V{ "}" parse-until ;
+PARSER: ppoker-hand HAND{ "}" parse-until ;
+PARSER: phex-array HEX{ "}" parse-until ;
 
 ! words@
 PARSER: pstruct-literal-at S@ token parse ; ! [[ ]]
@@ -261,11 +270,6 @@ PARSER: px509 X509_V_: new-word token ;
 PARSER: ptags TAGS: new-word parse-entire-signature ;
 PARSER: ptag TAG: token existing-word body ;
 
-PARSER: pglobal GLOBAL: new-word ;
-PARSER: pvar VAR: new-word ;
-PARSER: ptyped-global TYPED-GLOBAL: new-word parse ;
-PARSER: ptyped-var TYPED-VAR: new-word parse ;
-
 ! funky
 
 : parse-bind ( -- seq )
@@ -361,17 +365,6 @@ natural-sort
 [ . ] each
 
 
-"SA{"
-"TREE{"
-"SHS{"
-"SH{"
-"SPLAY{"
-"qw{"
-"?V{"
-"AVL{"
-"F{"
-"HAND{"
-"HEX{"
 
 "ESC"
 "GB"
@@ -380,15 +373,15 @@ natural-sort
 "<XML"
 "=>"
 
+PARSER: pd D: token ;
+PARSER: pdecimal DECIMAL: token ;
+
 PARSER: pafter AFTER: existing-class existing-word body ;
 PARSER: pbefore BEFORE: existing-class existing-word body ;
 PARSER: papplescript APPLESCRIPT: scan-new-word ";APPLESCRIPT" multiline-string-until ;
 PARSER: pchloe CHLOE: new-word body ;
 PARSER: pcomponent COMPONENT: token ;
-PARSER: pd D:
-PARSER: pdecimal DECIMAL:
-PARSER: pdelimited DELIMITED:
-PARSER: pderivative DERIVATIVE:
+PARSER: pderivative DERIVATIVE: existing-word body ;
 PARSER: pdescriptive DESCRIPTIVE:
 PARSER: pdescriptive-locals DESCRIPTIVE::
 PARSER: peuc EUC:
@@ -442,7 +435,6 @@ PARSER: pvertext-struct VERTEX-STRUCT:
 PARSER: pxkcd XKCD:
 PARSER: pxml-error XML-ERROR:
 PARSER: pxml-ns XML-NS:
-PARSER: pset set:
 PARSER: pfeedback-format feedback-format:
 PARSER: pgeometry-shader-vertices-out geometry-shader-vertices-out:
 "`"

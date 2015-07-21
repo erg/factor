@@ -5,8 +5,9 @@ classes.tuple combinators combinators.short-circuit
 combinators.smart constructors fry generalizations io
 io.encodings.utf8 io.files io.streams.document io.streams.string
 kernel lexer make math math.parser modern.paths namespaces
-nested-comments parser prettyprint sequences sequences.extras
-strings unicode.case vocabs.files vocabs.loader words ;
+parser prettyprint sequences sequences.extras
+strings unicode.case vocabs.files vocabs.loader words
+multiline ;
 IN: modern.parser
 
 SYMBOL: parsers
@@ -31,6 +32,7 @@ TUPLE: pstring < psequence ;
 TUPLE: pinputs < psequence ;
 TUPLE: poutputs < psequence ;
 TUPLE: pbody < psequence ;
+TUPLE: pcontainer < psequence ;
 TUPLE: pidentifier < doc ;
 TUPLE: pnew-class < doc ;
 TUPLE: pexisting-class < doc ;
@@ -96,13 +98,39 @@ ERROR: expected-sequence expected got ;
         execute( -- parsed ) [ swap ptext pbecome prefix ] change-object
     ] [ drop ] if ;
 
+! : read-container ( class/f sep start-level -- container )
+    ! "[" read-until rot CHAR: = <string> append "]" "]" surround {
+        ! { [ ] [ ] }
+    ! } cond ;
+
+: read-quotation ( -- quotation )
+    "]" parse-until ;
+
+: parse-quot-or-container-or-word ( class/f sep -- obj )
+    read1 {
+        { [ dup object>> "\r\n\s" member? ] [ read-quotation 4array ] }
+        ! { [ dup object>> CHAR: = ] [ 1 read-container ] }
+        [ "\r\n\s" read-until drop 4array ]
+    } cond ;
+
+ERROR: token-loop-ended symbol ;
+
+! : token-loop'' ( string -- string/f )
+        ! { [ dup f = ] [ drop parse-action ] }
+        ! { [ dup object>> "[" tail? ] [ [ f like ] dip parse-quot-or-container-or-word ] }
+        ! { [ dup object>> "\r\n\s" member? ] [ drop [ token-loop' ] when-empty ] }
+        ! { [ dup object>> CHAR: " = ] [ [ f like ] dip parse-string ] }
+    ! ;
+
 : token-loop' ( -- string/f )
     "\r\n\s\"" read-until {
-        { [ dup f = ] [ drop ] }
+    ! "\r\n\s\"[{" read-until {
+        ! { [ dup object>> "[" tail? ] [ [ f like ] dip parse-runtime-or-container ] }
+        ! { [ dup object>> "{" tail? ] [ [ f like ] dip parse-compile-time ] }
         { [ dup object>> "\r\n\s" member? ] [ drop [ token-loop' ] when-empty ] }
-        { [ dup object>> CHAR: " = ] [
-            [ f like ] dip parse-string
-        ] }
+        { [ dup object>> CHAR: " = ] [ [ f like ] dip parse-string ] }
+        ! { [ dup f = ] [ drop parse-action ] } ! last one
+        { [ dup f = ] [ drop ] } ! last one
     } cond ;
 
 : token-loop ( type -- token/f )
@@ -225,10 +253,9 @@ SYNTAX: PARSER:
     scan-token
     parse-definition define-parser ;
 
-(*
-
+/*
 ERROR: multiline-string-expected got ;
-! multi"==[Lol. This string syntax...]=="
+! multi[==[stuff]==]
 : parse-multiline-string ( class -- mstring )
     "[" read-until [
         "]" "\"" surround multiline-string-until 2array pstring new swap >>object
@@ -237,4 +264,4 @@ ERROR: multiline-string-expected got ;
         multiline-string-expected
     ] if ;
 
-*)
+*/
