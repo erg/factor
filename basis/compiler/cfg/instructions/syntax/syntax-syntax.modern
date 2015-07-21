@@ -1,9 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: compiler.cfg.instructions.syntax.syntax
-
-PARSER: flushable-insn { name body } FLUSHABLE-INSN: token ; parse-until ;
-PARSER: foldable-insn { name body } FOLDABLE-INSN: token ; parse-until ;
-PARSER: insn { name body } INSN: token ; parse-until ;
-PARSER: vreg-insn { name body } VREG-INSN: token ; parse-until ;

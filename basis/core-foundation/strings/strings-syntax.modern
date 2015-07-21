@@ -1,6 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: core-foundation.strings.syntax
-
-PARSER: cfstring { } CFSTRING:  ;

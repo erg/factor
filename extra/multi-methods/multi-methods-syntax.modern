@@ -1,8 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: multi-methods.syntax
-
-PARSER: generic { name signature } GENERIC: token parse-signature(--) ;
-PARSER: m { class name body } M: parse token body ;
-PARSER: method { } METHOD:  ;

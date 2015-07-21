@@ -1,7 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: compiler.codegen.syntax
-
-PARSER: codegen { name1 name2 } CODEGEN: token token ;
-PARSER: conditional { name1 name2 } CONDITIONAL: token token ;

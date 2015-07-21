@@ -1,9 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: multiline.syntax
-
-PARSER: /* { } /*  ;
-PARSER: delimited { } DELIMITED:  ;
-PARSER: heredoc { } HEREDOC:  ;
-PARSER: string { name text } STRING: token ; parse-comment-until ;

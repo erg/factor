@@ -1,7 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: cpu.x86.assembler.syntax.syntax
-
-PARSER: hi-registers { names } HI-REGISTERS: ; parse-until ;
-PARSER: registers { names } REGISTERS: ; parse-until ;

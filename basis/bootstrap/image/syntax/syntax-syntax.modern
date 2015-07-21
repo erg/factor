@@ -1,7 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: bootstrap.image.syntax.syntax
-
-PARSER: reset { } RESET  ;
-PARSER: special-object { } SPECIAL-OBJECT:  ;

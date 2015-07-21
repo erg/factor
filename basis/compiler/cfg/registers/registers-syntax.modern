@@ -1,7 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: compiler.cfg.registers.syntax
-
-PARSER: d { } D  ;
-PARSER: r { } R  ;

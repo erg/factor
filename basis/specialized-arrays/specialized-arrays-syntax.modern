@@ -1,7 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: specialized-arrays.syntax
-
-PARSER: specialized-array { class } SPECIALIZED-ARRAY: token ;
-PARSER: specialized-arrays { classes } SPECIALIZED-ARRAYS: ; strings-until ;

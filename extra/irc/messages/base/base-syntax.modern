@@ -1,6 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: irc.messages.base.syntax
-
-PARSER: irc { name command body } IRC: token parse ; strings-until ;

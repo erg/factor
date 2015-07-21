@@ -1,7 +1,0 @@
-! Copyright (C) 2015 Doug Coleman.
-! See http://factorcode.org/license.txt for BSD license.
-USING: ;
-IN: alien.data.map.syntax
-
-PARSER: data-map!( { signature } data-map!( parse-signature--) ;
-PARSER: data-map( { signature } data-map( parse-signature--) ;
