@@ -124,19 +124,19 @@ ERROR: token-loop-ended symbol ;
         ! { [ dup object>> CHAR: " = ] [ [ f like ] dip parse-string ] }
     ! ;
 
-: token-loop' ( -- string/f )
+: token ( -- string/f )
     "\r\n\s\"" read-until {
     ! "\r\n\s\"[{" read-until {
         ! { [ dup object>> "[" tail? ] [ [ f like ] dip parse-runtime-or-container ] }
         ! { [ dup object>> "{" tail? ] [ [ f like ] dip parse-compile-time ] }
         { [ dup f = ] [ drop ] } ! last one
-        { [ dup object>> "\r\n\s" member? ] [ drop [ token-loop' ] when-empty ] }
+        { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
         { [ dup object>> CHAR: " = ] [ [ f like ] dip parse-string ] }
         ! { [ dup f = ] [ drop parse-action ] } ! last one
     } cond ;
 
-: token-loop ( type -- token/f )
-    [ token-loop' ] dip pbecome ;
+: typed-token ( type -- token/f )
+    [ token ] dip pbecome ;
 
 : raw ( -- object )
     "\r\n\s" read-until {
@@ -153,13 +153,12 @@ ERROR: token-expected token ;
         raw [ dup object>> _ = [ ptext pbecome , f ] when ] [ _ token-expected ] if*
     ] loop>array cut-last ;
 
-: new-class ( -- object ) pnew-class token-loop ;
-: existing-class ( -- object ) pexisting-class token-loop ;
-: new-word ( -- object ) pnew-word token-loop ;
-: existing-word ( -- object ) pexisting-word token-loop ;
-: token ( -- object ) token-loop' ;
+: new-class ( -- object ) pnew-class typed-token ;
+: existing-class ( -- object ) pexisting-class typed-token ;
+: new-word ( -- object ) pnew-word typed-token ;
+: existing-word ( -- object ) pexisting-word typed-token ;
 : token-to-find ( -- token string ) token [ ptext pbecome ] keep  ;
-: parse ( -- object/f ) token-loop' dup [ parse-action ] when ;
+: parse ( -- object/f ) token dup [ parse-action ] when ;
 
 ! XXX: parsing word named ";" will execute while parse-until is looking for a ; -- may never find it!
 ! XXX: fix is to call token here and parse-action manually
