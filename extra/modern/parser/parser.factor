@@ -129,18 +129,19 @@ DEFER: parse-until
 : parse-runtime-or-container ( class/f sep -- obj )
     fixup-container-args
     read1 {
-        { [ dup object>> "\r\n\s" member? ] [ drop read-quotation 4array prun-time boa ] }
+        { [ dup object>> "\r\n\s" member? ] [ drop read-quotation 4array sift prun-time boa ] }
         ! { [ dup object>> CHAR: [ = ] [ 1 read-container ] }
-        [ "\r\n\s" read-until drop 4array ]
+        [ "\r\n\s" read-until drop 4array sift prun-time boa ]
     } cond ;
 
 : token ( -- string/f )
-    "\r\n\s\"{[" read-until {
+    "\r\n\s\"" read-until {
+    ! "\r\n\s\"[{" read-until {
         { [ dup f = ] [ drop ] } ! XXX: parse-action here?
         { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
         { [ dup object>> CHAR: " = ] [ parse-string ] }
-        { [ dup object>> CHAR: { = ] [ parse-compile-time ] }
-        { [ dup object>> CHAR: [ = ] [ parse-runtime-or-container ] }
+        ! { [ dup object>> CHAR: { = ] [ parse-compile-time ] }
+        ! { [ dup object>> CHAR: [ = ] [ parse-runtime-or-container ] }
     } cond ;
 
 : typed-token ( type -- token/f )
