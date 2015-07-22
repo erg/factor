@@ -127,10 +127,10 @@ ERROR: token-loop-ended symbol ;
     ! "\r\n\s\"[{" read-until {
         ! { [ dup object>> "[" tail? ] [ [ f like ] dip parse-runtime-or-container ] }
         ! { [ dup object>> "{" tail? ] [ [ f like ] dip parse-compile-time ] }
+        { [ dup f = ] [ drop ] } ! last one
         { [ dup object>> "\r\n\s" member? ] [ drop [ token-loop' ] when-empty ] }
         { [ dup object>> CHAR: " = ] [ [ f like ] dip parse-string ] }
         ! { [ dup f = ] [ drop parse-action ] } ! last one
-        { [ dup f = ] [ drop ] } ! last one
     } cond ;
 
 : token-loop ( type -- token/f )
