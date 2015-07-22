@@ -5,8 +5,10 @@ classes.tuple combinators combinators.short-circuit
 combinators.smart constructors fry generalizations io
 io.encodings.utf8 io.files io.streams.document io.streams.string
 kernel lexer make math math.parser modern.paths multiline
-namespaces parser prettyprint sequences sequences.extras shuffle
-splitting strings unicode.case vocabs.files vocabs.loader words ;
+namespaces prettyprint sequences sequences.extras
+sequences.generalizations shuffle splitting strings unicode.case
+vocabs.files vocabs.loader words ;
+QUALIFIED: parser
 IN: modern.parser
 
 SYMBOL: parsers
@@ -35,32 +37,19 @@ ERROR: double-quote-expected partial-string got pos ;
 
 ! These ARE parsed or psequences
 TUPLE: ptext < doc ;
-TUPLE: pstring < psequence ;
 TUPLE: pstring-text < doc ;
-TUPLE: parguments < psequence ;
-TUPLE: pbody < psequence ;
 TUPLE: pnew-class < doc ;
 TUPLE: pexisting-class < doc ;
 TUPLE: pnew-word < doc ;
 TUPLE: pexisting-word < doc ;
 
+TUPLE: pstring < psequence ;
+TUPLE: parguments < psequence ;
+TUPLE: pbody < psequence ;
+TUPLE: prun-time < psequence ;
+TUPLE: pcompile-time < psequence ;
+
 ! TUPLE: pcontainer < psequence ;
-
-: parse-string' ( -- sep )
-    "\\\"" read-until
-    dup dup [ object>> ] when {
-        { CHAR: " [ swap % ] }
-        { CHAR: \ [ [ % ] [ , ] bi* read1 , parse-string' ] }
-        { f [ [ dup [ object>> ] when ] dip tell-input double-quote-expected ] }
-        [ tell-input double-quote-expected ]
-    } case ;
-
-: parse-string ( class sep -- mstring )
-    ptext pdoc-become
-    tell-input [ parse-string' ptext pdoc-become ] "" make
-    tell-input [ 1 - ] change-column rot [ pstring-text boa ] dip
-    4 npick [ 4array ] [ 3array nip ] if
-    pstring new swap >>object ;
 
 : building-tail? ( string -- ? )
     [ building get ] dip {
@@ -107,27 +96,53 @@ TUPLE: pexisting-word < doc ;
         ! { [ ] [ ] }
     ! } cond ;
 
-: read-quotation ( -- quotation )
-    "]" parse-until ;
+DEFER: parse-until
+: read-quotation ( -- quotation sep ) "]" parse-until ;
 
 : parse-quot-or-container-or-word ( class/f sep -- obj )
     read1 {
-        { [ dup object>> "\r\n\s" member? ] [ read-quotation 4array ] }
+        { [ dup object>> "\r\n\s" member? ] [ read-quotation 5 narray ] }
         ! { [ dup object>> CHAR: = ] [ 1 read-container ] }
         [ "\r\n\s" read-until drop 4array ]
     } cond ;
 
+: fixup-container-args ( type sep -- type' sep' )
+    [ f like dup [ pexisting-class pdoc-become ] when ]
+    [ [ 1string ] change-object ptext pdoc-become ] bi* ;
+
+: parse-compile-time ( type sep -- obj )
+    fixup-container-args
+    "}" parse-until 4array prun-time boa ;
+
+: parse-string' ( -- sep )
+    "\\\"" read-until
+    dup dup [ object>> ] when {
+        { CHAR: " [ swap % ] }
+        { CHAR: \ [ [ % ] [ , ] bi* read1 , parse-string' ] }
+        { f [ [ dup [ object>> ] when ] dip tell-input double-quote-expected ] }
+        [ tell-input double-quote-expected ]
+    } case ;
+
+: parse-string ( class sep -- mstring )
+    fixup-container-args
+    ptext pdoc-become
+    tell-input [ parse-string' [ 1string ] change-object ptext pdoc-become ] "" make
+    tell-input [ 1 - ] change-column rot [ pstring-text boa ] dip
+    4 npick [ 4array ] [ 3array nip ] if
+    pstring new swap >>object ;
+
 ERROR: token-loop-ended symbol ;
 
 : token ( -- string/f )
-    "\r\n\s\"" read-until {
-    ! "\r\n\s\"[{" read-until {
-        ! { [ dup object>> "[" tail? ] [ [ f like ] dip parse-runtime-or-container ] }
-        ! { [ dup object>> "{" tail? ] [ [ f like ] dip parse-compile-time ] }
+    ! "\r\n\s\"" read-until {
+    "\r\n\s\"{" read-until {
         { [ dup f = ] [ drop ] } ! last one
-        { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
-        { [ dup object>> CHAR: " = ] [ [ f like ] dip parse-string ] }
         ! { [ dup f = ] [ drop parse-action ] } ! last one
+
+        { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
+        ! { [ dup object>> "[" tail? ] [ [ f like ] dip parse-runtime-or-container ] }
+        { [ dup object>> CHAR: { = ] [ parse-compile-time ] }
+        { [ dup object>> CHAR: " = ] [ parse-string ] }
     } cond ;
 
 : typed-token ( type -- token/f )
@@ -243,8 +258,8 @@ M: psequence write-pflat' object>> [ write-parsed ] each ;
     [ 2drop psequence { } define-tuple-class ]
     [
         [
-            [ name>> "parse-" prepend create-word-in mark-top-level-syntax ]
-            [ name>> "parse-" prepend "(" ")" surround create-word-in ]
+            [ name>> "parse-" prepend parser:create-word-in mark-top-level-syntax ]
+            [ name>> "parse-" prepend "(" ")" surround parser:create-word-in ]
             [ ] tri
         ] 2dip
         ! word (word) class token quot
@@ -259,7 +274,7 @@ M: psequence write-pflat' object>> [ write-parsed ] each ;
 SYNTAX: PARSER:
     scan-new-class
     scan-token
-    parse-definition define-parser ;
+    parser:parse-definition define-parser ;
 
 
 ! MOVE STUFF BELOW OUT
