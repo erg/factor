@@ -34,13 +34,6 @@ TUPLE: pexisting-class < doc ;
 TUPLE: pnew-word < doc ;
 TUPLE: pexisting-word < doc ;
 
-: reject-texts ( seq -- seq' ) [ ptext? ] reject ; inline
-GENERIC: remove-texts ( obj -- obj' )
-M: object remove-texts ;
-M: sequence remove-texts [ remove-texts ] map ;
-M: psequence remove-texts [ reject-texts [ remove-texts ] map ] change-object ;
-
-
 ERROR: string-expected got separator ;
 : parse-string' ( -- sep )
     "\\\"" read-until
@@ -117,13 +110,6 @@ ERROR: expected-sequence expected got ;
 
 ERROR: token-loop-ended symbol ;
 
-! : token-loop'' ( string -- string/f )
-        ! { [ dup f = ] [ drop parse-action ] }
-        ! { [ dup object>> "[" tail? ] [ [ f like ] dip parse-quot-or-container-or-word ] }
-        ! { [ dup object>> "\r\n\s" member? ] [ drop [ token-loop' ] when-empty ] }
-        ! { [ dup object>> CHAR: " = ] [ [ f like ] dip parse-string ] }
-    ! ;
-
 : token ( -- string/f )
     "\r\n\s\"" read-until {
     ! "\r\n\s\"[{" read-until {
@@ -144,14 +130,11 @@ ERROR: token-loop-ended symbol ;
         { [ dup object>> "\r\n\s" member? ] [ drop [ raw ] when-empty ] }
     } cond ;
 
-: cut-last ( seq -- before last )
-    dup length 1 - cut first ;
-
 ERROR: token-expected token ;
 : raw-until ( string -- strings sep )
     dup '[
         raw [ dup object>> _ = [ ptext pbecome , f ] when ] [ _ token-expected ] if*
-    ] loop>array cut-last ;
+    ] loop>array unclip-last ;
 
 : new-class ( -- object ) pnew-class typed-token ;
 : existing-class ( -- object ) pexisting-class typed-token ;
@@ -166,17 +149,16 @@ ERROR: token-expected token ;
     dup '[
         parse [ _ token-expected ] unless*
         dup object>> _ = [ , f ] when
-    ] loop>array cut-last ptext pbecome ;
+    ] loop>array unclip-last ptext pbecome ;
 
 : expect ( string -- string )
-    token
-    2dup dup [ object>> ] when = [ nip ptext pbecome ] [ expected ] if ;
+    ptext typed-token
+    2dup dup [ object>> ] when = [ nip ] [ expected ] if ;
 
 : body ( -- strings last ) ";" parse-until [ pbody boa ] dip ;
 
-: parse-metadata ( path -- data ) utf8 file-contents ;
-
 : parse-input-stream ( -- seq ) [ parse ] loop>array ;
+
 
 : parse-stream ( stream -- seq )
     [ parse-input-stream ] with-input-stream ; inline
@@ -189,6 +171,8 @@ ERROR: token-expected token ;
 
 : parse-vocab ( string -- data )
     modern-source-path parse-source-file ;
+
+: parse-metadata ( path -- data ) utf8 file-contents ;
 
 ERROR: unrecognized-factor-file path ;
 : parse-modern-file ( path -- seq )
@@ -245,8 +229,8 @@ M: psequence write-pflat' object>> [ write-parsed ] each ;
         ] 2dip
         ! word (word) class token quot
         {
-            [ [ drop ] 4dip nip swap '[ _ output>array _ boa ] ( -- obj ) define-declared ] ! (word)
             [ [ drop ] 3dip [ '[ _ expect ] ] dip compose swap '[ _ output>array _ boa ] ( -- obj ) define-declared ] ! word
+            [ [ drop ] 4dip nip swap '[ _ output>array _ boa ] ( -- obj ) define-declared ] ! (word)
             [ [ drop ] 4dip drop nip register-parser ] ! (word) token register
         } 5 ncleave
     ] 3bi ;
@@ -256,3 +240,12 @@ SYNTAX: PARSER:
     scan-new-class
     scan-token
     parse-definition define-parser ;
+
+
+! MOVE STUFF BELOW OUT
+
+: reject-texts ( seq -- seq' ) [ ptext? ] reject ; inline
+GENERIC: remove-texts ( obj -- obj' )
+M: object remove-texts ;
+M: sequence remove-texts [ remove-texts ] map ;
+M: psequence remove-texts [ reject-texts [ remove-texts ] map ] change-object ;
