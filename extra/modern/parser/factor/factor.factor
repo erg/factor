@@ -2,7 +2,7 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators combinators.smart
 constructors io kernel make math modern.parser multiline
-namespaces nested-comments sequences ;
+namespaces sequences ;
 IN: modern.parser.factor
 
 PARSER: psyntax SYNTAX: raw body ;
@@ -170,8 +170,8 @@ PARSER: pcuda-global CUDA-GLOBAL: new-word ;
 PARSER: pcuda-library CUDA-LIBRARY: new-word existing-class token ; ! XXX: token might have spaces...
 PARSER: pc-callback CALLBACK: token token c-arguments ;
 PARSER: psubroutine SUBROUTINE: token c-arguments ;
-PARSER: pdescriptive DESCRIPTIVE: token new-identifer c-arguments ;
-PARSER: pdescriptive-locals DESCRIPTIVE:: token new-identifer c-arguments ;
+PARSER: pdescriptive DESCRIPTIVE: token new-identifier c-arguments ;
+PARSER: pdescriptive-locals DESCRIPTIVE:: token new-identifier c-arguments ;
 
 PARSER: pcom-interface COM-INTERFACE: token new-word parse ";" parse-until ;
 PARSER: ptypedef TYPEDEF: token token ;
@@ -211,7 +211,7 @@ PARSER: pspecialized-arrays SPECIALIZED-ARRAYS: ";" raw-until ;
 PARSER: pspecialized-vector SPECIALIZED-VECTOR: token ;
 PARSER: pspecialized-vectors SPECIALIZED-VECTORS: ";" raw-until ;
 PARSER: pvectored-struct VECTORED-STRUCT: existing-class ;
-j
+
 PARSER: pglsl-shader GLSL-SHADER: token token "\n;" multiline-string-until ;
 PARSER: pglsl-program GLSL-PROGRAM: token body ;
 PARSER: puniform-tuple UNIFORM-TUPLE: token body ;
@@ -291,14 +291,14 @@ PARSER: prule RULE: new-word ";" raw-until ;
 PARSER: prole ROLE: ";" raw-until ;
 PARSER: prole-tuple ROLE-TUPLE: ";" raw-until ;
 PARSER: pvariant VARIANT: ";" raw-until ;
-PARSER: pvariant-member VARIANT-MEMBER:
+PARSER: pvariant-member VARIANT-MEMBER: ";" raw-until ;
 
 PARSER: pd D: token ;
 PARSER: pdecimal DECIMAL: token ;
 
 PARSER: pafter AFTER: existing-class existing-word body ;
 PARSER: pbefore BEFORE: existing-class existing-word body ;
-PARSER: papplescript APPLESCRIPT: scan-new-word ";APPLESCRIPT" multiline-string-until ;
+PARSER: papplescript APPLESCRIPT: new-word ";APPLESCRIPT" multiline-string-until ;
 PARSER: pchloe CHLOE: new-word body ;
 PARSER: pcomponent COMPONENT: token ;
 PARSER: pderivative DERIVATIVE: existing-word body ;
@@ -335,12 +335,11 @@ PARSER: proll ROLL: token ;
 
 
 ! Smalltalk
-PARSER: pselector SELECTOR: token 
+PARSER: pselector SELECTOR: token ;
 ! units
 PARSER: pstorage STORAGE: token ;
 
 PARSER: psingletons-union SINGLETONS-UNION: new-class ";" parse-until ;
-PARSER: pstored-tuple STORED-TUPLE:
 ! slides
 PARSER: pstrip-tease STRIP-TEASE: ";" parse-until ;
 PARSER: puse-rev USE-REV: token token ;
