@@ -139,6 +139,8 @@ PARSER: pidentity-memo IDENTITY-MEMO: new-identifier parse-entire-signature body
 PARSER: pmacro MACRO: new-identifier parse-entire-signature body ;
 PARSER: pmacro-locals MACRO:: new-identifier parse-entire-signature body ;
 PARSER: ppeg PEG: new-identifier parse-entire-signature body ;
+PARSER: pdescriptive DESCRIPTIVE: new-identifier parse-entire-signature body ;
+PARSER: pdescriptive-locals DESCRIPTIVE:: new-identifier parse-entire-signature body ;
 
 PARSER: pconstant CONSTANT: token parse ;
 PARSER: psymbol SYMBOL: token ;
@@ -170,8 +172,6 @@ PARSER: pcuda-global CUDA-GLOBAL: new-word ;
 PARSER: pcuda-library CUDA-LIBRARY: new-word existing-class token ; ! XXX: token might have spaces...
 PARSER: pc-callback CALLBACK: token token c-arguments ;
 PARSER: psubroutine SUBROUTINE: token c-arguments ;
-PARSER: pdescriptive DESCRIPTIVE: token new-identifier c-arguments ;
-PARSER: pdescriptive-locals DESCRIPTIVE:: token new-identifier c-arguments ;
 
 PARSER: pcom-interface COM-INTERFACE: token new-word parse ";" parse-until ;
 PARSER: ptypedef TYPEDEF: token token ;
@@ -414,6 +414,16 @@ PARSER: pebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
         [ drop , parse-pnested-comment' ]
     } cond ;
 PARSER: pnested-comment (* [ 1 parse-pnested-comment' ] { } make ;
+
+
+PARSER: regexp-/ R/ "/" multiline-string-until ;
+PARSER: regexp-# R# "#" multiline-string-until ;
+PARSER: regexp-' R' "'" multiline-string-until ;
+PARSER: regexp-( R( "(" multiline-string-until ;
+PARSER: regexp-@ R@ "@" multiline-string-until ;
+PARSER: regexp-` R` "`" multiline-string-until ;
+PARSER: regexp-| R| "|" multiline-string-until ;
+PARSER: regexp-! R! "!" multiline-string-until ;
 
 /*
 "%>"

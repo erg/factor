@@ -88,7 +88,6 @@ ERROR: expected-sequence expected got ;
 : multiline-string-until ( end -- string )
     [ tell-input ] dip
     [ multiline-string-until' ] "" make tell-input doc boa ;
-    ! [ [ multiline-string-until' ] "" make ] keep length head* ;
 
 : execute-parser ( word -- object/f )
     dup object>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
