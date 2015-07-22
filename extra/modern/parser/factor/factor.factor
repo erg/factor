@@ -9,7 +9,7 @@ PARSER: psyntax SYNTAX: raw body ;
 PARSER: pparser PARSER: raw raw body ;
 PARSER: pcomment ! readln ;
 PARSER: pshell-comment #! readln ;
-PARSER: heredoc HEREDOC: token dup object>> multiline-string-until ;
+PARSER: heredoc HEREDOC: token-to-find object>> multiline-string-until ;
 
 PARSER: pin IN: token ;
 PARSER: puse USE: token ;
@@ -425,6 +425,8 @@ PARSER: regexp-` R` "`" multiline-string-until ;
 PARSER: regexp-| R| "|" multiline-string-until ;
 PARSER: regexp-! R! "!" multiline-string-until ;
 
+PARSER: pbacktick ` "`" multiline-string-until ;
+
 /*
 "%>"
 
@@ -434,6 +436,4 @@ all-words [ "syntax" word-prop ] filter
 natural-sort
 [ . ] each
 
-
-"`"
 */

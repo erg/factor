@@ -68,6 +68,40 @@ IN: modern.parser.factor.tests
     }
 } [ "\"Added \\\"\"" parse-modern-string ] unit-test
 
+{
+    {
+        T{ heredoc
+            { object
+                {
+                    T{ ptext
+                        { object "HEREDOC:" }
+                        { finish T{ pos { column 8 } } }
+                    }
+                    T{ ptext
+                        { start T{ pos { column 9 } } }
+                        { object "lol" }
+                        { finish T{ pos { column 12 } } }
+                    }
+                    T{ doc
+                        { start T{ pos { line 1 } } }
+                        { object "something\n" }
+                        { finish T{ pos { line 2 } } }
+                    }
+                    T{ ptext
+                        { start T{ pos { line 2 } } }
+                        { object "lol" }
+                        { finish T{ pos { line 2 } { column 3 } } }
+                    }
+                }
+            }
+        }
+    }
+} [
+"HEREDOC: lol
+something
+lol" parse-modern-string
+] unit-test
+
 : check-parsed-string ( string -- ? )
     dup parse-modern-string write-modern-string sequence= ;
 
