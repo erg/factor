@@ -48,8 +48,7 @@ TUPLE: parguments < psequence ;
 TUPLE: pbody < psequence ;
 TUPLE: prun-time < psequence ;
 TUPLE: pcompile-time < psequence ;
-
-! TUPLE: pcontainer < psequence ;
+TUPLE: pcontainer < psequence ;
 
 : building-tail? ( string -- ? )
     [ building get ] dip {
@@ -134,14 +133,112 @@ DEFER: parse-until
         [ "\r\n\s" read-until drop 4array sift prun-time boa ]
     } cond ;
 
+
+: class>trigger ( class/f -- trigger/f )
+    ! name>> first "!@#$%^&*'`" member? ;
+    dup [ object>> first "$" member? ] [ drop f ] if ;
+
+CONSTANT: matching-syntax-table
+    H{
+        { CHAR: [ CHAR: ] }
+        { CHAR: { CHAR: } }
+        { CHAR: ( CHAR: ) }
+        { CHAR: < CHAR: > }
+        ! { CHAR: / CHAR: \ }
+    }
+
+ERROR: unimplemented pos str ;
+
+ERROR: no-matching-syntax obj ch ;
+: matching-syntax ( sep -- string )
+    object>> dup first matching-syntax-table ?at [
+        1string tuck '[
+            _
+            _ length 2 - CHAR: = <string>
+            _
+        ] "" append-outputs-as
+    ] [
+        no-matching-syntax
+    ] if ;
+
+ERROR: bracket-error pos ;
+: (parse-trigger-bracket) ( ch -- obj )
+    read1 {
+        { f [ tell-input bracket-error ] }
+        [ tell-input "here0" unimplemented ]
+    } case ;
+
+ERROR: malformed-bracket-opening sep pos ;
+
+: verify-opening ( sep1 sep2 sep3 -- sep )
+B
+    pick 2dup [ object>> ] bi@ = [
+        drop
+    ] [
+        "error0" tell-input 2array throw
+    ] if
+    [ [ start>> ] [ object>> ] bi ]
+    [ object>> dup [ CHAR: = = ] all? [ tell-input malformed-bracket-opening ] unless ] 
+    [ object>> ] tri*
+    ! pos ch str ch
+    suffix swap prefix tell-input ptext boa ;
+
+: parse-rest-of-opening ( sep-ch -- full-opening-sep )
+    dup [ tell-input malformed-bracket-opening ] unless
+    ! CHAR: [, for isntance, read until "[" then verify that we got [=]*\[
+    ! [{( ""/"===" [{(/f
+    dup object>> 1string read-until verify-opening ;
+
+! $
+: parse-trigger-bracket ( contents ch -- obj )
+    tell-input "here1" unimplemented ;
+    ! '[ _ (parse-trigger-bracket) ] "" make ;
+
+: parse-whitespace-bracket ( obj -- obj' )
+    tell-input "here2" unimplemented ;
+
+: parse-contents-of-container ( class sep -- obj )
+    dup matching-syntax multiline-string-until
+    ! class sep object sep
+    4array pcontainer boa ;
+
+: parse-named-bracket ( class sep -- obj )
+    [
+        parse-rest-of-opening
+        parse-contents-of-container
+    ] 2keep drop
+    class>trigger [
+        parse-trigger-bracket
+    ] [
+        parse-whitespace-bracket
+    ] if* ;
+    ! over class>trigger dup [
+        ! parse-trigger-bracket
+    ! ] [
+        ! drop parse-whitespace-bracket
+    ! ] if ;
+
+
+
+: parse-unnamed-bracket ( sep -- obj )
+    ! "[= \r\n\s"
+    tell-input "here3" unimplemented ;
+
+: parse-bracket ( class/f sep -- obj )
+    over dup [ object>> f like ] when [
+        parse-named-bracket
+    ] [
+        nip parse-unnamed-bracket
+    ] if ;
+
 : token ( -- string/f )
-    "\r\n\s\"" read-until {
-    ! "\r\n\s\"[{" read-until {
+    ! "\r\n\s\"" read-until {
+    "\r\n\s\"[" read-until {
         { [ dup f = ] [ drop ] } ! XXX: parse-action here?
         { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
         { [ dup object>> CHAR: " = ] [ parse-string ] }
         ! { [ dup object>> CHAR: { = ] [ parse-compile-time ] }
-        ! { [ dup object>> CHAR: [ = ] [ parse-runtime-or-container ] }
+        { [ dup object>> CHAR: [ = ] [ parse-bracket ] }
     } cond ;
 
 : typed-token ( type -- token/f )

@@ -56,6 +56,7 @@ SLOT: foo
 : name-and-predicate-and-constructor ( name -- seq )
     [ ] [ predicate-name ] [ constructor-name ] tri 3array ;
 
+/*
 : enum>symbols ( enum -- obj )
     {
         [ name>> name>> ]
@@ -65,6 +66,7 @@ SLOT: foo
             dup [ predicate-name ] map
         ]
     } { } cleave>sequence flatten ;
+*/
 
 
 GENERIC: object>identifiers ( object -- string )
@@ -173,7 +175,7 @@ M: packed-struct object>identifiers name>> name>> ;
 M: union-struct object>identifiers name>> name>> ;
 M: library object>identifiers drop f ;
 M: typedef object>identifiers new>> name>> ;
-M: menum object>identifiers enum>symbols ;
+! M: menum object>identifiers enum>symbols ;
 M: mpointer object>identifiers drop f ;
 
 ! Locals/fry/etc
