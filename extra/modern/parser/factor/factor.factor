@@ -102,7 +102,7 @@ PARSER: pstruct-literal-at S@ token parse ; ! [[ ]]
 PARSER: c-array@ c-array@ parse parse parse ; ! [[ ]]
 
 ! words(
-PARSER: psignature ( ")" raw-until ;
+PARSER: psignature ( ")" parguments typed-raw-until ;
 PARSER: pexecute-parens execute( (parse-psignature) ;
 PARSER: pcall-parens call( (parse-psignature) ;
 PARSER: peval-parens eval( (parse-psignature) ;
@@ -393,7 +393,7 @@ PARSER: pebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
 : parse-pnested-comment' ( level -- )
     raw dup object>> {
         { [ dup "(*" = ] [ drop , 1 + parse-pnested-comment' ] }
-        { [ dup "*)" = ] [ drop ptext pbecome , 1 - dup zero? [ drop ] [ parse-pnested-comment' ] if ] }
+        { [ dup "*)" = ] [ drop ptext pdoc-become , 1 - dup zero? [ drop ] [ parse-pnested-comment' ] if ] }
         { [ dup f = ] [ "*)" expected ] } ! failed
         [ drop , parse-pnested-comment' ]
     } cond ;
