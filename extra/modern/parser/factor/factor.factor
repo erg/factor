@@ -165,7 +165,7 @@ PARSER: pc-function FUNCTION: token new-identifier c-arguments ;
 PARSER: pfunction-alias FUNCTION-ALIAS: token token new-identifier c-arguments ;
 PARSER: px-function X-FUNCTION: token new-identifier c-arguments ;
 PARSER: pgl-function GL-FUNCTION: token new-identifier parse c-arguments ;
-PARSER: pcuda-function CUDA-FUNCTION: token new-identifier c-arguments ;
+PARSER: pcuda-function CUDA-FUNCTION: new-identifier c-arguments ; ! no return value
 PARSER: pcuda-global CUDA-GLOBAL: new-word ;
 PARSER: pcuda-library CUDA-LIBRARY: new-word existing-class token ; ! XXX: token might have spaces...
 PARSER: pc-callback CALLBACK: token token c-arguments ;
