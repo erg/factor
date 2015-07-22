@@ -4,10 +4,9 @@ USING: accessors arrays assocs bootstrap.syntax classes.parser
 classes.tuple combinators combinators.short-circuit
 combinators.smart constructors fry generalizations io
 io.encodings.utf8 io.files io.streams.document io.streams.string
-kernel lexer make math math.parser modern.paths namespaces
-parser prettyprint sequences sequences.extras
-strings unicode.case vocabs.files vocabs.loader words
-multiline ;
+kernel lexer make math math.parser modern.paths multiline
+namespaces parser prettyprint sequences sequences.extras shuffle
+splitting strings unicode.case vocabs.files vocabs.loader words ;
 IN: modern.parser
 
 SYMBOL: parsers
@@ -85,9 +84,15 @@ ERROR: expected-sequence expected got ;
         ] if
     ] if* ;
 
-: multiline-string-until ( end -- string )
+! XXX: cleanup so ugly
+: multiline-string-until ( end -- string sep )
     [ tell-input ] dip
-    [ multiline-string-until' ] "" make tell-input doc boa ;
+    [ '[ _ multiline-string-until' ] "" make ] keep
+    [ ?tail drop tell-input doc boa ] keep
+    tell-input tuck doc boa
+    dup object>> [ count-newlines ] [ count-trailing ] bi <rel>
+    [ nip '[ _ pos-rel- ] change-finish ]
+    [ '[ _ pos-rel- ] change-start nip ] 3bi ptext pbecome ;
 
 : execute-parser ( word -- object/f )
     dup object>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
@@ -158,6 +163,7 @@ ERROR: token-expected token ;
 : new-word ( -- object ) pnew-word token-loop ;
 : existing-word ( -- object ) pexisting-word token-loop ;
 : token ( -- object ) token-loop' ;
+: token-to-find ( -- token string ) token [ ptext pbecome ] keep  ;
 : parse ( -- object/f ) token-loop' dup [ parse-action ] when ;
 
 ! XXX: parsing word named ";" will execute while parse-until is looking for a ; -- may never find it!
