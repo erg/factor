@@ -12,7 +12,7 @@ IN: modern.compiler
 GENERIC: lookup-token ( obj -- obj' )
 
 M: pstring lookup-token string>> ;
-M: pnumber lookup-token n>> string>number ;
+! M: pnumber lookup-token n>> string>number ;
 ERROR: word-not-found word ;
 M: ptoken lookup-token name>> search ;
 M: parray lookup-token elements>> [ lookup-token ] map expand-literals ;

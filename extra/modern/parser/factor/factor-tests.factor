@@ -48,16 +48,16 @@ IN: modern.parser.factor.tests
         T{ pstring
             { object
                 {
-                    T{ doc
+                    T{ ptext
                         { object 34 }
                         { finish T{ pos { column 1 } } }
                     }
-                    T{ ptoken
+                    T{ pstring-text
                         { start T{ pos { column 1 } } }
                         { object "Added \\\"" }
                         { finish T{ pos { column 9 } } }
                     }
-                    T{ doc
+                    T{ ptext
                         { start T{ pos { column 9 } } }
                         { object 34 }
                         { finish T{ pos { column 10 } } }

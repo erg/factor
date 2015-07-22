@@ -25,14 +25,10 @@ TUPLE: psequence object ;
 
 ! These ARE parsed or psequences
 TUPLE: ptext < doc ;
-TUPLE: ptoken < doc ;
-TUPLE: pnumber < doc ;
 TUPLE: pstring < psequence ;
-TUPLE: pinputs < psequence ;
-TUPLE: poutputs < psequence ;
+TUPLE: pstring-text < doc ;
 TUPLE: pbody < psequence ;
-TUPLE: pcontainer < psequence ;
-TUPLE: pidentifier < doc ;
+! TUPLE: pcontainer < psequence ;
 TUPLE: pnew-class < doc ;
 TUPLE: pexisting-class < doc ;
 TUPLE: pnew-word < doc ;
@@ -56,7 +52,9 @@ ERROR: string-expected got separator ;
     } case ;
 
 : parse-string ( class sep -- mstring )
-    tell-input [ parse-string' ] "" make tell-input [ 1 - ] change-column rot [ ptoken boa ] dip
+    ptext pbecome
+    tell-input [ parse-string' ptext pbecome ] "" make
+    tell-input [ 1 - ] change-column rot [ pstring-text boa ] dip
     4 npick [ 4array ] [ 3array nip ] if
     pstring new swap >>object ;
 
@@ -155,9 +153,6 @@ ERROR: token-expected token ;
         raw [ dup object>> _ = [ ptext pbecome , f ] when ] [ _ token-expected ] if*
     ] loop>array cut-last ;
 
-! ERROR: identifier-can't-be-number n ;
-
-: new-identifier ( -- object ) pidentifier token-loop ;
 : new-class ( -- object ) pnew-class token-loop ;
 : existing-class ( -- object ) pexisting-class token-loop ;
 : new-word ( -- object ) pnew-word token-loop ;
@@ -172,7 +167,6 @@ ERROR: token-expected token ;
     dup '[
         parse [ _ token-expected ] unless*
         dup object>> _ = [ , f ] when
-        ! dup doc? [ ptoken pbecome ] when
     ] loop>array cut-last ptext pbecome ;
 
 : expect ( string -- string )
@@ -245,11 +239,17 @@ M: psequence write-pflat' object>> [ write-parsed ] each ;
 : define-parser ( class token quot -- )
     [ 2drop psequence { } define-tuple-class ]
     [
-        [ [ name>> "parse-" prepend create-word-in mark-top-level-syntax ] keep ] 2dip
+        [
+            [ name>> "parse-" prepend create-word-in mark-top-level-syntax ]
+            [ name>> "parse-" prepend "(" ")" surround create-word-in ]
+            [ ] tri
+        ] 2dip
+        ! word (word) class token quot
         {
-            [ nip swap '[ _ output>array _ boa ] ( -- obj ) define-declared ]
-            [ drop nip register-parser ]
-        } 4cleave
+            [ [ drop ] 4dip nip swap '[ _ output>array _ boa ] ( -- obj ) define-declared ] ! (word)
+            [ [ drop ] 3dip [ '[ _ expect ] ] dip compose swap '[ _ output>array _ boa ] ( -- obj ) define-declared ] ! word
+            [ [ drop ] 4dip drop nip register-parser ] ! (word) token register
+        } 5 ncleave
     ] 3bi ;
 >>
 
@@ -257,16 +257,3 @@ SYNTAX: PARSER:
     scan-new-class
     scan-token
     parse-definition define-parser ;
-
-/*
-ERROR: multiline-string-expected got ;
-! multi[==[stuff]==]
-: parse-multiline-string ( class -- mstring )
-    "[" read-until [
-        "]" "\"" surround multiline-string-until 2array pstring new swap >>object
-        ! "]" "\"" surround multiline-string-until <pstring>
-    ] [
-        multiline-string-expected
-    ] if ;
-
-*/
