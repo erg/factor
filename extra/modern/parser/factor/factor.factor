@@ -5,7 +5,7 @@ constructors io kernel make math modern.parser multiline
 namespaces sequences ;
 IN: modern.parser.factor
 
-PARSER: psyntax SYNTAX: raw body ;
+PARSER: psyntax-word SYNTAX: raw body ;
 PARSER: pparser PARSER: raw raw body ;
 PARSER: pcomment ! readln ;
 PARSER: pshell-comment #! readln ;
@@ -22,29 +22,12 @@ PARSER: pqualified QUALIFIED: token ;
 PARSER: pqualified-with QUALIFIED-WITH: token token ;
 PARSER: pforget FORGET: token ;
 
-: parse-pinputs ( -- inputs sep )
-    "--" raw-until [ pinputs boa ] dip ;
-
-: parse-poutputs ( -- outputs sep )
-    ")" raw-until [ poutputs boa ] dip ;
-
-: parse-open-signature ( -- in sep out sep )
-    parse-pinputs parse-poutputs ;
-
-! PARSER: psignature ( parse-open-signature ;
-TUPLE: psignature < psequence ;
-
-! Hacky, should be able to call parse-psignature with its "(" expect
-: parse-entire-signature ( -- seq )
-    [ "(" expect parse-open-signature ] output>array psignature boa ;
-
 ! string literals
 ! PARSER: " " ;
 ! PARSER: P" P" ;
 ! PARSER: URL" URL" ;
 ! PARSER: SBUF" SBUF" ;
 ! PARSER: DLL" DLL" ;
-! exec"
 
 ! words[
 PARSER: pblock [ "]" parse-until ;
@@ -119,28 +102,61 @@ PARSER: pstruct-literal-at S@ token parse ; ! [[ ]]
 PARSER: c-array@ c-array@ parse parse parse ; ! [[ ]]
 
 ! words(
-! PARSER: psignature ( ;
-PARSER: pexecute-parens execute( parse-open-signature ;
-PARSER: pcall-parens call( parse-open-signature ;
-PARSER: peval-parens eval( parse-open-signature ;
-PARSER: pdata-map-parens data-map( parse-open-signature ;
-PARSER: pdata-map!-parens data-map!( parse-open-signature ;
-PARSER: pshuffle-parens shuffle( ")" parse-until ;
+PARSER: psignature ( ")" raw-until ;
+PARSER: pexecute-parens execute( (parse-psignature) ;
+PARSER: pcall-parens call( (parse-psignature) ;
+PARSER: peval-parens eval( (parse-psignature) ;
+PARSER: pdata-map-parens data-map( (parse-psignature) ;
+PARSER: pdata-map!-parens data-map!( (parse-psignature) ;
+PARSER: pshuffle-parens shuffle( (parse-psignature) ;
+
 
 ! words:
-PARSER: pfunction : new-identifier parse-entire-signature body ;
-PARSER: pfunction-locals :: new-identifier parse-entire-signature body ;
+! : c-arguments ( -- sep arguments sep ) "(" expect ")" raw-until ;
+PARSER: pc-function FUNCTION: token new-word parse-psignature ;
+PARSER: pfunction-alias FUNCTION-ALIAS: token token new-word parse-psignature ;
+PARSER: px-function X-FUNCTION: token new-word parse-psignature ;
+PARSER: pgl-function GL-FUNCTION: token new-word parse parse-psignature ;
+PARSER: pcuda-function CUDA-FUNCTION: new-word parse-psignature ; ! no return value
+PARSER: pcuda-global CUDA-GLOBAL: new-word ;
+PARSER: pcuda-library CUDA-LIBRARY: new-word existing-class token ; ! XXX: token might have spaces...
+PARSER: pc-callback CALLBACK: token token parse-psignature ;
+PARSER: psubroutine SUBROUTINE: token parse-psignature ;
+
+PARSER: pfunction : new-word parse-psignature body ;
+PARSER: pfunction-locals :: new-word parse-psignature body ;
 PARSER: palias ALIAS: new-word existing-word ;
-PARSER: ptyped TYPED: new-identifier parse-entire-signature body ;
-PARSER: ptyped-locals TYPED:: new-identifier parse-entire-signature body ;
-PARSER: pmemo MEMO: new-identifier parse-entire-signature body ;
-PARSER: pmemo-locals MEMO:: new-identifier parse-entire-signature body ;
-PARSER: pidentity-memo IDENTITY-MEMO: new-identifier parse-entire-signature body ;
-PARSER: pmacro MACRO: new-identifier parse-entire-signature body ;
-PARSER: pmacro-locals MACRO:: new-identifier parse-entire-signature body ;
-PARSER: ppeg PEG: new-identifier parse-entire-signature body ;
-PARSER: pdescriptive DESCRIPTIVE: new-identifier parse-entire-signature body ;
-PARSER: pdescriptive-locals DESCRIPTIVE:: new-identifier parse-entire-signature body ;
+PARSER: ptyped TYPED: new-word parse-psignature body ;
+PARSER: ptyped-locals TYPED:: new-word parse-psignature body ;
+PARSER: pmemo MEMO: new-word parse-psignature body ;
+PARSER: pmemo-locals MEMO:: new-word parse-psignature body ;
+PARSER: pidentity-memo IDENTITY-MEMO: new-word parse-psignature body ;
+PARSER: pidentity-memo-locals IDENTITY-MEMO:: new-word parse-psignature body ;
+PARSER: pmacro MACRO: new-word parse-psignature body ;
+PARSER: pmacro-locals MACRO:: new-word parse-psignature body ;
+PARSER: ppeg PEG: new-word parse-psignature body ;
+PARSER: pdescriptive DESCRIPTIVE: new-word parse-psignature body ;
+PARSER: pdescriptive-locals DESCRIPTIVE:: new-word parse-psignature body ;
+PARSER: pconstructor-new CONSTRUCTOR: token token parse-psignature body ;
+PARSER: pprimitive PRIMITIVE: new-word parse-psignature ;
+PARSER: pfunctor FUNCTOR: token parse-psignature ";FUNCTOR" parse-until ;
+PARSER: pfunctor-syntax FUNCTOR-SYNTAX: token body ;
+PARSER: pgeneric GENERIC: new-class parse-psignature ;
+PARSER: pgeneric# GENERIC# new-class token parse-psignature ;
+PARSER: phook HOOK: new-class existing-word parse-psignature ;
+PARSER: pmethod M: existing-class existing-word body ;
+PARSER: pmethod-locals M:: existing-class existing-word body ;
+PARSER: pmath MATH: new-word parse-psignature ;
+PARSER: ppair-generic PAIR-GENERIC: new-class parse-psignature ;
+PARSER: ppair-m PAIR-M: existing-class existing-class existing-word body ;
+PARSER: ptags TAGS: new-word parse-psignature ;
+PARSER: ptag TAG: token existing-word body ;
+PARSER: prule RULE: new-word ";" raw-until ;
+PARSER: proman ROMAN: token ;
+PARSER: proman-op ROMAN-OP: raw parse-psignature ;
+PARSER: plazy LAZY: new-word parse-psignature body ;
+PARSER: pinfix-locals INFIX:: new-word parse-psignature body ;
+
 
 PARSER: pconstant CONSTANT: token parse ;
 PARSER: psymbol SYMBOL: token ;
@@ -150,49 +166,30 @@ PARSER: pdefer DEFER: token ;
 PARSER: pchar CHAR: raw ;
 PARSER: palien ALIEN: token ;
 
-PARSER: ptuple TUPLE: new-identifier body ;
-PARSER: pstruct STRUCT: new-identifier body ;
-PARSER: ppacked-struct PACKED-STRUCT: new-identifier body ;
-PARSER: ple-packed-struct LE-PACKED-STRUCT: new-identifier body ;
-PARSER: pbe-packed-struct BE-PACKED-STRUCT: new-identifier body ;
-PARSER: ple-struct LE-STRUCT: new-identifier body ;
-PARSER: pbe-struct BE-STRUCT: new-identifier body ;
-PARSER: punion-struct UNION-STRUCT: new-identifier body ;
-PARSER: perror ERROR: new-identifier body ;
+PARSER: ptuple TUPLE: new-class body ;
+PARSER: pstruct STRUCT: new-class body ;
+PARSER: ppacked-struct PACKED-STRUCT: new-class body ;
+PARSER: ple-packed-struct LE-PACKED-STRUCT: new-class body ;
+PARSER: pbe-packed-struct BE-PACKED-STRUCT: new-class body ;
+PARSER: ple-struct LE-STRUCT: new-class body ;
+PARSER: pbe-struct BE-STRUCT: new-class body ;
+PARSER: punion-struct UNION-STRUCT: new-class body ;
+PARSER: perror ERROR: new-class body ;
 PARSER: pslot SLOT: token ;
 PARSER: pconstructor C: token token ;
-PARSER: pconstructor-new CONSTRUCTOR: token token parse-entire-signature body ;
-: c-arguments ( -- sep arguments sep ) "(" expect ")" raw-until ;
-PARSER: pc-function FUNCTION: token new-identifier c-arguments ;
-PARSER: pfunction-alias FUNCTION-ALIAS: token token new-identifier c-arguments ;
-PARSER: px-function X-FUNCTION: token new-identifier c-arguments ;
-PARSER: pgl-function GL-FUNCTION: token new-identifier parse c-arguments ;
-PARSER: pcuda-function CUDA-FUNCTION: new-identifier c-arguments ; ! no return value
-PARSER: pcuda-global CUDA-GLOBAL: new-word ;
-PARSER: pcuda-library CUDA-LIBRARY: new-word existing-class token ; ! XXX: token might have spaces...
-PARSER: pc-callback CALLBACK: token token c-arguments ;
-PARSER: psubroutine SUBROUTINE: token c-arguments ;
 
-PARSER: pcom-interface COM-INTERFACE: token new-word parse ";" parse-until ;
+PARSER: pcom-interface COM-INTERFACE: existing-word new-word parse ";" parse-until ;
 PARSER: ptypedef TYPEDEF: token token ;
 PARSER: plibrary LIBRARY: token ;
 PARSER: pc-type C-TYPE: token ;
 PARSER: pc-global C-GLOBAL: token token ;
 PARSER: phints HINTS: parse body ;
 PARSER: pbuiltin BUILTIN: token body ;
-PARSER: pprimitive PRIMITIVE: new-word parse-entire-signature ;
 PARSER: pmain MAIN: existing-word ;
 
-PARSER: pfunctor FUNCTOR: token parse-entire-signature ";FUNCTOR" parse-until ;
-PARSER: pfunctor-syntax FUNCTOR-SYNTAX: token body ;
 
 PARSER: pdestructor DESTRUCTOR: existing-word ;
-PARSER: pgeneric GENERIC: new-class parse-entire-signature ;
-PARSER: pgeneric# GENERIC# new-class token parse-entire-signature ;
-PARSER: phook HOOK: new-class existing-word parse-entire-signature ;
-PARSER: pmethod M: existing-class token body ;
-PARSER: pmethod-locals M:: existing-class token body ;
-PARSER: ppredicate PREDICATE: new-identifier "<" expect existing-class body ;
+PARSER: ppredicate PREDICATE: new-class "<" expect existing-class body ;
 PARSER: pmixin MIXIN: new-class ;
 PARSER: pinstance INSTANCE: existing-class existing-class ;
 PARSER: psingleton SINGLETON: new-class ;
@@ -200,7 +197,6 @@ PARSER: psingletons SINGLETONS: body ;
 PARSER: pimport IMPORT: token ;
 PARSER: pimports IMPORTS: ";" raw-until ;
 PARSER: pspecial-object SPECIAL-OBJECT: token parse ;
-PARSER: pmath MATH: new-word parse-entire-signature ;
 PARSER: punion UNION: new-class body ;
 PARSER: pintersection INTERSECTION: token body ;
 PARSER: punicode-category CATEGORY: token token ;
@@ -216,9 +212,6 @@ PARSER: pglsl-shader GLSL-SHADER: token token "\n;" multiline-string-until ;
 PARSER: pglsl-program GLSL-PROGRAM: token body ;
 PARSER: puniform-tuple UNIFORM-TUPLE: token body ;
 PARSER: pebnf EBNF: token ";EBNF" multiline-string-until ;
-
-PARSER: ppair-generic PAIR-GENERIC: new-class parse-entire-signature ;
-PARSER: ppair-m PAIR-M: existing-class existing-class existing-word body ;
 
 PARSER: ptest TEST: token ;
 PARSER: pregisters REGISTERS: body ;
@@ -269,7 +262,6 @@ PARSER: plong-string STRING: token "\n;" multiline-string-until ;
 PARSER: pbreakpoint-parse-time B: raw ; ! going away
 
 PARSER: picon ICON: new-word token ;
-PARSER: pidentity-memo-locals IDENTITY-MEMO:: new-word parse-entire-signature body ;
 PARSER: pmatch-vars MATCH-VARS: body ;
 PARSER: ppixel-format-attribute-table PIXEL-FORMAT-ATTRIBUTE-TABLE: new-word parse parse ;
 PARSER: prect RECT: parse parse ;
@@ -283,10 +275,6 @@ PARSER: pslot-protocol SLOT-PROTOCOL: ";" raw-until ;
 PARSER: ptip TIP: ";" parse-until ;
 PARSER: ptokenizer TOKENIZER: existing-word ; ! hmm
 PARSER: px509 X509_V_: new-word token ;
-
-PARSER: ptags TAGS: new-word parse-entire-signature ;
-PARSER: ptag TAG: token existing-word body ;
-PARSER: prule RULE: new-word ";" raw-until ;
 
 PARSER: prole ROLE: ";" raw-until ;
 PARSER: prole-tuple ROLE-TUPLE: ";" raw-until ;
@@ -302,8 +290,6 @@ PARSER: papplescript APPLESCRIPT: new-word ";APPLESCRIPT" multiline-string-until
 PARSER: pchloe CHLOE: new-word body ;
 PARSER: pcomponent COMPONENT: token ;
 PARSER: pderivative DERIVATIVE: existing-word body ;
-PARSER: proman ROMAN: token ;
-PARSER: proman-op ROMAN-OP: raw parse-entire-signature ;
 
 PARSER: ptuple-array TUPLE-ARRAY: token ;
 PARSER: pglsl-shader-file GLSL-SHADER-FILE: new-word existing-class parse ;
@@ -319,8 +305,6 @@ PARSER: pimplement-structs IMPLEMENT-STRUCTS: ";" raw-until ;
 PARSER: pholiday HOLIDAY: new-word body ;
 PARSER: pholiday-name HOLIDAY-NAME: existing-word existing-class parse ;
 
-PARSER: pinfix-locals INFIX:: new-word parse-entire-signature body ;
-PARSER: plazy LAZY: new-word parse-entire-signature body ;
 
 PARSER: pisntruction INSTRUCTION: ";" raw-until ;
 PARSER: ppool POOL: existing-class token ;
@@ -415,7 +399,6 @@ PARSER: pebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
     } cond ;
 PARSER: pnested-comment (* [ 1 parse-pnested-comment' ] { } make ;
 
-
 PARSER: regexp-/ R/ "/" multiline-string-until ;
 PARSER: regexp-# R# "#" multiline-string-until ;
 PARSER: regexp-' R' "'" multiline-string-until ;
@@ -428,12 +411,11 @@ PARSER: regexp-! R! "!" multiline-string-until ;
 PARSER: pbacktick ` "`" multiline-string-until ;
 
 /*
-"%>"
-
 parsers get-global keys
 all-words [ "syntax" word-prop ] filter
 [ name>> ] map swap diff
 natural-sort
 [ . ] each
 
+"%>"
 */
