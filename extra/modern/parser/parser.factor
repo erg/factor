@@ -97,21 +97,6 @@ TUPLE: pcompile-time < psequence ;
     [ [ 1string ] change-object ptext pdoc-become ] bi* ;
 
 DEFER: parse-until
-: read-quotation ( -- quotation sep ) "]" parse-until ;
-
-! : read-container ( class/f sep start-level -- container )
-    ! "[" read-until rot CHAR: = <string> append "]" "]" surround {
-        ! { [ ] [ ] }
-    ! } cond ;
-
-: parse-runtime-or-container ( class/f sep -- obj )
-    fixup-container-args
-    read1 {
-        { [ dup object>> "\r\n\s" member? ] [ drop read-quotation 4array prun-time boa ] }
-        ! { [ dup object>> CHAR: [ = ] [ 1 read-container ] }
-        [ "\r\n\s" read-until drop 4array ]
-    } cond ;
-
 
 : parse-string' ( -- sep )
     "\\\"" read-until
@@ -134,15 +119,24 @@ DEFER: parse-until
     fixup-container-args
     "}" parse-until 4array pcompile-time boa ;
 
+: read-quotation ( -- quotation sep ) "]" parse-until ;
 
-ERROR: token-loop-ended symbol ;
+! : read-container ( class/f sep start-level -- container )
+    ! "[" read-until rot CHAR: = <string> append "]" "]" surround {
+        ! { [ ] [ ] }
+    ! } cond ;
+
+: parse-runtime-or-container ( class/f sep -- obj )
+    fixup-container-args
+    read1 {
+        { [ dup object>> "\r\n\s" member? ] [ drop read-quotation 4array prun-time boa ] }
+        ! { [ dup object>> CHAR: [ = ] [ 1 read-container ] }
+        [ "\r\n\s" read-until drop 4array ]
+    } cond ;
 
 : token ( -- string/f )
-    ! "\r\n\s\"" read-until {
     "\r\n\s\"{[" read-until {
-        { [ dup f = ] [ drop ] } ! last one
-        ! { [ dup f = ] [ drop parse-action ] } ! last one
-
+        { [ dup f = ] [ drop ] } ! XXX: parse-action here?
         { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
         { [ dup object>> CHAR: " = ] [ parse-string ] }
         { [ dup object>> CHAR: { = ] [ parse-compile-time ] }
