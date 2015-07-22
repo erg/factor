@@ -2,9 +2,9 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs combinators
 combinators.short-circuit fry io io.files io.streams.document
-io.streams.string kernel math modern.lookup modern.parser
-modern.parser.factor modern.paths multiline sequences
-sequences.extras sequences.deep unicode.categories ;
+io.streams.string kernel math modern.parser modern.parser.factor
+modern.paths multiline sequences sequences.deep sequences.extras
+unicode.categories ;
 FROM: sequences => change-nth ;
 IN: modern.refactor
 
