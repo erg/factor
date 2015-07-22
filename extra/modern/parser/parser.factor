@@ -91,28 +91,27 @@ TUPLE: pcompile-time < psequence ;
         execute( -- parsed ) [ swap ptext pdoc-become prefix ] change-object
     ] [ drop ] if ;
 
-! : read-container ( class/f sep start-level -- container )
-    ! "[" read-until rot CHAR: = <string> append "]" "]" surround {
-        ! { [ ] [ ] }
-    ! } cond ;
-
-DEFER: parse-until
-: read-quotation ( -- quotation sep ) "]" parse-until ;
-
-: parse-quot-or-container-or-word ( class/f sep -- obj )
-    read1 {
-        { [ dup object>> "\r\n\s" member? ] [ read-quotation 5 narray ] }
-        ! { [ dup object>> CHAR: = ] [ 1 read-container ] }
-        [ "\r\n\s" read-until drop 4array ]
-    } cond ;
 
 : fixup-container-args ( type sep -- type' sep' )
     [ f like dup [ pexisting-class pdoc-become ] when ]
     [ [ 1string ] change-object ptext pdoc-become ] bi* ;
 
-: parse-compile-time ( type sep -- obj )
+DEFER: parse-until
+: read-quotation ( -- quotation sep ) "]" parse-until ;
+
+! : read-container ( class/f sep start-level -- container )
+    ! "[" read-until rot CHAR: = <string> append "]" "]" surround {
+        ! { [ ] [ ] }
+    ! } cond ;
+
+: parse-runtime-or-container ( class/f sep -- obj )
     fixup-container-args
-    "}" parse-until 4array prun-time boa ;
+    read1 {
+        { [ dup object>> "\r\n\s" member? ] [ drop read-quotation 4array prun-time boa ] }
+        ! { [ dup object>> CHAR: [ = ] [ 1 read-container ] }
+        [ "\r\n\s" read-until drop 4array ]
+    } cond ;
+
 
 : parse-string' ( -- sep )
     "\\\"" read-until
@@ -131,18 +130,23 @@ DEFER: parse-until
     4 npick [ 4array ] [ 3array nip ] if
     pstring new swap >>object ;
 
+: parse-compile-time ( type sep -- obj )
+    fixup-container-args
+    "}" parse-until 4array pcompile-time boa ;
+
+
 ERROR: token-loop-ended symbol ;
 
 : token ( -- string/f )
     ! "\r\n\s\"" read-until {
-    "\r\n\s\"{" read-until {
+    "\r\n\s\"{[" read-until {
         { [ dup f = ] [ drop ] } ! last one
         ! { [ dup f = ] [ drop parse-action ] } ! last one
 
         { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
-        ! { [ dup object>> "[" tail? ] [ [ f like ] dip parse-runtime-or-container ] }
-        { [ dup object>> CHAR: { = ] [ parse-compile-time ] }
         { [ dup object>> CHAR: " = ] [ parse-string ] }
+        { [ dup object>> CHAR: { = ] [ parse-compile-time ] }
+        { [ dup object>> CHAR: [ = ] [ parse-runtime-or-container ] }
     } cond ;
 
 : typed-token ( type -- token/f )
