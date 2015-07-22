@@ -176,3 +176,27 @@ ${example-indent}}]""""
 { { } } [
     all-tests-paths [ dup check-parsed-file ] { } map>assoc [ nip ] assoc-reject
 ] unit-test
+
+
+! Error checking
+[ "( -- " parse-modern-string ]
+[
+    T{ token-expected
+        { expected ")" }
+        { pos T{ pos { column 6 } } }
+    } =
+] must-fail-with
+
+[ ":" parse-modern-string ]
+[
+    T{ parser-expected
+        { class pnew-word }
+    { pos T{ pos { column 3 } } } } = ] must-fail-with
+
+[ "\"ab" parse-modern-string ]
+[
+    T{ double-quote-expected
+        { partial-string "ab" }
+        { pos T{ pos { column 4 } } }
+    } =
+] must-fail-with

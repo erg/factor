@@ -21,7 +21,13 @@ TUPLE: psequence object ;
     new
         swap object>> >>object ; inline
 
+ERROR: parser-expected class pos ;
+ERROR: token-expected expected pos ;
+ERROR: expected expected got pos ;
+ERROR: expected-sequence expected got pos ;
+ERROR: double-quote-expected partial-string got pos ;
 : pdoc-become ( doc doc-class -- parser' )
+    over [ nip tell-input parser-expected ] unless
     new
         over start>> >>start
         over finish>> >>finish
@@ -31,21 +37,22 @@ TUPLE: psequence object ;
 TUPLE: ptext < doc ;
 TUPLE: pstring < psequence ;
 TUPLE: pstring-text < doc ;
+TUPLE: parguments < psequence ;
 TUPLE: pbody < psequence ;
-! TUPLE: pcontainer < psequence ;
 TUPLE: pnew-class < doc ;
 TUPLE: pexisting-class < doc ;
 TUPLE: pnew-word < doc ;
 TUPLE: pexisting-word < doc ;
 
-ERROR: string-expected got separator ;
+! TUPLE: pcontainer < psequence ;
+
 : parse-string' ( -- sep )
     "\\\"" read-until
     dup dup [ object>> ] when {
         { CHAR: " [ swap % ] }
         { CHAR: \ [ [ % ] [ , ] bi* read1 , parse-string' ] }
-        { f [ nip f string-expected ] }
-        [ string-expected ]
+        { f [ [ dup [ object>> ] when ] dip tell-input double-quote-expected ] }
+        [ tell-input double-quote-expected ]
     } case ;
 
 : parse-string ( class sep -- mstring )
@@ -61,8 +68,6 @@ ERROR: string-expected got separator ;
         [ [ but-last-slice ] bi@ tail? ]
     } 2&& ;
 
-ERROR: expected got expected ;
-ERROR: expected-sequence expected got ;
 : multiline-string-until' ( seq -- )
     dup ?last 1array read-until [
         [ % ] [ , ] bi*
@@ -75,7 +80,7 @@ ERROR: expected-sequence expected got ;
         % dup building-tail? [
             drop
         ] [
-            building get >string expected-sequence
+            building get >string tell-input expected-sequence
         ] if
     ] if* ;
 
@@ -134,11 +139,16 @@ ERROR: token-loop-ended symbol ;
         { [ dup object>> "\r\n\s" member? ] [ drop [ raw ] when-empty ] }
     } cond ;
 
-ERROR: token-expected token ;
 : raw-until ( string -- strings sep )
     dup '[
-        raw [ dup object>> _ = [ ptext pdoc-become , f ] when ] [ _ token-expected ] if*
-    ] loop>array unclip-last ;
+        raw
+        [ dup object>> _ = [ ptext pdoc-become , f ] when ]
+        [ _ tell-input token-expected ] if*
+    ] loop>array unclip-last
+    [ psequence boa ] [ ptext pdoc-become ] bi* ;
+
+: typed-raw-until ( string type -- strings sep )
+    [ raw-until ] dip '[ _ psequence-become ] dip ;
 
 : new-class ( -- object ) pnew-class typed-token ;
 : existing-class ( -- object ) pexisting-class typed-token ;
@@ -151,7 +161,7 @@ ERROR: token-expected token ;
 ! XXX: fix is to call token here and parse-action manually
 : parse-until ( string -- strings sep )
     dup '[
-        parse [ _ token-expected ] unless*
+        parse [ _ tell-input token-expected ] unless*
         dup object>> _ = [ , f ] when
     ] loop>array unclip-last
     [ psequence boa ] [ ptext pdoc-become ] bi* ;
@@ -161,7 +171,9 @@ ERROR: token-expected token ;
 
 : expect ( string -- string )
     ptext typed-token
-    2dup dup [ object>> ] when = [ nip ] [ expected ] if ;
+    2dup dup [ object>> ] when =
+    [ nip ]
+    [ dup [ object>> ] when tell-input expected ] if ;
 
 : body ( -- strings last ) ";" pbody typed-parse-until ;
 
