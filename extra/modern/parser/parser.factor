@@ -4,7 +4,7 @@ USING: accessors arrays assocs bootstrap.syntax classes.parser
 classes.tuple combinators combinators.short-circuit
 combinators.smart constructors fry generalizations io
 io.encodings.utf8 io.files io.streams.document io.streams.string
-kernel lexer make math math.parser modern.paths multiline
+kernel lexer locals make math math.parser modern.paths multiline
 namespaces prettyprint sequences sequences.extras
 sequences.generalizations shuffle splitting strings unicode.case
 vocabs.files vocabs.loader words ;
@@ -28,7 +28,7 @@ ERROR: token-expected expected pos ;
 ERROR: expected expected got pos ;
 ERROR: expected-sequence expected got pos ;
 ERROR: double-quote-expected partial-string got pos ;
-: pdoc-become ( doc doc-class -- parser' )
+: doc-become ( doc doc-class -- parser' )
     over [ nip tell-input parser-expected ] unless
     new
         over start>> >>start
@@ -80,20 +80,20 @@ TUPLE: pcontainer < psequence ;
     tell-input tuck doc boa
     dup object>> [ count-newlines ] [ count-trailing ] bi <rel>
     [ nip '[ _ pos-rel- ] change-finish ]
-    [ '[ _ pos-rel- ] change-start nip ] 3bi ptext pdoc-become ;
+    [ '[ _ pos-rel- ] change-start nip ] 3bi ptext doc-become ;
 
 : execute-parser ( word -- object/f )
     dup object>> \ parsers get ?at [ execute( -- parsed ) nip ] [ drop ] if ;
 
 : parse-action ( string -- object )
     dup dup [ object>> ] when \ parsers get ?at [
-        execute( -- parsed ) [ swap ptext pdoc-become prefix ] change-object
+        execute( -- parsed ) [ swap ptext doc-become prefix ] change-object
     ] [ drop ] if ;
 
 
 : fixup-container-args ( type sep -- type' sep' )
-    [ f like dup [ pexisting-class pdoc-become ] when ]
-    [ [ 1string ] change-object ptext pdoc-become ] bi* ;
+    [ f like dup [ pexisting-class doc-become ] when ]
+    [ [ 1string ] change-object ptext doc-become ] bi* ;
 
 DEFER: parse-until
 
@@ -108,8 +108,8 @@ DEFER: parse-until
 
 : parse-string ( class sep -- mstring )
     fixup-container-args
-    ptext pdoc-become
-    tell-input [ parse-string' [ 1string ] change-object ptext pdoc-become ] "" make
+    ptext doc-become
+    tell-input [ parse-string' [ 1string ] change-object ptext doc-become ] "" make
     tell-input [ 1 - ] change-column rot [ pstring-text boa ] dip
     4 npick [ 4array ] [ 3array nip ] if
     pstring new swap >>object ;
@@ -178,14 +178,14 @@ B
         "error0" tell-input 2array throw
     ] if
     [ [ start>> ] [ object>> ] bi ]
-    [ object>> dup [ CHAR: = = ] all? [ tell-input malformed-bracket-opening ] unless ] 
+    [ object>> dup [ CHAR: = = ] all? [ tell-input malformed-bracket-opening ] unless ]
     [ object>> ] tri*
     ! pos ch str ch
     suffix swap prefix tell-input ptext boa ;
 
 : parse-rest-of-opening ( sep-ch -- full-opening-sep )
     dup [ tell-input malformed-bracket-opening ] unless
-    ! CHAR: [, for isntance, read until "[" then verify that we got [=]*\[
+    ! CHAR: [, for instance, read until "[" then verify that we got [=]*\[
     ! [{( ""/"===" [{(/f
     dup object>> 1string read-until verify-opening ;
 
@@ -219,17 +219,44 @@ B
     ! ] if ;
 
 
+: parse-quotation ( class/f sep -- obj )
+B
+    [ 1string ] change-object ptext doc-become
+    "]" parse-until 4array psequence boa ;
 
+: parse-universal-bracket ( class/f sep sep-ch -- obj )
+    "here11" tell-input 2array throw
+    ;
+
+
+! Just a string without escapes
 : parse-unnamed-bracket ( sep -- obj )
     ! "[= \r\n\s"
     tell-input "here3" unimplemented ;
 
-: parse-bracket ( class/f sep -- obj )
-    over dup [ object>> f like ] when [
-        parse-named-bracket
+:: bracket-word-combine ( class sep ch obj -- doc )
+    class [
+        class [ start>> ] [ object>> ] bi
+        sep object>> suffix
+        ch suffix
+        obj [ object>> append ] [ finish>> ] bi \ doc boa
     ] [
-        nip parse-unnamed-bracket
+        sep [ start>> ] [ object>> ] bi
+        ch 2array >string
+        obj [ object>> append ] [ finish>> ] bi \ doc boa
     ] if ;
+ 
+
+DEFER: raw
+: parse-bracket ( class/f sep -- obj )
+    [ dup object>> empty? [ drop f ] when ] dip
+    read1 dup [ object>> ] when {
+        { [ dup f = ] [ tell-input "error10" 2array throw ] }
+        { [ dup "\s\r\n" member? ] [ drop parse-quotation ] }
+        { [ dup "=[" member? ] [ parse-universal-bracket ] }
+        [ raw bracket-word-combine ] ! just a word!?
+    } cond ;
+    ! [ parse-named-bracket ] [ nip parse-unnamed-bracket ] if ;
 
 : token ( -- string/f )
     ! "\r\n\s\"" read-until {
@@ -242,7 +269,7 @@ B
     } cond ;
 
 : typed-token ( type -- token/f )
-    [ token ] dip pdoc-become ;
+    [ token ] dip doc-become ;
 
 : raw ( -- object )
     "\r\n\s" read-until {
@@ -253,10 +280,10 @@ B
 : raw-until ( string -- strings sep )
     dup '[
         raw
-        [ dup object>> _ = [ ptext pdoc-become , f ] when ]
+        [ dup object>> _ = [ ptext doc-become , f ] when ]
         [ _ tell-input token-expected ] if*
     ] loop>array unclip-last
-    [ psequence boa ] [ ptext pdoc-become ] bi* ;
+    [ psequence boa ] [ ptext doc-become ] bi* ;
 
 : typed-raw-until ( string type -- strings sep )
     [ raw-until ] dip '[ _ psequence-become ] dip ;
@@ -265,7 +292,7 @@ B
 : existing-class ( -- object ) pexisting-class typed-token ;
 : new-word ( -- object ) pnew-word typed-token ;
 : existing-word ( -- object ) pexisting-word typed-token ;
-: token-to-find ( -- token string ) token [ ptext pdoc-become ] keep  ;
+: token-to-find ( -- token string ) token [ ptext doc-become ] keep  ;
 : parse ( -- object/f ) token dup [ parse-action ] when ;
 
 ! XXX: parsing word named ";" will execute while parse-until is looking for a ; -- may never find it!
@@ -275,7 +302,7 @@ B
         parse [ _ tell-input token-expected ] unless*
         dup object>> _ = [ , f ] when
     ] loop>array unclip-last
-    [ psequence boa ] [ ptext pdoc-become ] bi* ;
+    [ psequence boa ] [ ptext doc-become ] bi* ;
 
 : typed-parse-until ( string type -- strings sep )
     [ parse-until ] dip '[ _ psequence-become ] dip ;
