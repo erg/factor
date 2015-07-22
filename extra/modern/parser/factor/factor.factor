@@ -184,7 +184,7 @@ PARSER: plibrary LIBRARY: token ;
 PARSER: pc-type C-TYPE: token ;
 PARSER: pc-global C-GLOBAL: token token ;
 PARSER: phints HINTS: parse body ;
-PARSER: pbuiltin BUILTIN: token body ;
+PARSER: pbuiltin BUILTIN: existing-class body ;
 PARSER: pmain MAIN: existing-word ;
 
 

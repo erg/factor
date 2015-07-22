@@ -11,25 +11,26 @@ IN: modern.parser.factor.tests
         T{ parray
             { object
                 {
-                    T{ ptext
-                        { object "{" }
-                        { finish T{ pos { column 1 } } }
-                    }
-                    {
-                        T{ doc
-                            { start T{ pos { column 2 } } }
-                            { object "1" }
-                            { finish T{ pos { column 3 } } }
-                        }
-                        T{ doc
-                            { start T{ pos { column 4 } } }
-                            { object "2" }
-                            { finish T{ pos { column 5 } } }
-                        }
-                        T{ doc
-                            { start T{ pos { column 6 } } }
-                            { object "3" }
-                            { finish T{ pos { column 7 } } }
+                    T{ ptext { object "{" } { finish T{ pos { column 1 } } } }
+                    T{ psequence
+                        { object
+                            {
+                                T{ doc
+                                    { start T{ pos { column 2 } } }
+                                    { object "1" }
+                                    { finish T{ pos { column 3 } } }
+                                }
+                                T{ doc
+                                    { start T{ pos { column 4 } } }
+                                    { object "2" }
+                                    { finish T{ pos { column 5 } } }
+                                }
+                                T{ doc
+                                    { start T{ pos { column 6 } } }
+                                    { object "3" }
+                                    { finish T{ pos { column 7 } } }
+                                }
+                            }
                         }
                     }
                     T{ ptext
