@@ -181,3 +181,14 @@ IN: io.streams.document.tests
 } [
     "asdf" [ input>document-stream "j" read-until ] with-string-reader
 ] unit-test
+
+{ 0 } [ "\n" count-trailing ] unit-test
+{ 1 } [ "\na" count-trailing ] unit-test
+{ 2 } [ "\nab" count-trailing ] unit-test
+{ 0 } [ "\nab\n" count-trailing ] unit-test
+{ 1 } [ "\nab\na" count-trailing ] unit-test
+{ 2 } [ "\nab\nab" count-trailing ] unit-test
+
+{ 0 } [ "" count-newlines ] unit-test
+{ 1 } [ "\n" count-newlines ] unit-test
+{ 2 } [ "\n\n" count-newlines ] unit-test

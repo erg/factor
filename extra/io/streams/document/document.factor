@@ -9,8 +9,8 @@ IN: io.streams.document
 TUPLE: pos { line integer } { column integer } ;
 CONSTRUCTOR: <pos> pos ( line column -- pos ) ;
 
-TUPLE: relpos < pos ;
-CONSTRUCTOR: <relpos> relpos ( line column -- relpos ) ;
+TUPLE: rel < pos ;
+CONSTRUCTOR: <rel> rel ( line column -- rel ) ;
 
 TUPLE: document-stream < position-stream
     { line integer } { column integer }
@@ -25,15 +25,15 @@ TUPLE: document-stream < position-stream
 : add-lines ( stream n -- stream ) '[ _ + ] change-line ; inline
 : count-newlines ( string -- n ) [ CHAR: \n = ] count ;
 : find-last-newline ( string -- n/f ) [ CHAR: \n = ] find-last drop ;
-: count-trailing ( string -- n ) [ length ] [ find-last-newline ] bi [ - ] when* ;
+: count-trailing ( string -- n ) [ length ] [ find-last-newline ] bi [ - 1 - ] when* ;
 
 TUPLE: doc { start pos } object { finish pos } ;
 CONSTRUCTOR: <doc> doc ( start object finish -- doc ) ;
 
-TUPLE: reldoc { start relpos } object { finish relpos } ;
+TUPLE: reldoc { start rel } object { finish rel } ;
 CONSTRUCTOR: <spaced-reldoc> reldoc ( object -- reldoc )
-    0 1 <relpos> >>start
-    0 0 <relpos> >>finish ;
+    0 1 <rel> >>start
+    0 0 <rel> >>finish ;
 
 M: doc length object>> length ;
 M: doc nth object>> nth ;
@@ -136,12 +136,32 @@ ERROR: negative-offset n ;
     [ object>> ] [ stream>> ] bi*
     over integer? [ stream-write1 ] [ stream-write ] if ;
 
+! XXX: cleanup the doc, pos, rel stuff.
 : docpos- ( start finish -- docpos )
     2dup [ line>> ] bi@ = [
         [ 0 ] 2dip [ column>> ] bi@ - <pos>
     ] [
         [ [ line>> ] bi@ - ] [ drop column>> ] 2bi <pos>
     ] if ;
+
+! if you go back a line and the col is not 0,
+! you don't know how long the previous line was so you can't
+! calculate this in general. however, you can calculate it
+! for the finish of a doc if you have the start as well.
+ERROR: unimplemented-diff pos rel ;
+
+: pos-rel- ( pos rel -- pos' )
+    dup line>> 0 = [
+        [ drop line>> ]
+        [ [ column>> ] bi@ - ] 2bi <pos>
+    ] [
+        dup column>> { 0 1 } member? [
+            [ line>> ] bi@ - 0 <pos>
+        ] [
+            unimplemented-diff
+        ] if
+    ] if ;
+
 
 : write-diff-spacing ( position stream -- )
     [ write-newlines ] [ write-spaces ] 2bi ;
