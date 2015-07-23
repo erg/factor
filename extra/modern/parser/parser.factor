@@ -170,8 +170,26 @@ ERROR: bracket-error pos ;
 
 ERROR: malformed-bracket-opening sep pos ;
 
-: verify-opening ( sep1 sep2 sep3 -- sep )
+: verify-opening2 ( sep1 ch -- sep )
+    2dup swap object>> = [ "error0" tell-input 2array throw ] unless
+    [ [ start>> ] [ object>> ] bi ] dip
+    ! pos ch ch
+    2array >string tell-input ptext boa ;
+
+:: verify-opening4 ( doc1 ch doc2 doc3 -- sep )
+    doc1 object>>
+    doc3 object>> first = [
 B
+        doc1 [ start>> ] [ object>> ] bi
+        ch 2array
+        doc2 object>>
+        ptext object>> "" 3append-as
+        tell-input ptext boa
+    ] [
+        "lol" throw
+    ] if ;
+
+/*
     pick 2dup [ object>> ] bi@ = [
         drop
     ] [
@@ -182,12 +200,7 @@ B
     [ object>> ] tri*
     ! pos ch str ch
     suffix swap prefix tell-input ptext boa ;
-
-: parse-rest-of-opening ( sep-ch -- full-opening-sep )
-    dup [ tell-input malformed-bracket-opening ] unless
-    ! CHAR: [, for instance, read until "[" then verify that we got [=]*\[
-    ! [{( ""/"===" [{(/f
-    dup object>> 1string read-until verify-opening ;
+*/
 
 ! $
 : parse-trigger-bracket ( contents ch -- obj )
@@ -202,31 +215,27 @@ B
     ! class sep object sep
     4array pcontainer boa ;
 
-: parse-named-bracket ( class sep -- obj )
+: parse-rest-of-opening ( sep ch -- full-opening-sep )
+    ! dup [ tell-input malformed-bracket-opening ] unless
+    ! CHAR: [, for instance, read until "[" then verify that we got [=]*\[
+    ! [{( ""/"===" [{(/f
+B
+    dup {
+        { f [ tell-input malformed-bracket-opening ] }
+        { CHAR: = [ B over object>> 1string multiline-string-until verify-opening4 throw ] }
+        { CHAR: [ [ verify-opening2 ] }
+    } case ;
+
+: parse-universal-bracket ( class sep ch -- obj )
     [
         parse-rest-of-opening
         parse-contents-of-container
-    ] 2keep drop
-    class>trigger [
-        parse-trigger-bracket
-    ] [
-        parse-whitespace-bracket
-    ] if* ;
-    ! over class>trigger dup [
-        ! parse-trigger-bracket
-    ! ] [
-        ! drop parse-whitespace-bracket
-    ! ] if ;
-
+    ] 3keep 2drop drop ;
+    ! class>trigger [ parse-trigger-bracket ] [ parse-whitespace-bracket ] if* ;
 
 : parse-quotation ( class/f sep -- obj )
-B
     [ 1string ] change-object ptext doc-become
     "]" parse-until 4array psequence boa ;
-
-: parse-universal-bracket ( class/f sep sep-ch -- obj )
-    "here11" tell-input 2array throw
-    ;
 
 
 ! Just a string without escapes
@@ -245,6 +254,8 @@ B
         ch 2array >string
         obj [ object>> append ] [ finish>> ] bi \ doc boa
     ] if ;
+
+! "$foo[[omg[=[lol]]=]]" parse-modern-string
  
 
 DEFER: raw
@@ -256,7 +267,6 @@ DEFER: raw
         { [ dup "=[" member? ] [ parse-universal-bracket ] }
         [ raw bracket-word-combine ] ! just a word!?
     } cond ;
-    ! [ parse-named-bracket ] [ nip parse-unnamed-bracket ] if ;
 
 : token ( -- string/f )
     ! "\r\n\s\"" read-until {
