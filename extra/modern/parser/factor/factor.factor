@@ -393,7 +393,7 @@ PARSER: pebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
 : parse-pnested-comment' ( level -- )
     raw dup object>> {
         { [ dup "(*" = ] [ drop , 1 + parse-pnested-comment' ] }
-        { [ dup "*)" = ] [ drop ptext pdoc-become , 1 - dup zero? [ drop ] [ parse-pnested-comment' ] if ] }
+        { [ dup "*)" = ] [ drop ptext doc-become , 1 - dup zero? [ drop ] [ parse-pnested-comment' ] if ] }
         { [ dup f = ] [ "*)" expected ] } ! failed
         [ drop , parse-pnested-comment' ]
     } cond ;

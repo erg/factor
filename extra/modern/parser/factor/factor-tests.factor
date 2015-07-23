@@ -50,7 +50,7 @@ IN: modern.parser.factor.tests
             { object
                 {
                     T{ ptext
-                        { object 34 }
+                        { object "\"" }
                         { finish T{ pos { column 1 } } }
                     }
                     T{ pstring-text
@@ -60,7 +60,7 @@ IN: modern.parser.factor.tests
                     }
                     T{ ptext
                         { start T{ pos { column 9 } } }
-                        { object 34 }
+                        { object "\"" }
                         { finish T{ pos { column 10 } } }
                     }
                 }
@@ -225,3 +225,10 @@ ${example-indent}}]""""
 { } [ "$foo[=[$a]=]" parse-modern-string drop ] unit-test
 { } [ "$foo[==[$a]==]" parse-modern-string drop ] unit-test
 
+{ } [ "[]" parse-modern-string drop ] unit-test
+{ } [ "a[]" parse-modern-string drop ] unit-test
+{ } [ "a[b]" parse-modern-string drop ] unit-test
+{ } [ "]" parse-modern-string drop ] unit-test
+{ } [ "]a" parse-modern-string drop ] unit-test
+{ } [ "[-]" parse-modern-string drop ] unit-test
+{ } [ "a[-]" parse-modern-string drop ] unit-test
