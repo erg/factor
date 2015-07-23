@@ -114,10 +114,6 @@ DEFER: parse-until
     4 npick [ 4array ] [ 3array nip ] if
     pstring new swap >>object ;
 
-: parse-compile-time ( type sep -- obj )
-    fixup-container-args
-    "}" parse-until 4array pcompile-time boa ;
-
 : read-quotation ( -- quotation sep ) "]" parse-until ;
 
 ! : read-container ( class/f sep start-level -- container )
@@ -168,6 +164,7 @@ ERROR: bracket-error pos ;
         [ tell-input "here0" unimplemented ]
     } case ;
 
+
 ERROR: malformed-bracket-opening sep pos ;
 
 : verify-opening2 ( sep1 ch -- sep )
@@ -189,60 +186,7 @@ ERROR: malformed-bracket-opening sep pos ;
         "lol" throw
     ] if ;
 
-/*
-    pick 2dup [ object>> ] bi@ = [
-        drop
-    ] [
-        "error0" tell-input 2array throw
-    ] if
-    [ [ start>> ] [ object>> ] bi ]
-    [ object>> dup [ CHAR: = = ] all? [ tell-input malformed-bracket-opening ] unless ]
-    [ object>> ] tri*
-    ! pos ch str ch
-    suffix swap prefix tell-input ptext boa ;
-*/
-
-! $
-: parse-trigger-bracket ( contents ch -- obj )
-    tell-input "here1" unimplemented ;
-    ! '[ _ (parse-trigger-bracket) ] "" make ;
-
-: parse-whitespace-bracket ( obj -- obj' )
-    tell-input "here2" unimplemented ;
-
-: parse-contents-of-container ( class sep -- obj )
-    dup matching-syntax multiline-string-until
-    ! class sep object sep
-    4array pcontainer boa ;
-
-: parse-rest-of-opening ( sep ch -- full-opening-sep )
-    ! dup [ tell-input malformed-bracket-opening ] unless
-    ! CHAR: [, for instance, read until "[" then verify that we got [=]*\[
-    ! [{( ""/"===" [{(/f
-    dup {
-        { f [ tell-input malformed-bracket-opening ] }
-        { CHAR: = [ over object>> 1string multiline-string-until verify-opening4 ] }
-        { CHAR: [ [ verify-opening2 ] }
-    } case ;
-
-: parse-universal-bracket ( class sep ch -- obj )
-    [
-        parse-rest-of-opening
-        parse-contents-of-container
-    ] 3keep 2drop drop ;
-    ! class>trigger [ parse-trigger-bracket ] [ parse-whitespace-bracket ] if* ;
-
-: parse-quotation ( class/f sep -- obj )
-    [ 1string ] change-object ptext doc-become
-    "]" parse-until 4array psequence boa ;
-
-
-! Just a string without escapes
-: parse-unnamed-bracket ( sep -- obj )
-    ! "[= \r\n\s"
-    tell-input "here3" unimplemented ;
-
-:: bracket-word-combine ( class sep ch obj -- doc )
+:: word-combine ( class sep ch obj -- doc )
     class [
         class [ start>> ] [ object>> ] bi
         sep object>> suffix
@@ -254,26 +198,75 @@ ERROR: malformed-bracket-opening sep pos ;
         obj [ object>> append ] [ finish>> ] bi \ doc boa
     ] if ;
 
-! "$foo[[omg[=[lol]]=]]" parse-modern-string
+ERROR: malformed-brace-opening sep pos ;
+
+: parse-array ( class/f sep -- obj )
+    [ 1string ] change-object ptext doc-become
+    "}" parse-until 4array psequence boa ;
+
+: parse-quotation ( class/f sep -- obj )
+    [ 1string ] change-object ptext doc-become
+    "]" parse-until 4array psequence boa ;
+
+: parse-rest-of-opening ( sep ch -- full-opening-sep )
+    2dup swap object>> = [
+        verify-opening2
+    ] [
+        dup CHAR: = = [
+            over object>> 1string multiline-string-until verify-opening4
+        ] [
+            "omgomgomg" throw
+        ] if
+    ] if ;
+
+    ! dup {
+        ! { f [ tell-input malformed-bracket-opening ] }
+        ! { CHAR: = [ over object>> 1string multiline-string-until verify-opening4 ] }
+        ! { CHAR: [ [ verify-opening2 ] }
+    ! } case ;
  
+: parse-contents-of-container ( class sep -- obj )
+    dup matching-syntax multiline-string-until
+    4array pcontainer boa ;
+
+: parse-universal ( class sep ch -- obj )
+    parse-rest-of-opening
+    parse-contents-of-container ;
+
+: parse-trigger-bracket ( contents ch -- obj )
+    tell-input "here1" unimplemented ;
+    ! '[ _ (parse-trigger-bracket) ] "" make ;
+
+: parse-whitespace-bracket ( obj -- obj' )
+    tell-input "here2" unimplemented ;
 
 DEFER: raw
+: parse-brace ( class/f sep -- obj )
+    [ dup object>> empty? [ drop f ] when ] dip
+    read1 dup [ object>> ] when {
+        { [ dup f = ] [ tell-input "error10" 2array throw ] }
+        { [ dup "\s\r\n" member? ] [ drop parse-array ] }
+        { [ dup "={" member? ] [ parse-universal ] }
+        [ raw word-combine ] ! just a word!?
+    } cond ;
+
 : parse-bracket ( class/f sep -- obj )
     [ dup object>> empty? [ drop f ] when ] dip
     read1 dup [ object>> ] when {
         { [ dup f = ] [ tell-input "error10" 2array throw ] }
         { [ dup "\s\r\n" member? ] [ drop parse-quotation ] }
-        { [ dup "=[" member? ] [ parse-universal-bracket ] }
-        [ raw bracket-word-combine ] ! just a word!?
+        { [ dup "=[" member? ] [ parse-universal ] }
+        [ raw word-combine ] ! just a word!?
     } cond ;
+
 
 : token ( -- string/f )
     ! "\r\n\s\"" read-until {
-    "\r\n\s\"[" read-until {
+    "\r\n\s\"{[" read-until {
         { [ dup f = ] [ drop ] } ! XXX: parse-action here?
         { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
         { [ dup object>> CHAR: " = ] [ parse-string ] }
-        ! { [ dup object>> CHAR: { = ] [ parse-compile-time ] }
+        { [ dup object>> CHAR: { = ] [ parse-brace ] }
         { [ dup object>> CHAR: [ = ] [ parse-bracket ] }
     } cond ;
 
