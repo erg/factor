@@ -268,12 +268,12 @@ DEFER: raw
 
 : token ( -- string/f )
     ! "\r\n\s\"{[" read-until {
-    "\r\n\s\"[" read-until {
+    "\r\n\s\"" read-until {
         { [ dup f = ] [ drop ] } ! XXX: parse-action here?
         { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
         { [ dup object>> CHAR: " = ] [ parse-string ] }
         ! { [ dup object>> CHAR: { = ] [ parse-brace ] }
-        { [ dup object>> CHAR: [ = ] [ parse-bracket ] }
+        ! { [ dup object>> CHAR: [ = ] [ parse-bracket ] }
     } cond ;
 
 : typed-token ( type -- token/f )
