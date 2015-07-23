@@ -39,6 +39,7 @@ M: sequence refactor' '[ _ refactor' ] each ;
     [ all-factor-files [ ".modern" tail? ] reject ] 2dip '[ _ _ refactor-path ] each ; inline
 
 
+/*
 : refactor-macro-out ( obj -- obj' )
     object>> third object>> fourth
     dup poutputs? [
@@ -50,6 +51,7 @@ M: sequence refactor' '[ _ refactor' ] each ;
 : refactor-codebase-macro-out ( -- )
     [ { [ pmacro? ] [ pmacro-locals? ] } 1|| ]
     [ refactor-macro-out ] refactor-codebase ;
+*/
 
 
 
