@@ -200,3 +200,28 @@ ${example-indent}}]""""
         { pos T{ pos { column 4 } } }
     } =
 ] must-fail-with
+
+{ } [ "[[]]" parse-modern-string drop ] unit-test
+{ } [ "[=[]=]" parse-modern-string drop ] unit-test
+{ } [ "[==[]==]" parse-modern-string drop ] unit-test
+
+{ } [ "[[a]]" parse-modern-string drop ] unit-test
+{ } [ "[=[a]=]" parse-modern-string drop ] unit-test
+{ } [ "[==[a]==]" parse-modern-string drop ] unit-test
+
+{ } [ "foo[[]]" parse-modern-string drop ] unit-test
+{ } [ "foo[=[]=]" parse-modern-string drop ] unit-test
+{ } [ "foo[==[]==]" parse-modern-string drop ] unit-test
+
+{ } [ "foo[[a]]" parse-modern-string drop ] unit-test
+{ } [ "foo[=[a]=]" parse-modern-string drop ] unit-test
+{ } [ "foo[==[a]==]" parse-modern-string drop ] unit-test
+
+{ } [ "$foo[[a]]" parse-modern-string drop ] unit-test
+{ } [ "$foo[=[a]=]" parse-modern-string drop ] unit-test
+{ } [ "$foo[==[a]==]" parse-modern-string drop ] unit-test
+
+{ } [ "$foo[[$a]]" parse-modern-string drop ] unit-test
+{ } [ "$foo[=[$a]=]" parse-modern-string drop ] unit-test
+{ } [ "$foo[==[$a]==]" parse-modern-string drop ] unit-test
+
