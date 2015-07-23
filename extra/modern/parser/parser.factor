@@ -207,7 +207,11 @@ ERROR: malformed-brace-opening sep pos ;
 
 : parse-quotation ( class/f sep -- obj )
     [ 1string ] change-object ptext doc-become
-    "]" parse-until 4array psequence boa ;
+    over [
+        "]" multiline-string-until 4array psequence boa
+    ] [
+        "]" parse-until 4array psequence boa
+    ] if ;
 
 : parse-rest-of-opening ( sep0 sep1 -- full-opening-sep )
     2dup [ object>> ] bi@ = [
