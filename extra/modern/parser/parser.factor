@@ -179,13 +179,13 @@ ERROR: malformed-bracket-opening sep pos ;
 :: verify-opening4 ( doc1 ch doc2 doc3 -- sep )
     doc1 object>>
     doc3 object>> first = [
-B
         doc1 [ start>> ] [ object>> ] bi
         ch 2array
         doc2 object>>
-        ptext object>> "" 3append-as
+        doc3 object>> "" 3append-as
         tell-input ptext boa
     ] [
+        ! XXX: error
         "lol" throw
     ] if ;
 
@@ -219,10 +219,9 @@ B
     ! dup [ tell-input malformed-bracket-opening ] unless
     ! CHAR: [, for instance, read until "[" then verify that we got [=]*\[
     ! [{( ""/"===" [{(/f
-B
     dup {
         { f [ tell-input malformed-bracket-opening ] }
-        { CHAR: = [ B over object>> 1string multiline-string-until verify-opening4 throw ] }
+        { CHAR: = [ over object>> 1string multiline-string-until verify-opening4 ] }
         { CHAR: [ [ verify-opening2 ] }
     } case ;
 
