@@ -232,13 +232,6 @@ ERROR: malformed-brace-opening sep pos ;
     parse-rest-of-opening
     parse-contents-of-container ;
 
-: parse-trigger-bracket ( contents ch -- obj )
-    tell-input "here1" unimplemented ;
-    ! '[ _ (parse-trigger-bracket) ] "" make ;
-
-: parse-whitespace-bracket ( obj -- obj' )
-    tell-input "here2" unimplemented ;
-
 : parse-word ( class sep0 sep1 -- obj )
     "\s\r\n" read-until {
         { [ dup f = ] [ drop [ 4doc ] [ 3doc ] if* ] }
