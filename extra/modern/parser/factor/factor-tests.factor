@@ -149,11 +149,11 @@ lol" parse-modern-string
 ] unit-test
 
 ! Test multiline string experimental syntax
-CONSTANT: tools-scaffold-string """m"[${example-indent}"Example:"
-${example-indent}{ $example "USING: ${example-using} ;"
-${example-indent}    ""
-${example-indent}    ""
-${example-indent}}]""""
+! CONSTANT: tools-scaffold-string m"[${example-indent}"Example:"
+! ${example-indent}{ $example "USING: ${example-using} ;"
+! ${example-indent}    ""
+! ${example-indent}    ""
+! ${example-indent}}]""""
 
 ! { t } [ tools-scaffold-string parse-modern-string length 1 = ] unit-test
 ! { t } [ tools-scaffold-string parse-modern-string ?last pstring? ] unit-test
