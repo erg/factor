@@ -5,6 +5,10 @@ constructors io kernel make math modern.parser multiline
 namespaces sequences ;
 IN: modern.parser.factor
 
+! Test cases:
+! ALIAS: foo{ bar{
+! HELP: foo{
+
 ! Can go away:
 PARSER: heredoc HEREDOC: token-to-find object>> multiline-string-until ;
 ! string literals
@@ -188,7 +192,7 @@ PARSER: c-array@ c-array@ parse parse parse ; ! [[ ]]
 
 PARSER: pfunction : new-word parse-psignature body ;
 PARSER: pfunction-locals :: new-word parse-psignature body ;
-PARSER: palias ALIAS: new-word existing-word ;
+PARSER: palias ALIAS: raw raw ;
 PARSER: ptyped TYPED: new-word parse-psignature body ;
 PARSER: ptyped-locals TYPED:: new-word parse-psignature body ;
 PARSER: pmemo MEMO: new-word parse-psignature body ;
@@ -207,8 +211,8 @@ PARSER: pfunctor-syntax FUNCTOR-SYNTAX: token body ;
 PARSER: pgeneric GENERIC: new-class parse-psignature ;
 PARSER: pgeneric# GENERIC# new-class token parse-psignature ;
 PARSER: phook HOOK: new-class existing-word parse-psignature ;
-PARSER: pmethod M: existing-class existing-word body ;
-PARSER: pmethod-locals M:: existing-class existing-word body ;
+PARSER: pmethod M: parse existing-word body ;
+PARSER: pmethod-locals M:: parse existing-word body ;
 PARSER: pmath MATH: new-word parse-psignature ;
 PARSER: ppair-generic PAIR-GENERIC: new-class parse-psignature ;
 PARSER: ppair-m PAIR-M: existing-class existing-class existing-word body ;
@@ -252,7 +256,7 @@ PARSER: pmain MAIN: existing-word ;
 
 
 PARSER: pdestructor DESTRUCTOR: existing-word ;
-PARSER: ppredicate PREDICATE: new-class "<" expect existing-class body ;
+PARSER: ppredicate PREDICATE: new-class "<" expect parse body ;
 PARSER: pmixin MIXIN: new-class ;
 PARSER: pinstance INSTANCE: existing-class existing-class ;
 PARSER: psingleton SINGLETON: new-class ;
@@ -300,7 +304,7 @@ PARSER: psimd-instrinsic SIMD-INTRINSIC: token body ;
 PARSER: psimd-instrinsic-locals SIMD-INTRINSIC:: token body ;
 PARSER: penum ENUM: token body ;
 PARSER: ppointer pointer: token ;
-PARSER: phelp HELP: token body ;
+PARSER: phelp HELP: raw body ;
 PARSER: pname NAME: token token ;
 PARSER: ptr TR: token body ;
 

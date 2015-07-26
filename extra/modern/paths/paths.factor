@@ -54,6 +54,8 @@ ERROR: not-a-source-path path ;
         "resource:core/vocabs/loader/test/a/a.factor"
         "resource:core/vocabs/loader/test/b/b.factor"
         "resource:core/vocabs/loader/test/c/c.factor"
+        "resource:extra/math/blas/vectors/vectors.factor" ! need .modern file
+        "resource:extra/math/blas/matrices/matrices.factor" ! need .modern file
     } diff
     ! Don't parse .modern files yet
     [ ".modern" tail? ] reject ;

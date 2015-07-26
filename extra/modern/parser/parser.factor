@@ -260,17 +260,20 @@ DEFER: raw
 
 
 : token ( -- string/f )
-    ! "\r\n\s\"{[" read-until {
-    "\r\n\s\"" read-until {
+    "\r\n\s\"{[" read-until {
+!  "\r\n\s\"" read-until {
         { [ dup f = ] [ drop ] } ! XXX: parse-action here?
         { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
         { [ dup object>> CHAR: " = ] [ parse-string ] }
-        ! { [ dup object>> CHAR: { = ] [ parse-brace ] }
-        ! { [ dup object>> CHAR: [ = ] [ parse-bracket ] }
+        { [ dup object>> CHAR: { = ] [ parse-brace ] }
+        { [ dup object>> CHAR: [ = ] [ parse-bracket ] }
     } cond ;
 
 : typed-token ( type -- token/f )
     [ token ] dip doc-become ;
+
+: typed-raw ( type -- token/f )
+    [ raw ] dip doc-become ;
 
 : raw ( -- object )
     "\r\n\s" read-until {
@@ -291,7 +294,7 @@ DEFER: raw
 
 : new-class ( -- object ) pnew-class typed-token ;
 : existing-class ( -- object ) pexisting-class typed-token ;
-: new-word ( -- object ) pnew-word typed-token flush ;
+: new-word ( -- object ) pnew-word typed-raw flush ;
 : existing-word ( -- object ) pexisting-word typed-token ;
 : token-to-find ( -- token string ) token [ ptext doc-become ] keep  ;
 : parse ( -- object/f ) token dup [ parse-action ] when ;
