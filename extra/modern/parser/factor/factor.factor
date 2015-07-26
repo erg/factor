@@ -5,29 +5,28 @@ constructors io kernel make math modern.parser multiline
 namespaces sequences ;
 IN: modern.parser.factor
 
-PARSER: psyntax-word SYNTAX: raw body ;
-PARSER: pparser PARSER: raw raw body ;
-PARSER: pcomment ! readln ;
-PARSER: pshell-comment #! readln ;
+! Can go away:
 PARSER: heredoc HEREDOC: token-to-find object>> multiline-string-until ;
-
-PARSER: pin IN: token ;
-PARSER: puse USE: token ;
-PARSER: punuse UNUSE: token ;
-PARSER: pusing USING: ";" raw-until ;
-PARSER: pfrom FROM: token "=>" expect ";" raw-until ;
-PARSER: pexclude EXCLUDE: token "=>" expect ";" raw-until ;
-PARSER: prename RENAME: raw raw "=>" expect raw ;
-PARSER: pqualified QUALIFIED: token ;
-PARSER: pqualified-with QUALIFIED-WITH: token token ;
-PARSER: pforget FORGET: token ;
-
 ! string literals
 ! PARSER: " " ;
 ! PARSER: P" P" ;
 ! PARSER: URL" URL" ;
 ! PARSER: SBUF" SBUF" ;
 ! PARSER: DLL" DLL" ;
+
+PARSER: pcompilation-unit-begin << ; ! going away
+PARSER: pcompilation-unit-end >> ; ! going away
+
+
+PARSER: regexp-/ R/ "/" multiline-string-until ;
+PARSER: regexp-# R# "#" multiline-string-until ;
+PARSER: regexp-' R' "'" multiline-string-until ;
+PARSER: regexp-( R( "(" multiline-string-until ;
+PARSER: regexp-@ R@ "@" multiline-string-until ;
+PARSER: regexp-` R` "`" multiline-string-until ;
+PARSER: regexp-| R| "|" multiline-string-until ;
+PARSER: regexp-! R! "!" multiline-string-until ;
+
 
 ! words[
 PARSER: pblock [ "]" parse-until ;
@@ -39,15 +38,6 @@ PARSER: pget-quot get[ "]" parse-until ;
 PARSER: pslots-quot slots[ "]" parse-until ;
 PARSER: pset-slots-quot set-slots[ "]" parse-until ;
 PARSER: pmemo-block MEMO[ "]" parse-until ;
-
-! words[ funky
-PARSER: plet-block [let "]" parse-until ;
-PARSER: pinterpolate I[ "]I" multiline-string-until ;
-PARSER: pliterate <LITERATE "LITERATE>" multiline-string-until ;
-PARSER: pxml-acute <XML "XML>" multiline-string-until ;
-PARSER: pxml-bracket [XML "XML]" multiline-string-until ;
-PARSER: pinfix [infix "infix]" multiline-string-until ;
-PARSER: pmorse [MORSE "MORSE]" multiline-string-until ;
 
 ! words{
 PARSER: parray { "}" parse-until ;
@@ -97,10 +87,6 @@ PARSER: pbit-vector ?V{ "}" parse-until ;
 PARSER: ppoker-hand HAND{ "}" parse-until ;
 PARSER: phex-array HEX{ "}" parse-until ;
 
-! words@
-PARSER: pstruct-literal-at S@ token parse ; ! [[ ]]
-PARSER: c-array@ c-array@ parse parse parse ; ! [[ ]]
-
 ! words(
 PARSER: psignature ( ")" parguments typed-raw-until ;
 PARSER: pexecute-parens execute( (parse-psignature) ;
@@ -111,8 +97,64 @@ PARSER: pdata-map!-parens data-map!( (parse-psignature) ;
 PARSER: pshuffle-parens shuffle( (parse-psignature) ;
 
 
-! words:
-! : c-arguments ( -- sep arguments sep ) "(" expect ")" raw-until ;
+
+! END OF GO AWAY
+
+! move to lexer
+PARSER: pcomment ! readln ;
+PARSER: pshell-comment #! readln ;
+: parse-pnested-comment' ( level -- )
+    raw dup object>> {
+        { [ dup "(*" = ] [ drop , 1 + parse-pnested-comment' ] }
+        { [ dup "*)" = ] [ drop ptext doc-become , 1 - dup zero? [ drop ] [ parse-pnested-comment' ] if ] }
+        { [ dup f = ] [ "*)" expected ] } ! failed
+        [ drop , parse-pnested-comment' ]
+    } cond ;
+PARSER: pnested-comment (* [ 1 parse-pnested-comment' ] { } make ;
+
+! BEGIN REGULAR WORDS
+! Single token words
+PARSER: pprivate-begin <PRIVATE ;
+PARSER: pprivate-end PRIVATE> ;
+PARSER: BAD-ALIEN BAD-ALIEN ;
+PARSER: pdelimiter delimiter ;
+PARSER: pdeprecated deprecated ;
+PARSER: pf f ;
+PARSER: pfinal final ;
+PARSER: pflushable flushable ;
+PARSER: pfoldable foldable ;
+PARSER: pinline inline ;
+PARSER: precursive recursive ;
+PARSER: pd-register D ;
+PARSER: pr-register R ;
+PARSER: pbreakpoint B ;
+PARSER: call-next-method call-next-method ;
+PARSER: pno-compile no-compile ;
+PARSER: pcycles cycles ;
+PARSER: popcode opcode ;
+PARSER: pspecialized specialized ;
+PARSER: pgb GB ;
+
+! Single token parsers that need rename (?)
+PARSER: pin IN: token ;
+PARSER: puse USE: token ;
+PARSER: punuse UNUSE: token ;
+PARSER: pfrom FROM: token "=>" expect ";" raw-until ;
+PARSER: pexclude EXCLUDE: token "=>" expect ";" raw-until ;
+PARSER: prename RENAME: raw raw "=>" expect raw ;
+PARSER: pqualified QUALIFIED: token ;
+PARSER: pqualified-with QUALIFIED-WITH: token token ;
+PARSER: pforget FORGET: token ;
+
+PARSER: pselector SELECTOR: token ; ! Smalltalk
+PARSER: pstorage STORAGE: token ; ! units
+
+! Nice, regular uppercase read til ; parsers
+PARSER: pusing USING: ";" raw-until ;
+PARSER: psyntax-word SYNTAX: raw body ; ! needs \
+PARSER: pparser PARSER: raw raw body ; ! needs \
+
+! Upper case but not explicit end
 PARSER: pc-function FUNCTION: token new-word parse-psignature ;
 PARSER: pfunction-alias FUNCTION-ALIAS: token token new-word parse-psignature ;
 PARSER: px-function X-FUNCTION: token new-word parse-psignature ;
@@ -122,6 +164,27 @@ PARSER: pcuda-global CUDA-GLOBAL: new-word ;
 PARSER: pcuda-library CUDA-LIBRARY: new-word existing-class token ; ! XXX: token might have spaces...
 PARSER: pc-callback CALLBACK: token token parse-psignature ;
 PARSER: psubroutine SUBROUTINE: token parse-psignature ;
+
+
+! WEIRD
+! words[ funky
+PARSER: plet-block [let "]" parse-until ;
+PARSER: pinterpolate I[ "]I" multiline-string-until ;
+PARSER: pliterate <LITERATE "LITERATE>" multiline-string-until ;
+PARSER: pxml-acute <XML "XML>" multiline-string-until ;
+PARSER: pxml-bracket [XML "XML]" multiline-string-until ;
+PARSER: pinfix [infix "infix]" multiline-string-until ;
+PARSER: pmorse [MORSE "MORSE]" multiline-string-until ;
+PARSER: pebnf-acute <EBNF token "EBNF>" multiline-string-until ; ! going away
+PARSER: pebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
+
+
+! words@
+PARSER: pstruct-literal-at S@ token parse ; ! [[ ]]
+PARSER: c-array@ c-array@ parse parse parse ; ! [[ ]]
+
+
+! words:
 
 PARSER: pfunction : new-word parse-psignature body ;
 PARSER: pfunction-locals :: new-word parse-psignature body ;
@@ -318,11 +381,6 @@ PARSER: prenaming RENAMING: new-word parse parse parse ;
 PARSER: proll ROLL: token ;
 
 
-! Smalltalk
-PARSER: pselector SELECTOR: token ;
-! units
-PARSER: pstorage STORAGE: token ;
-
 PARSER: psingletons-union SINGLETONS-UNION: new-class ";" parse-until ;
 ! slides
 PARSER: pstrip-tease STRIP-TEASE: ";" parse-until ;
@@ -351,30 +409,6 @@ PARSER: pmethod-literal M\ token token ;
 PARSER: peval-dollar $ parse ;
 
 ! singleton parsing words
-PARSER: BAD-ALIEN BAD-ALIEN ;
-PARSER: pdelimiter delimiter ;
-PARSER: pdeprecated deprecated ;
-PARSER: pf f ;
-PARSER: pfinal final ;
-PARSER: pflushable flushable ;
-PARSER: pfoldable foldable ;
-PARSER: pinline inline ;
-PARSER: precursive recursive ;
-PARSER: pd-register D ;
-PARSER: pr-register R ;
-PARSER: pbreakpoint B ;
-PARSER: call-next-method call-next-method ;
-PARSER: pno-compile no-compile ;
-PARSER: pcycles cycles ;
-PARSER: popcode opcode ;
-PARSER: pspecialized specialized ;
-PARSER: pgb GB ;
-
-! paired singleton parsing words
-PARSER: pprivate-begin <PRIVATE ;
-PARSER: pprivate-end PRIVATE> ;
-PARSER: pcompilation-unit-begin << ; ! going away
-PARSER: pcompilation-unit-end >> ; ! going away
 
 ! Cocoa
 PARSER: pcfstring CFSTRING: new-word parse ;
@@ -384,29 +418,6 @@ PARSER: pframework FRAMEWORK: parse ;
 PARSER: SEL: SEL: token ;
 ! PARSER: pcocoa-selector -> token ;
 ! PARSER: psuper-selector SUPER-> token ;
-
-! funky
-PARSER: pebnf-acute <EBNF token "EBNF>" multiline-string-until ; ! going away
-PARSER: pebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
-
-! go away
-: parse-pnested-comment' ( level -- )
-    raw dup object>> {
-        { [ dup "(*" = ] [ drop , 1 + parse-pnested-comment' ] }
-        { [ dup "*)" = ] [ drop ptext doc-become , 1 - dup zero? [ drop ] [ parse-pnested-comment' ] if ] }
-        { [ dup f = ] [ "*)" expected ] } ! failed
-        [ drop , parse-pnested-comment' ]
-    } cond ;
-PARSER: pnested-comment (* [ 1 parse-pnested-comment' ] { } make ;
-
-PARSER: regexp-/ R/ "/" multiline-string-until ;
-PARSER: regexp-# R# "#" multiline-string-until ;
-PARSER: regexp-' R' "'" multiline-string-until ;
-PARSER: regexp-( R( "(" multiline-string-until ;
-PARSER: regexp-@ R@ "@" multiline-string-until ;
-PARSER: regexp-` R` "`" multiline-string-until ;
-PARSER: regexp-| R| "|" multiline-string-until ;
-PARSER: regexp-! R! "!" multiline-string-until ;
 
 PARSER: pbacktick ` "`" multiline-string-until ;
 
