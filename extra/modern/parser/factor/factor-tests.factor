@@ -8,7 +8,7 @@ IN: modern.parser.factor.tests
 
 {
     {
-        T{ parray
+        T{ psequence
             { object
                 {
                     T{ ptext { object "{" } { finish T{ pos { column 1 } } } }

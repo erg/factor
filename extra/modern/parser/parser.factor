@@ -201,16 +201,18 @@ ERROR: malformed-bracket-opening sep pos ;
 
 ERROR: malformed-brace-opening sep pos ;
 
+! XXX: class can be f here, calling sift is hack imo
 : parse-array ( class/f sep -- obj )
     [ 1string ] change-object ptext doc-become
-    "}" parse-until 4array psequence boa ;
+    "}" parse-until 4array sift psequence boa ;
 
+! XXX: class can be f here, calling sift is hack imo
 : parse-quotation ( class/f sep -- obj )
     [ 1string ] change-object ptext doc-become
     over [
         "]" multiline-string-until 4array psequence boa
     ] [
-        "]" parse-until 4array psequence boa
+        "]" parse-until 4array sift psequence boa
     ] if ;
 
 : parse-rest-of-opening ( sep0 sep1 -- full-opening-sep )
