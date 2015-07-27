@@ -92,13 +92,13 @@ PARSER: regexp-! R! "!" multiline-string-until ;
 ! PARSER: phex-array HEX{ "}" parse-until ;
 
 ! words(
-PARSER: psignature ( ")" parguments typed-raw-until ;
-PARSER: pexecute-parens execute( (parse-psignature) ;
-PARSER: pcall-parens call( (parse-psignature) ;
-PARSER: peval-parens eval( (parse-psignature) ;
-PARSER: pdata-map-parens data-map( (parse-psignature) ;
-PARSER: pdata-map!-parens data-map!( (parse-psignature) ;
-PARSER: pshuffle-parens shuffle( (parse-psignature) ;
+! PARSER: psignature ( ")" parguments typed-raw-until ;
+! PARSER: pexecute-parens execute( (parse-psignature) ;
+! PARSER: pcall-parens call( (parse-psignature) ;
+! PARSER: peval-parens eval( (parse-psignature) ;
+! PARSER: pdata-map-parens data-map( (parse-psignature) ;
+! PARSER: pdata-map!-parens data-map!( (parse-psignature) ;
+! PARSER: pshuffle-parens shuffle( (parse-psignature) ;
 
 
 
@@ -159,15 +159,15 @@ PARSER: psyntax-word SYNTAX: raw body ; ! needs \
 PARSER: pparser PARSER: raw raw body ; ! needs \
 
 ! Upper case but not explicit end
-PARSER: pc-function FUNCTION: token new-word parse-psignature ;
-PARSER: pfunction-alias FUNCTION-ALIAS: token token new-word parse-psignature ;
-PARSER: px-function X-FUNCTION: token new-word parse-psignature ;
-PARSER: pgl-function GL-FUNCTION: token new-word parse parse-psignature ;
-PARSER: pcuda-function CUDA-FUNCTION: new-word parse-psignature ; ! no return value
+PARSER: pc-function FUNCTION: token new-word parse ;
+PARSER: pfunction-alias FUNCTION-ALIAS: token token new-word parse ;
+PARSER: px-function X-FUNCTION: token new-word parse ;
+PARSER: pgl-function GL-FUNCTION: token new-word parse parse ;
+PARSER: pcuda-function CUDA-FUNCTION: new-word parse ; ! no return value
 PARSER: pcuda-global CUDA-GLOBAL: new-word ;
 PARSER: pcuda-library CUDA-LIBRARY: new-word existing-class token ; ! XXX: token might have spaces...
-PARSER: pc-callback CALLBACK: token token parse-psignature ;
-PARSER: psubroutine SUBROUTINE: token parse-psignature ;
+PARSER: pc-callback CALLBACK: token token parse ;
+PARSER: psubroutine SUBROUTINE: token parse ;
 
 
 ! WEIRD
@@ -190,39 +190,39 @@ PARSER: c-array@ c-array@ parse parse parse ; ! [[ ]]
 
 ! words:
 
-PARSER: pfunction : new-word parse-psignature body ;
-PARSER: pfunction-locals :: new-word parse-psignature body ;
+PARSER: pfunction : new-word parse body ;
+PARSER: pfunction-locals :: new-word parse body ;
 PARSER: palias ALIAS: raw raw ;
-PARSER: ptyped TYPED: new-word parse-psignature body ;
-PARSER: ptyped-locals TYPED:: new-word parse-psignature body ;
-PARSER: pmemo MEMO: new-word parse-psignature body ;
-PARSER: pmemo-locals MEMO:: new-word parse-psignature body ;
-PARSER: pidentity-memo IDENTITY-MEMO: new-word parse-psignature body ;
-PARSER: pidentity-memo-locals IDENTITY-MEMO:: new-word parse-psignature body ;
-PARSER: pmacro MACRO: new-word parse-psignature body ;
-PARSER: pmacro-locals MACRO:: new-word parse-psignature body ;
-PARSER: ppeg PEG: new-word parse-psignature body ;
-PARSER: pdescriptive DESCRIPTIVE: new-word parse-psignature body ;
-PARSER: pdescriptive-locals DESCRIPTIVE:: new-word parse-psignature body ;
-PARSER: pconstructor-new CONSTRUCTOR: token token parse-psignature body ;
-PARSER: pprimitive PRIMITIVE: new-word parse-psignature ;
-PARSER: pfunctor FUNCTOR: token parse-psignature ";FUNCTOR" parse-until ;
+PARSER: ptyped TYPED: new-word parse body ;
+PARSER: ptyped-locals TYPED:: new-word parse body ;
+PARSER: pmemo MEMO: new-word parse body ;
+PARSER: pmemo-locals MEMO:: new-word parse body ;
+PARSER: pidentity-memo IDENTITY-MEMO: new-word parse body ;
+PARSER: pidentity-memo-locals IDENTITY-MEMO:: new-word parse body ;
+PARSER: pmacro MACRO: new-word parse body ;
+PARSER: pmacro-locals MACRO:: new-word parse body ;
+PARSER: ppeg PEG: new-word parse body ;
+PARSER: pdescriptive DESCRIPTIVE: new-word parse body ;
+PARSER: pdescriptive-locals DESCRIPTIVE:: new-word parse body ;
+PARSER: pconstructor-new CONSTRUCTOR: token token parse body ;
+PARSER: pprimitive PRIMITIVE: new-word parse ;
+PARSER: pfunctor FUNCTOR: token parse ";FUNCTOR" parse-until ;
 PARSER: pfunctor-syntax FUNCTOR-SYNTAX: token body ;
-PARSER: pgeneric GENERIC: new-class parse-psignature ;
-PARSER: pgeneric# GENERIC# new-class token parse-psignature ;
-PARSER: phook HOOK: new-class existing-word parse-psignature ;
+PARSER: pgeneric GENERIC: new-class parse ;
+PARSER: pgeneric# GENERIC# new-class token parse ;
+PARSER: phook HOOK: new-class existing-word parse ;
 PARSER: pmethod M: parse existing-word body ;
 PARSER: pmethod-locals M:: parse existing-word body ;
-PARSER: pmath MATH: new-word parse-psignature ;
-PARSER: ppair-generic PAIR-GENERIC: new-class parse-psignature ;
+PARSER: pmath MATH: new-word parse ;
+PARSER: ppair-generic PAIR-GENERIC: new-class parse ;
 PARSER: ppair-m PAIR-M: existing-class existing-class existing-word body ;
-PARSER: ptags TAGS: new-word parse-psignature ;
+PARSER: ptags TAGS: new-word parse ;
 PARSER: ptag TAG: token existing-word body ;
 PARSER: prule RULE: new-word ";" raw-until ;
 PARSER: proman ROMAN: token ;
-PARSER: proman-op ROMAN-OP: raw parse-psignature ;
-PARSER: plazy LAZY: new-word parse-psignature body ;
-PARSER: pinfix-locals INFIX:: new-word parse-psignature body ;
+PARSER: proman-op ROMAN-OP: raw parse ;
+PARSER: plazy LAZY: new-word parse body ;
+PARSER: pinfix-locals INFIX:: new-word parse body ;
 
 
 PARSER: pconstant CONSTANT: token parse ;

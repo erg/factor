@@ -49,6 +49,7 @@ TUPLE: pbody < psequence ;
 TUPLE: prun-time < psequence ;
 TUPLE: pcompile-time < psequence ;
 TUPLE: pcontainer < psequence ;
+TUPLE: psignature < psequence ;
 
 : building-tail? ( string -- ? )
     [ building get ] dip {
@@ -212,8 +213,24 @@ ERROR: malformed-brace-opening sep pos ;
     over [
         "]" multiline-string-until 4array psequence boa
     ] [
-        "]" parse-until 4array sift psequence boa
+        "]" parse-until [ drop ] 3dip 3array psequence boa
     ] if ;
+
+: parse-word ( class sep0 sep1 -- obj )
+    "\s\r\n" read-until {
+        { [ dup f = ] [ drop [ 4doc ] [ 3doc ] if* ] }
+        { [ dup object>> "\s\r\n" member? ] [ drop 4doc ] }
+        [ "sigh2" throw ]
+    } cond ;
+
+ERROR: more-input-expected token pos ;
+: parse-parens ( class/f sep -- obj )
+    [ 1string ] change-object ptext doc-become
+    read1 {
+        { [ dup f = ] [ tell-input more-input-expected ] }
+        { [ dup object>> "\s\r\n" member? ] [ drop ")" parse-until 4array psignature boa ] }
+        [ parse-word ] ! just a word!?
+    } cond ;
 
 : parse-rest-of-opening ( sep0 sep1 -- full-opening-sep )
     2dup [ object>> ] bi@ = [
@@ -233,13 +250,6 @@ ERROR: malformed-brace-opening sep pos ;
 : parse-universal ( class sep0 sep1 -- obj )
     parse-rest-of-opening
     parse-contents-of-container ;
-
-: parse-word ( class sep0 sep1 -- obj )
-    "\s\r\n" read-until {
-        { [ dup f = ] [ drop [ 4doc ] [ 3doc ] if* ] }
-        { [ dup object>> "\s\r\n" member? ] [ drop 4doc ] }
-        [ "sigh2" throw ]
-    } cond ;
 
 DEFER: raw
 : parse-brace ( class/f sep -- obj )
@@ -262,13 +272,14 @@ DEFER: raw
 
 
 : token ( -- string/f )
-    "\r\n\s\"{[" read-until {
+    "\r\n\s\"{[(" read-until {
 !  "\r\n\s\"" read-until {
         { [ dup f = ] [ drop ] } ! XXX: parse-action here?
         { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
         { [ dup object>> CHAR: " = ] [ parse-string ] }
         { [ dup object>> CHAR: { = ] [ parse-brace ] }
         { [ dup object>> CHAR: [ = ] [ parse-bracket ] }
+        { [ dup object>> CHAR: ( = ] [ parse-parens ] }
     } cond ;
 
 : typed-token ( type -- token/f )
