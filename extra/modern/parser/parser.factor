@@ -43,6 +43,7 @@ TUPLE: pexisting-class < doc ;
 TUPLE: pnew-word < doc ;
 TUPLE: pexisting-word < doc ;
 
+TUPLE: pcomment < psequence ;
 TUPLE: pstring < psequence ;
 TUPLE: parguments < psequence ;
 TUPLE: pbody < psequence ;
@@ -199,6 +200,14 @@ ERROR: malformed-bracket-opening sep pos ;
         doc2 [ object>> affix ] [ finish>> ] bi \ doc boa
     ] if ;
 
+:: 2doc ( doc0 doc1 -- obj )
+    doc0 [
+        doc0 [ start>> ] [ object>> stringify ] bi
+        doc1 [ object>> affix ] [ finish>> ] bi \ doc boa
+    ] [
+        doc1
+    ] if ;
+
 
 ERROR: malformed-brace-opening sep pos ;
 
@@ -216,11 +225,18 @@ ERROR: malformed-brace-opening sep pos ;
         "]" parse-until [ drop ] 3dip 3array psequence boa
     ] if ;
 
+: parse-word2 ( class sep0 -- obj )
+    "\s\r\n" read-until {
+        { [ dup f = ] [ drop [ 3doc ] [ 2doc ] if* ] }
+        { [ dup object>> "\s\r\n" member? ] [ drop 3doc ] }
+        [ "parse-word2 failed" throw ]
+    } cond ;
+
 : parse-word ( class sep0 sep1 -- obj )
     "\s\r\n" read-until {
         { [ dup f = ] [ drop [ 4doc ] [ 3doc ] if* ] }
         { [ dup object>> "\s\r\n" member? ] [ drop 4doc ] }
-        [ "sigh2" throw ]
+        [ "parse-word failed" throw ]
     } cond ;
 
 ERROR: more-input-expected token pos ;
@@ -270,12 +286,25 @@ DEFER: raw
         [ parse-word ] ! just a word!?
     } cond ;
 
+! ugs
+: parse-exclamation ( class/f sep -- obj )
+    [ dup object>> empty? [ drop f ] when ] dip
+    [ 1string ] change-object ptext doc-become
+    over [
+        parse-word2
+    ] [
+        read1 {
+            { [ dup f = ] [ tell-input more-input-expected ] }
+            { [ dup object>> "\s\r\n" member? ] [ drop nip readln 2array pcomment boa ] }
+            [ parse-word ] ! just a word!?
+        } cond
+    ] if ;
 
 : token ( -- string/f )
-    "\r\n\s\"{[(" read-until {
-!  "\r\n\s\"" read-until {
+    "\r\n\s\"{[(!" read-until {
         { [ dup f = ] [ drop ] } ! XXX: parse-action here?
         { [ dup object>> "\r\n\s" member? ] [ drop [ token ] when-empty ] }
+        { [ dup object>> CHAR: ! = ] [ parse-exclamation ] }
         { [ dup object>> CHAR: " = ] [ parse-string ] }
         { [ dup object>> CHAR: { = ] [ parse-brace ] }
         { [ dup object>> CHAR: [ = ] [ parse-bracket ] }
