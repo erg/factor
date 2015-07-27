@@ -13,13 +13,11 @@ GENERIC: lookup-token ( obj -- obj' )
 
 M: pstring lookup-token string>> ;
 ! M: pnumber lookup-token n>> string>number ;
-ERROR: word-not-found word ;
+! ERROR: word-not-found word ;
 ! M: ptoken lookup-token name>> search ;
-M: parray lookup-token elements>> [ lookup-token ] map expand-literals ;
+! M: parray lookup-token elements>> [ lookup-token ] map expand-literals ;
 ! M: pescaped lookup-token name>> ptoken new swap >>object lookup-token <wrapper> ;
-
-M: pblock lookup-token
-    body>> [ lookup-token ] map >quotation ;
+! M: pblock lookup-token body>> [ lookup-token ] map >quotation ;
 
 : >modern ( name -- name' ) ;
 
