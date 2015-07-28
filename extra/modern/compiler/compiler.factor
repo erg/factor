@@ -36,7 +36,7 @@ M: string precompile-word
 
 
 GENERIC: precompile ( obj -- )
-M: pcomment precompile drop ;
+! M: pcomment precompile drop ;
 M: pdefer precompile name>> name>> precompile-word ;
 M: pgeneric precompile name>> name>> precompile-word ;
 M: pbuiltin precompile

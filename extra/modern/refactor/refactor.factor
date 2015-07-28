@@ -75,6 +75,7 @@ M: sequence refactor' '[ _ refactor' ] each ;
     [ trim-trailing-comment-whitespace ] refactor-codebase ;
 
 
+/*
 : boa-tuple-literal? ( obj -- ? )
     {
         [ ptuple-literal? ]
@@ -94,6 +95,7 @@ M: sequence refactor' '[ _ refactor' ] each ;
 
 : rename-boa-tuple-literal-codebase ( -- )
     [ boa-tuple-literal? ] [ rename-boa-tuple ] refactor-codebase ;
+*/
 
 
 : c-function-declaration? ( obj -- ? )
