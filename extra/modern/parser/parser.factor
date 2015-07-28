@@ -43,7 +43,6 @@ TUPLE: pexisting-class < doc ;
 TUPLE: pnew-word < doc ;
 TUPLE: pexisting-word < doc ;
 
-TUPLE: pcomment < psequence ;
 TUPLE: pstring < psequence ;
 TUPLE: parguments < psequence ;
 TUPLE: pbody < psequence ;
@@ -295,7 +294,7 @@ DEFER: raw
     ] [
         read1 {
             { [ dup f = ] [ tell-input more-input-expected ] }
-            { [ dup object>> "\s\r\n" member? ] [ drop nip readln 2array pcomment boa ] }
+            { [ dup object>> "\s\r\n" member? ] [ drop nip readln 2array ] } ! pcomment boa ] }
             [ parse-word ] ! just a word!?
         } cond
     ] if ;

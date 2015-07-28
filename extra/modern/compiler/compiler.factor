@@ -1,14 +1,62 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors assocs classes.mixin classes.predicate
-combinators compiler.units constructors effects fry generic
-generic.parser kernel literals.private math math.parser
-modern.lookup modern.parser modern.parser.factor modern.paths
-multiline namespaces parser prettyprint
-quotations sequences sequences.extras sets splitting strings
-vocabs vocabs.parser words ;
+combinators combinators.smart compiler.units constructors
+effects fry generic generic.parser io.streams.document kernel
+literals.private math math.parser modern.lookup modern.parser
+modern.parser.factor modern.paths multiline namespaces parser
+prettyprint quotations sequences sequences.extras sets splitting
+strings vocabs vocabs.parser words ;
+QUALIFIED: words.constant
 IN: modern.compiler
 
+: tokens ( object -- seq )
+    object>> [ ptext? ] reject ;
+
+GENERIC: parsed>object ( obj -- obj' )
+
+M: sequence parsed>object ( obj -- obj' )
+    [ parsed>object ] map ;
+
+M: doc parsed>object ( obj -- obj' )
+    object>> ;
+
+
+GENERIC: compile-object ( obj -- quot )
+
+! M: sequence compile-object ( obj -- obj' )
+    ! [ parsed>object compile-object ] map ;
+
+M: doc compile-object
+    object>> [
+        {
+            [ string>number ]
+        } cleave
+    ] output>array ;
+
+
+: compile-modern ( seq -- )
+    [
+        [ parsed>object ] map
+        [ compile-object ] map [ ] concat-as
+        _ call( -- )
+    ] with-compilation-unit ;
+
+
+
+TUPLE: cconstant name value ;
+
+M: pconstant parsed>object
+    tokens first2 [ ] [ parsed>object ] bi* cconstant boa ;
+
+M: cconstant compile-object
+    [ name>> object>> create-word-in ] [ value>> ] bi '[ _ _ words.constant:define-constant ] ;
+
+
+
+
+
+/*
 GENERIC: lookup-token ( obj -- obj' )
 
 M: pstring lookup-token string>> ;
@@ -81,7 +129,6 @@ M: ptuple precompile
     [ "?" append precompile-word ] bi ;
 
 GENERIC: mcompile ( obj -- quot )
-/*
 M: pcomment mcompile drop [ ] ;
 M: pbuiltin mcompile drop [ ] ;
 M: pprimitive mcompile drop [ ] ;
@@ -128,7 +175,6 @@ M: pprivate-begin mcompile
     end-private ;
 
 ! M: mtuple mcompile [
-*/
 
 : compile-modern ( seq -- )
     ! "syntax" use-vocab
@@ -143,3 +189,4 @@ M: pprivate-begin mcompile
 
 : compile-vocab ( name -- )
     modern-source-path parse-modern-file compile-modern ;
+*/
