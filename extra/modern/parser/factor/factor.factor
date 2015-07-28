@@ -104,7 +104,6 @@ PARSER: regexp-! R! "!" multiline-string-until ;
 
 ! END OF GO AWAY
 
-! move to lexer
 PARSER: pcomment ! readln ;
 PARSER: pshell-comment #! readln ;
 : parse-pnested-comment' ( level -- )
