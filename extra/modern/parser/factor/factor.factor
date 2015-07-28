@@ -173,13 +173,13 @@ PARSER: psubroutine SUBROUTINE: token parse ;
 ! words[ funky
 PARSER: plet-block [let "]" parse-until ;
 PARSER: pinterpolate I[ "]I" multiline-string-until ;
-PARSER: pliterate <LITERATE "LITERATE>" multiline-string-until ;
-PARSER: pxml-acute <XML "XML>" multiline-string-until ;
 PARSER: pxml-bracket [XML "XML]" multiline-string-until ;
 PARSER: pinfix [infix "infix]" multiline-string-until ;
 PARSER: pmorse [MORSE "MORSE]" multiline-string-until ;
-PARSER: pebnf-acute <EBNF token "EBNF>" multiline-string-until ; ! going away
 PARSER: pebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
+PARSER: pebnf-acute <EBNF token "EBNF>" multiline-string-until ; ! going away
+PARSER: pliterate <LITERATE "LITERATE>" multiline-string-until ;
+PARSER: pxml-acute <XML "XML>" multiline-string-until ;
 
 
 ! words@
