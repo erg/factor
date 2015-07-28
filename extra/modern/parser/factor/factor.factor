@@ -153,7 +153,7 @@ PARSER: pselector SELECTOR: token ; ! Smalltalk
 PARSER: pstorage STORAGE: token ; ! units
 
 ! Nice, regular uppercase read til ; parsers
-PARSER: pusing USING: ";" raw-until ;
+PARSER: pusing USING: ";" parse-until ;
 PARSER: psyntax-word SYNTAX: raw body ; ! needs \
 PARSER: pparser PARSER: raw raw body ; ! needs \
 
