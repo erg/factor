@@ -1,7 +1,7 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors ascii combinators fry io.encodings.utf8
-io.files kernel math modern.paths multiline sequences
+USING: accessors arrays ascii combinators fry io.encodings.utf8
+io.files kernel make math modern.paths multiline sequences
 sequences.extras ;
 IN: modern.quick-parser
 
@@ -48,9 +48,11 @@ DEFER: parse-until
     2over nth blank? [ complete-token ] unless ; inline
 
 : read-paren ( n string seq -- n string seq )
-B
-    2over nth blank? [
-        ")" parse-until
+    [ 1 + ] 2dip
+    2over ?nth blank? [
+        [ drop nip ] ! string
+        [ drop ")" parse-until ]
+        [ 2nip ] 3tri prefix swapd
     ] [
         complete-token
     ] if ; inline
@@ -58,7 +60,7 @@ B
 : read-bracket ( n string seq -- n string seq )
     2over nth blank? [ complete-token ] unless ; inline
 
-: ensure-token ( n' string seq/f ch/f -- n/f string/f seq/f loop? )
+: ensure-token ( n string seq/f ch/f -- n/f string/f seq/f loop? )
     {
         { f [ f ] }
         { CHAR: ! [ drop skip-til-eol f t ] }
@@ -86,10 +88,9 @@ B
     over [ token dup [ parse-action ] when ] [ 2drop f f ] if ; inline
 
 : parse-until ( n/f string token -- n/f object/f )
-B
-    [
-        _ parse _ = not
-    ] loop>array ;
+    '[
+        [ _ parse _ over sequence= [ , f ] [ , t ] if ] loop
+    ] { } make ;
 
 : quick-parse-string ( string -- sequence )
     [ 0 ] dip '[ _ parse ] loop>array nip ;
