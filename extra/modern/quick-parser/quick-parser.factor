@@ -158,9 +158,7 @@ ERROR: closing-brace-expected n string last ;
     over [ token dup [ parse-action ] when ] [ 2drop f f ] if ; inline
 
 : parse-until ( n/f string token -- n/f object/f )
-    '[
-        [ _ parse _ over sequence= [ , f ] [ , t ] if ] loop
-    ] { } make ;
+    '[ [ _ parse dup , _ sequence= not ] loop ] { } make ;
 
 : quick-parse-string ( string -- sequence )
     [ 0 ] dip '[ _ parse ] loop>array nip ;
