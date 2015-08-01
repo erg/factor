@@ -2,7 +2,7 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays ascii combinators fry io.encodings.utf8
 io.files kernel locals make math modern.paths multiline
-sequences sequences.extras ;
+sequences sequences.extras strings ;
 IN: modern.quick-parser
 
 /*
@@ -38,6 +38,12 @@ TUPLE:  parsed-compound atoms { slice slice } ;
         n n' [ string length ] unless* string <slice> ch
     ] if ; inline
 
+:: take-until-multi ( n string multi -- n' string inside end/f )
+    multi string n start* :> n'
+    n' multi length + string
+    n n' string <slice>
+    n' dup multi length + string <slice> ;
+
 : skip-blank ( n string -- n' string )
     [ [ blank? not ] find-from drop ] keep ; inline
 
@@ -66,20 +72,69 @@ ERROR: closing-paren-expected n string last ;
         complete-token
     ] if ;
 
-: read-bracket ( n string seq -- n seq )
-    2over ?nth [ closing-paren-expected ] unless* blank? [
-        [ ")" parse-until ] dip prefix
-    ] [
-        complete-token
-    ] if ;
+: extend-slice ( slice n -- slice' )
+    [ [ from>> ] [ to>> ] [ seq>> ] tri ] dip
+    swap [ + ] dip <slice> ;
 
-! : read-brace ( n string seq -- n seq )
-    ! 2over ?nth [ closing-paren-expected ] unless* blank? [
-        ! [ ")" parse-until ] dip prefix
-    ! ] [
-        ! complete-token
-    ! ] if ;
+! Ugly
+:: read-long-bracket ( n string tok ch -- n seq )
+    ch {
+        { CHAR: = [
+            n string "[" take-until-separator CHAR: [ = [ "omg error" throw ] unless :> ( n' string' tok2 )
+            tok2 length 1 - CHAR: = <string> "]" "]" surround :> needle
 
+            n' string' needle take-until-multi :> ( n'' string'' inside end )
+            n''
+            tok tok2 length extend-slice
+            inside
+            end 3array
+        ] }
+        { CHAR: [ [
+            n 1 + string "]]" take-until-multi :> ( n' string' inside end )
+            n'
+            tok 1 extend-slice
+            inside
+            end 3array
+        ] }
+    } case ;
+
+:: read-long-brace ( n string tok ch -- n seq )
+    ch {
+        { CHAR: = [
+            n string "{" take-until-separator CHAR: { = [ "omg error" throw ] unless :> ( n' string' tok2 )
+            tok2 length 1 - CHAR: = <string> "}" "}" surround :> needle
+
+            n' string' needle take-until-multi :> ( n'' string'' inside end )
+            n''
+            tok tok2 length extend-slice
+            inside
+            end 3array
+        ] }
+        { CHAR: { [
+            n 1 + string "}}" take-until-multi :> ( n' string' inside end )
+            n'
+            tok 1 extend-slice
+            inside
+            end 3array
+        ] }
+    } case ;
+
+
+ERROR: closing-bracket-expected n string last ;
+: read-bracket ( n string seq -- n' seq )
+    2over ?nth [ closing-bracket-expected ] unless* {
+        { [ dup "=[" member? ] [ read-long-bracket ] } ! double bracket, read [==[foo]==]
+        { [ dup blank? ] [ drop [ "]" parse-until ] dip prefix ] } ! regular[ word
+        [ drop complete-token ] ! something like [foo]
+    } cond ;
+
+ERROR: closing-brace-expected n string last ;
+: read-brace ( n string seq -- n' seq )
+    2over ?nth [ closing-brace-expected ] unless* {
+        { [ dup "={" member? ] [ read-long-brace ] } ! double brace read {=={foo}==}
+        { [ dup blank? ] [ drop [ "}" parse-until ] dip prefix ] } ! regular{ word
+        [ drop complete-token ] ! something like {foo}
+    } cond ;
 
 : token ( n/f string -- n'/f slice/f )
     over [
@@ -89,8 +144,8 @@ ERROR: closing-paren-expected n string last ;
                 { f [ nip ] }
                 { CHAR: ! [ drop skip-til-eol token ] }
                 { CHAR: ( [ read-paren ] }
-                ! { CHAR: [ [ read-bracket ] }
-                ! { CHAR: { [ read-brace ] }
+                { CHAR: [ [ read-bracket ] }
+                { CHAR: { [ read-brace ] }
                 [ drop nip ] ! "\s\r\n" found
             } case
             ! ensure-token [ drop token ] [ nip ] if
