@@ -1,8 +1,8 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays ascii combinators fry io.encodings.utf8
-io.files kernel make math modern.paths multiline sequences
-sequences.extras ;
+io.files kernel locals make math modern.paths multiline
+sequences sequences.extras ;
 IN: modern.quick-parser
 
 /*
@@ -14,20 +14,29 @@ USE: modern.quick-parser
 TUPLE:  parsed-atom { slice slice } ;
 TUPLE:  parsed-compound atoms { slice slice } ;
 
-: take-from-until ( n/f string tokens -- n'/f string slice/f ch/f )
-    ! If token is single character like ! or (, then width is zero
-    ! Add one for slice, and then take the to>> of the slice at the end
-    [ dup ] 2dip
-    [ '[ _ member? ] find-from ] 2keep drop
-    ! n n' ch string
-    {
-        [ nip over [ nip [ length ] keep ] unless
-            ! [ 2dup = [ 1 + ] when ] dip
-            <slice>
-        ]
-        [ drop 2nip ]
-    } 4cleave
-    [ [ to>> ] [ seq>> ] [ ] tri ] dip ; inline
+! Include the separator, which is not whitespace
+:: take-until-separator ( n string tokens -- n' string slice/f ch/f )
+    n string '[ tokens member? ] find-from [ dup [ 1 + ] when ] dip  :> ( n' ch )
+    n' string
+    n n' [ string length ] unless* string <slice> ch ; inline
+
+! Don't include the whitespace
+:: take-until-whitespace ( n string -- n' string slice/f ch/f )
+    n string '[ "\s\r\n" member? ] find-from :> ( n' ch )
+    n' string
+    n n' [ string length ] unless* string <slice> ch ; inline
+
+! If it's whitespace, don't include it
+:: take-until-either ( n string tokens -- n' string slice/f ch/f )
+    n string '[ tokens member? ] find-from dup "\s\r\n" member? [
+        :> ( n' ch )
+        n' string
+        n n' [ string length ] unless* string <slice> ch
+    ] [
+        [ dup [ 1 + ] when ] dip  :> ( n' ch )
+        n' string
+        n n' [ string length ] unless* string <slice> ch
+    ] if ; inline
 
 : skip-blank ( n string -- n' string )
     [ [ blank? not ] find-from drop ] keep ; inline
@@ -35,53 +44,56 @@ TUPLE:  parsed-compound atoms { slice slice } ;
 : skip-til-eol ( n string -- n' string )
     [ [ "\r\n" member? ] find-from drop ] keep ; inline
 
+
 : prepend-slice ( end begin -- slice )
     [ nip from>> ]
     [ drop [ to>> ] [ seq>> ] bi <slice> ] 2bi ; inline
 
-: complete-token ( n string seq -- n' string seq' )
-    [ "\s\r\n" take-from-until drop ] dip prepend-slice ; inline
+: complete-token ( n string seq -- n' seq' )
+    [ take-until-whitespace drop nip ] dip prepend-slice ;
 
 : parse-action ( n string -- n obj/f )
     ;
 
 DEFER: parse
 DEFER: parse-until
-: read-brace ( n string seq -- n string seq )
-    2over nth blank? [ complete-token ] unless ; inline
 
-: read-paren ( n string seq -- n string seq )
-    [ 1 + ] 2dip
-    2over ?nth blank? [
-        [ drop nip ] ! string
-        [ drop ")" parse-until ]
-        [ 2nip ] 3tri prefix swapd
+ERROR: closing-paren-expected n string last ;
+: read-paren ( n string seq -- n' seq )
+    2over ?nth [ closing-paren-expected ] unless* blank? [
+        [ ")" parse-until ] dip prefix
     ] [
         complete-token
-    ] if ; inline
+    ] if ;
 
-: read-bracket ( n string seq -- n string seq )
-    2over nth blank? [ complete-token ] unless ; inline
+: read-bracket ( n string seq -- n seq )
+    2over ?nth [ closing-paren-expected ] unless* blank? [
+        [ ")" parse-until ] dip prefix
+    ] [
+        complete-token
+    ] if ;
 
-: ensure-token ( n string seq/f ch/f -- n/f string/f seq/f loop? )
-    {
-        { f [ f ] }
-        { CHAR: ! [ drop skip-til-eol f t ] }
-        { CHAR: { [ read-brace f ] }
-        { CHAR: ( [ read-paren f ] }
-        { CHAR: [ [ read-bracket f ] }
-        [ drop f ] ! whitespace
-    } case ; inline
+! : read-brace ( n string seq -- n seq )
+    ! 2over ?nth [ closing-paren-expected ] unless* blank? [
+        ! [ ")" parse-until ] dip prefix
+    ! ] [
+        ! complete-token
+    ! ] if ;
+
 
 : token ( n/f string -- n'/f slice/f )
     over [
         skip-blank over
         [
-            "\s\r\n{([!" take-from-until ensure-token [
-                drop token
-            ] [
-                nip
-            ] if
+            "!([{\s\r\n" take-until-either {
+                { f [ nip ] }
+                { CHAR: ! [ drop skip-til-eol token ] }
+                { CHAR: ( [ read-paren ] }
+                ! { CHAR: [ [ read-bracket ] }
+                ! { CHAR: { [ read-brace ] }
+                [ drop nip ] ! "\s\r\n" found
+            } case
+            ! ensure-token [ drop token ] [ nip ] if
         ] [ 2drop f f ] if
     ] [
         2drop f f
