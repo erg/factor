@@ -21,7 +21,10 @@ TUPLE:  parsed-compound atoms { slice slice } ;
     [ '[ _ member? ] find-from ] 2keep drop
     ! n n' ch string
     {
-        [ nip over [ nip [ length ] keep ] unless [ 2dup = [ 1 + ] when ] dip <slice> ]
+        [ nip over [ nip [ length ] keep ] unless
+            ! [ 2dup = [ 1 + ] when ] dip
+            <slice>
+        ]
         [ drop 2nip ]
     } 4cleave
     [ [ to>> ] [ seq>> ] [ ] tri ] dip ; inline
