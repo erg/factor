@@ -6,6 +6,9 @@ sequences sequences.extras strings ;
 IN: modern.quick-parser
 
 /*
+"resource:basis/regexp/regexp-tests.factor" quick-parse-path
+
+[ dup . flush yield quick-parse-path drop ] each
 USE: modern.quick-parser
 "math" quick-parse-vocab
 [ >string . ] each
@@ -17,6 +20,11 @@ TUPLE:  parsed-compound atoms { slice slice } ;
 ! Include the separator, which is not whitespace
 :: take-until-separator ( n string tokens -- n' string slice/f ch/f )
     n string '[ tokens member? ] find-from [ dup [ 1 + ] when ] dip  :> ( n' ch )
+    n' string
+    n n' [ string length ] unless* string <slice> ch ; inline
+
+:: take-no-separator ( n string tokens -- n' string slice/f ch/f )
+    n string '[ tokens member? ] find-from :> ( n' ch )
     n' string
     n n' [ string length ] unless* string <slice> ch ; inline
 
@@ -43,6 +51,10 @@ TUPLE:  parsed-compound atoms { slice slice } ;
     n' multi length + string
     n n' string <slice>
     n' dup multi length + string <slice> ;
+
+: take-next ( n string -- n string ch )
+    [ [ 1 + ] dip ]
+    [ ?nth ] 2bi ;
 
 : skip-blank ( n string -- n' string )
     [ [ blank? not ] find-from drop ] keep ; inline
@@ -136,16 +148,33 @@ ERROR: closing-brace-expected n string last ;
         [ drop complete-token ] ! something like {foo}
     } cond ;
 
+: read-string' ( n string -- n' string )
+    "\"\\" take-until-separator {
+        { f [ "error123" throw ] }
+        { CHAR: " [ drop ] }
+        { CHAR: \ [ drop read-string' ] }
+        [ "errorr1212" throw ]
+    } case ;
+
+:: read-string ( n string seq -- n' seq' )
+    n string read-string' :> ( n' seq' )
+    n'
+    seq
+    n n' 1 - string <slice>
+    n' 1 - n' string <slice>
+    3array ;
+
 : token ( n/f string -- n'/f slice/f )
     over [
         skip-blank over
         [
-            "!([{\s\r\n" take-until-either {
+            "!([{\"\s\r\n" take-until-either {
                 { f [ nip ] }
                 { CHAR: ! [ drop skip-til-eol token ] }
                 { CHAR: ( [ read-paren ] }
                 { CHAR: [ [ read-bracket ] }
                 { CHAR: { [ read-brace ] }
+                { CHAR: " [ read-string ] }
                 [ drop nip ] ! "\s\r\n" found
             } case
             ! ensure-token [ drop token ] [ nip ] if
@@ -158,7 +187,7 @@ ERROR: closing-brace-expected n string last ;
     over [ token dup [ parse-action ] when ] [ 2drop f f ] if ; inline
 
 : parse-until ( n/f string token -- n/f object/f )
-    '[ [ _ parse dup , _ sequence= not ] loop ] { } make ;
+    '[ [ _ parse [ dup , _ sequence= not ] [ f ] if* ] loop ] { } make ;
 
 : quick-parse-string ( string -- sequence )
     [ 0 ] dip '[ _ parse ] loop>array nip ;

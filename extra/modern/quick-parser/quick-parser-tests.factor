@@ -37,3 +37,7 @@ IN: modern.quick-parser.tests
 { t } [ "[[]]" quick-parse-string length 1 = ] unit-test
 { t } [ "a[[]]" quick-parse-string length 1 = ] unit-test
 { t } [ "a[[b]]" quick-parse-string length 1 = ] unit-test
+
+{ t } [ "\"\"" quick-parse-string length 1 = ] unit-test
+{ t } [ "foo\"\"" quick-parse-string length 1 = ] unit-test
+{ t } [ "foo\"abc\"" quick-parse-string length 1 = ] unit-test
