@@ -47,36 +47,36 @@ TUPLE: qsequence object slice ;
 ! Include the separator, which is not whitespace
 :: take-until-separator ( n string tokens -- slice/f n' string ch/f )
     n string '[ tokens member? ] find-from [ dup [ 1 + ] when ] dip  :> ( n' ch )
-    n n' [ string length ] unless* string <slice>
+    n n' string ?<slice>
     n' string ch ; inline
 
 :: take-no-separator ( n string tokens -- slice/f n' string ch/f )
     n string '[ tokens member? ] find-from :> ( n' ch )
-    n n' [ string length ] unless* string <slice>
+    n n' string ?<slice>
     n' string ch ; inline
 
 ! Don't include the whitespace
 :: take-until-whitespace ( n string -- slice/f n' string ch/f )
     n string '[ "\s\r\n" member? ] find-from :> ( n' ch )
-    n n' [ string length ] unless* string <slice>
+    n n' string ?<slice>
     n' string ch ; inline
 
 ! If it's whitespace, don't include it
 :: take-until-either ( n string tokens -- slice/f n' string ch )
     n string '[ tokens member? ] find-from dup "\s\r\n" member? [
         :> ( n' ch )
-        n n' [ string length ] unless* string <slice>
+        n n' string ?<slice>
         n' string ch
     ] [
         [ dup [ 1 + ] when ] dip  :> ( n' ch )
-        n n' [ string length ] unless* string <slice>
+        n n' string ?<slice>
         n' string ch
     ] if ; inline
 
 :: take-until-multi ( n string multi -- inside end/f n' string )
     multi string n start* :> n'
-    n n' string <slice>
-    n' dup multi length + string <slice>
+    n n' string ?<slice>
+    n' dup multi length + string ?<slice>
     n' multi length + string ;
 
 : take-next ( n string -- ch n string )
@@ -199,8 +199,8 @@ ERROR: closing-brace-expected n string last ;
 
     n string read-string' :> ( n' seq' )
     name
-    n n' 1 - string <slice>
-    n' 1 - n' string <slice>
+    n n' 1 - string ?<slice>
+    n' 1 - n' string ?<slice>
     3array
     n'
     string ;
@@ -212,8 +212,8 @@ ERROR: closing-brace-expected n string last ;
             "!([{\"\s\r\n" take-until-either
             ! seq n string ch
             {
-                { f [ ] } ! XXX: what here
-                { CHAR: ! [ [ drop ] 2dip skip-til-eol token ] }
+                { f [ [ drop f ] dip ] } ! XXX: what here
+                { CHAR: ! [ pick empty? [ [ drop ] 2dip skip-til-eol token ] [ complete-token ] if ] }
                 { CHAR: ( [ read-paren ] }
                 { CHAR: [ [ read-bracket ] }
                 { CHAR: { [ read-brace ] }
@@ -221,9 +221,9 @@ ERROR: closing-brace-expected n string last ;
                 [ drop ] ! "\s\r\n" found
             } case
             ! ensure-token [ drop token ] [ nip ] if
-        ] [ 2drop f f f ] if
+        ] [ [ drop f f ] dip ] if
     ] [
-        2drop f f f
+        [ drop f f ] dip
     ] if ; inline recursive
 
 : new-class ( n/f string -- token n'/f string ) token ;
@@ -236,7 +236,7 @@ ERROR: closing-brace-expected n string last ;
     over [
         skip-blank take-until-whitespace [ drop ] 2dip
     ] [
-        2drop f f f
+        [ drop f f ] dip
     ] if ;
 
 ERROR: expected-error got expected ;
@@ -250,11 +250,21 @@ ERROR: expected-error got expected ;
         n string token :> ( tok n' string )
         tok n' string tok [ parse-action ] when
     ] [
-        f f f
+        f f string
     ] if ;
 
+GENERIC: object>sequence ( obj -- string )
+
+M: qsequence object>sequence slice>> ;
+M: object object>sequence ;
+
+ERROR: token-expected-but-got-eof n string token ;
 : parse-until ( n/f string token -- obj/f n/f string )
-    '[ [ parse rot [ dup , _ sequence= not ] [ f ] if* ] loop ] { } make -rot ;
+    pick [
+        '[ [ parse rot [ [ , ] [ object>sequence ] bi _ sequence= not ] [ f ] if* ] loop ] { } make -rot
+    ] [
+        token-expected-but-got-eof
+    ] if ;
 
 : raw-until ( n/f string token -- obj/f n/f string )
     '[ [ raw rot [ dup , _ sequence= not ] [ f ] if* ] loop ] { } make -rot ;
@@ -301,7 +311,9 @@ M: string >out ;
                 '[ _ 2 output>array-n [ swap ] 2dip [ ?<slice> _ boa ] 2keep ]
                 ( n n' string -- obj n' string ) define-declared
             ] [ ! (qparse-foo)
-                [ drop ] 4dip nip swap
+                [ drop ] 4dip nip
+                [ 2dup 2drop ] compose ! stack depth should be 2 for the macro below....
+                swap
                 '[ _ 2 output>array-n [ swap ] 2dip [ ?<slice> _ boa ] 2keep ]
                 ( n n' string -- obj n' string ) define-declared
             ] [ ! (word) token register
