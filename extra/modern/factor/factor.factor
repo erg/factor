@@ -2,14 +2,15 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays io kernel modern.quick-parser multiline ;
 IN: modern.factor
+QUALIFIED: sequences
+QUALIFIED: strings
 
 ! Test cases:
 ! ALIAS: foo{ bar{
 ! HELP: foo{
 
 ! Can go away:
-! XXX: IMPLEMENT ME
-! ! ! ! ! QPARSER: heredoc HEREDOC: token-to-find object>> multiline-string-until ;
+QPARSER: heredoc HEREDOC: token pick strings:>string multiline-string-until ;
 ! string literals
 ! QPARSER: " " ;
 ! QPARSER: P" P" ;
@@ -20,17 +21,14 @@ IN: modern.factor
 QPARSER: compilation-unit-begin << ; ! going away
 QPARSER: compilation-unit-end >> ; ! going away
 
-
-! XXX:
-! QPARSER: regexp-/ R/ "/" multiline-string-until ;
-! QPARSER: regexp-# R# "#" multiline-string-until ;
-! QPARSER: regexp-' R' "'" multiline-string-until ;
-! QPARSER: regexp-( R( "(" multiline-string-until ;
-! QPARSER: regexp-@ R@ "@" multiline-string-until ;
-! QPARSER: regexp-` R` "`" multiline-string-until ;
-! QPARSER: regexp-| R| "|" multiline-string-until ;
-! QPARSER: regexp-! R! "!" multiline-string-until ;
-
+QPARSER: regexp-/ R/ "/" multiline-string-until ;
+QPARSER: regexp-# R# "#" multiline-string-until ;
+QPARSER: regexp-' R' "'" multiline-string-until ;
+QPARSER: regexp-( R( "(" multiline-string-until ;
+QPARSER: regexp-@ R@ "@" multiline-string-until ;
+QPARSER: regexp-` R` "`" multiline-string-until ;
+QPARSER: regexp-| R| "|" multiline-string-until ;
+QPARSER: regexp-! R! "!" multiline-string-until ;
 
 ! words[
 ! QPARSER: block [ "]" parse-until ;
@@ -100,9 +98,8 @@ QPARSER: compilation-unit-end >> ; ! going away
 ! QPARSER: data-map!-parens data-map!( (parse-psignature) ;
 ! QPARSER: shuffle-parens shuffle( (parse-psignature) ;
 
-
-
 ! END OF GO AWAY
+
 
 QPARSER: comment ! skip-til-eol ;
 QPARSER: shell-comment #! skip-til-eol ;
@@ -118,13 +115,13 @@ QPARSER: shell-comment #! skip-til-eol ;
 ! QPARSER: nested-comment (* [ 1 parse-pnested-comment' ] { } make ;
 
 ! BEGIN REGULAR WORDS
-! Single token words
+! Single token words, probably don't need to be parsing words except for f maybe
+QPARSER: f f ;
 QPARSER: private-begin <PRIVATE ;
 QPARSER: private-end PRIVATE> ;
 QPARSER: BAD-ALIEN BAD-ALIEN ;
 QPARSER: delimiter delimiter ;
 QPARSER: deprecated deprecated ;
-QPARSER: f f ;
 QPARSER: final final ;
 QPARSER: flushable flushable ;
 QPARSER: foldable foldable ;
@@ -174,8 +171,7 @@ QPARSER: subroutine SUBROUTINE: token parse ;
 ! WEIRD
 ! words[ funky
 QPARSER: let-block [let "]" parse-until ;
-! XXX:
-QPARSER: interpolate I[ "]I" multiline-string-until ;
+QPARSER: interpolate [I "I]" multiline-string-until ;
 QPARSER: xml-bracket [XML "XML]" multiline-string-until ;
 QPARSER: infix [infix "infix]" multiline-string-until ;
 QPARSER: morse [MORSE "MORSE]" multiline-string-until ;
@@ -184,11 +180,10 @@ QPARSER: ebnf-acute <EBNF token "EBNF>" multiline-string-until ; ! going away
 QPARSER: literate <LITERATE "LITERATE>" multiline-string-until ;
 QPARSER: xml-acute <XML "XML>" multiline-string-until ;
 
-! XXX:
-! QPARSER: backtick ` "`" multiline-string-until ;
-! QPARSER: applescript APPLESCRIPT: new-word ";APPLESCRIPT" multiline-string-until ;
-! QPARSER: long-string STRING: token "\n;" multiline-string-until ;
-! QPARSER: glsl-shader GLSL-SHADER: token token "\n;" multiline-string-until ;
+QPARSER: backtick ` "`" multiline-string-until ;
+QPARSER: applescript APPLESCRIPT: new-word ";APPLESCRIPT" multiline-string-until ;
+QPARSER: long-string STRING: token "\n;" multiline-string-until ;
+QPARSER: glsl-shader GLSL-SHADER: token token "\n;" multiline-string-until ;
 QPARSER: ebnf EBNF: token ";EBNF" multiline-string-until ;
 
 
@@ -215,7 +210,9 @@ QPARSER: descriptive DESCRIPTIVE: new-word parse body ;
 QPARSER: descriptive-locals DESCRIPTIVE:: new-word parse body ;
 QPARSER: constructor-new CONSTRUCTOR: token token parse body ;
 QPARSER: primitive PRIMITIVE: new-word parse ;
-QPARSER: functor FUNCTOR: token parse ";FUNCTOR" parse-until ;
+! XXX: new def, can't use yet
+! QPARSER: functor FUNCTOR: token parse ";FUNCTOR" parse-until ;
+QPARSER: functor FUNCTOR: token ";FUNCTOR" multiline-string-until ;
 QPARSER: functor-syntax FUNCTOR-SYNTAX: token body ;
 QPARSER: generic GENERIC: new-class parse ;
 QPARSER: generic# GENERIC# new-class token parse ;
@@ -403,12 +400,11 @@ QPARSER: feedback-format feedback-format: token ;
 QPARSER: geometry-shader-vertices-out geometry-shader-vertices-out: parse ;
 ! funky
 
-! XXX:
-! : parse-bind ( -- seq )
-    ! raw dup dup [ object>> ] when "(" = [
-        ! ")" raw-until 3array
-    ! ] when ;
-! QPARSER: bind :> parse-bind ;
+: parse-bind ( n string -- seq n'/f string )
+    raw pick "(" sequences:sequence= [
+        ")" raw-until [ swap sequences:prefix ] 2dip
+    ] when ;
+QPARSER: bind :> parse-bind ;
 
 ! =================================================
 ! words\
