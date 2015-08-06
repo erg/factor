@@ -3,9 +3,9 @@
 USING: accessors arrays assocs bootstrap.syntax classes.parser
 classes.tuple combinators combinators.smart fry generalizations
 io.encodings.utf8 io.files kernel lexer locals macros make math
-modern.paths multiline namespaces sequences sequences.extras
-sequences.generalizations sets strings unicode.categories
-vectors words shuffle ;
+modern.paths multiline namespaces prettyprint sequences
+sequences.deep sequences.extras sequences.generalizations sets
+shuffle strings unicode.categories vectors vocabs.loader words ;
 QUALIFIED: parser
 QUALIFIED: lexer
 FROM: assocs => change-at ;
@@ -256,6 +256,9 @@ ERROR: expected-error got expected ;
 : parse-until ( n/f string token -- obj/f n/f string )
     '[ [ parse rot [ dup , _ sequence= not ] [ f ] if* ] loop ] { } make -rot ;
 
+: raw-until ( n/f string token -- obj/f n/f string )
+    '[ [ raw rot [ dup , _ sequence= not ] [ f ] if* ] loop ] { } make -rot ;
+
 : qparse ( string -- sequence )
     [ 0 ] dip [ parse rot ] loop>array 2nip ;
 
@@ -264,6 +267,20 @@ ERROR: expected-error got expected ;
 
 : quick-parse-vocab ( path -- sequence )
     modern-source-path quick-parse-path ;
+
+: qparse-vocab ( path -- seq )
+    vocab-source-path quick-parse-path ;
+
+GENERIC: >out ( obj -- string )
+
+M: slice >out >string ;
+M: qsequence >out slice>> >out ;
+M: sequence >out [ >out ] map ;
+M: string >out ;
+
+: qparse-vocab. ( path -- )
+    qparse-vocab
+    [ >out ] deep-map [ . ] each ;
 
 <<
 : define-qparser ( class token quot -- )
