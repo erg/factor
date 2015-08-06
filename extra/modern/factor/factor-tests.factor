@@ -22,6 +22,19 @@ IN: modern.factor.tests
 { t } [ "q[ a ]" qparse length 1 = ] unit-test
 { t } [ "q[ a b ]" qparse length 1 = ] unit-test
 
+{ t } [ "q[[]]" qparse length 1 = ] unit-test
+{ t } [ "q[[a]]" qparse length 1 = ] unit-test
+{ t } [ "q[=[a]=]" qparse length 1 = ] unit-test
+{ t } [ "q[==[a]==]" qparse length 1 = ] unit-test
+{ t } [ "q[====[a]====]" qparse length 1 = ] unit-test
+
+[ "q[[a]=]" qparse ] must-fail
+[ "q[=[a]]" qparse ] must-fail
+[ "q[==[a]]" qparse ] must-fail
+[ "q[[a]==]" qparse ] must-fail
+[ "q[==[a]===]" qparse ] must-fail
+[ "q[===[a]==]" qparse ] must-fail
+
 ! Exclamation words
 { } [
     ": suffix! ( a b -- c )

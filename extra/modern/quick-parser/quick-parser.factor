@@ -71,8 +71,10 @@ TUPLE: qsequence object slice ;
         n' string ch
     ] if ; inline
 
+ERROR: subseq-expected-but-got-eof string expected ;
 :: multiline-string-until ( n string multi -- inside end/f n' string )
     multi string n start* :> n'
+    n' [ n string multi subseq-expected-but-got-eof ] unless
     n n' string ?<slice>
     n' dup multi length + string ?<slice>
     n' multi length + string ;
