@@ -12,16 +12,16 @@ FROM: assocs => change-at ;
 IN: modern.quick-parser
 
 /*
-"resource:basis/regexp/regexp-tests.factor" quick-parse-path
-
-[ dup . flush yield quick-parse-path drop ] each
-USE: modern.quick-parser
-"math" quick-parse-vocab
-[ >string . ] each
+clear
+0 "\"\\\"\""
+"!([{\"\s\r\n" take-until-either 1string .
+{ CHAR: \ CHAR: " } take-including-separator [ >string . ] 3dip 1string .
+drop read-string'
 */
 
 
 SYMBOL: qparsers
+
 qparsers [ H{ } clone ] initialize
 
 : register-parser ( parser key -- )
@@ -36,34 +36,32 @@ ERROR: ambiguous-or-missing-parser seq ;
     qparsers get ?at [ ensure-action ] [ drop f ] if ;
 
 
-TUPLE: parsed-atom { slice slice } ;
-TUPLE: parsed-compound atoms { slice slice } ;
-
 TUPLE: qsequence object slice ;
 
 : ?<slice> ( n n' string -- slice )
     over [ nip [ length ] keep ] unless <slice> ; inline
 
-! Include the separator, which is not whitespace
-:: take-until-separator ( n string tokens -- slice/f n' string ch/f )
+! Increment past the separator
+:: take-including-separator ( n string tokens -- slice/f n' string ch/f )
     n string '[ tokens member? ] find-from [ dup [ 1 + ] when ] dip  :> ( n' ch )
     n n' string ?<slice>
     n' string ch ; inline
 
-:: take-no-separator ( n string tokens -- slice/f n' string ch/f )
+:: take-excluding-separator ( n string tokens -- slice/f n' string ch/f )
     n string '[ tokens member? ] find-from :> ( n' ch )
     n n' string ?<slice>
     n' string ch ; inline
 
-! Don't include the whitespace
+! Don't include the whitespace in the slice
 :: take-until-whitespace ( n string -- slice/f n' string ch/f )
     n string '[ "\s\r\n" member? ] find-from :> ( n' ch )
     n n' string ?<slice>
     n' string ch ; inline
 
-! If it's whitespace, don't include it
+! If it's whitespace, don't include it in the slice
 :: take-until-either ( n string tokens -- slice/f n' string ch )
-    n string '[ tokens member? ] find-from dup "\s\r\n" member? [
+    n string '[ tokens member? ] find-from
+    dup "\s\r\n" member? [
         :> ( n' ch )
         n n' string ?<slice>
         n' string ch
@@ -73,7 +71,7 @@ TUPLE: qsequence object slice ;
         n' string ch
     ] if ; inline
 
-:: take-until-multi ( n string multi -- inside end/f n' string )
+:: multiline-string-until ( n string multi -- inside end/f n' string )
     multi string n start* :> n'
     n n' string ?<slice>
     n' dup multi length + string ?<slice>
@@ -88,7 +86,6 @@ TUPLE: qsequence object slice ;
 
 : skip-til-eol ( n string -- n' string )
     [ [ "\r\n" member? ] find-from drop ] keep ; inline
-
 
 : prepend-slice ( end begin -- slice )
     [ nip from>> ]
@@ -123,50 +120,35 @@ ERROR: closing-paren-expected last n string ;
     [ [ from>> ] [ to>> ] [ seq>> ] tri ] dip
     swap [ + ] dip <slice> ;
 
-! Ugly
+! [ ]
 :: read-long-bracket ( tok n string ch -- seq n string )
     ch {
         { CHAR: = [
-            n string "[" take-until-separator CHAR: [ = [ "omg error" throw ] unless :> ( tok2 n' string' )
+            n string "[" take-including-separator CHAR: [ = [ "omg error" throw ] unless :> ( tok2 n' string' )
             tok2 length 1 - CHAR: = <string> "]" "]" surround :> needle
 
-            n' string' needle take-until-multi :> ( inside end n'' string'' )
-            tok tok2 length extend-slice
-            inside
-            end 3array
-            n''
-            string
+            n' string' needle multiline-string-until :> ( inside end n'' string'' )
+            tok tok2 length extend-slice  inside  end 3array n'' string
         ] }
         { CHAR: [ [
-            n 1 + string "]]" take-until-multi :> ( inside end n' string' )
-            tok 1 extend-slice
-            inside
-            end 3array
-            n'
-            string
+            n 1 + string "]]" multiline-string-until :> ( inside end n' string' )
+            tok 1 extend-slice  inside  end 3array n' string
         ] }
     } case ;
 
+! { }
 :: read-long-brace ( tok n string ch -- seq n string )
     ch {
         { CHAR: = [
-            n string "{" take-until-separator CHAR: { = [ "omg error" throw ] unless :> ( tok2 n' string' )
+            n string "{" take-including-separator CHAR: { = [ "omg error" throw ] unless :> ( tok2 n' string' )
             tok2 length 1 - CHAR: = <string> "}" "}" surround :> needle
 
-            n' string' needle take-until-multi :> ( inside end n'' string'' )
-            tok tok2 length extend-slice
-            inside
-            end 3array
-            n''
-            string
+            n' string' needle multiline-string-until :> ( inside end n'' string'' )
+            tok tok2 length extend-slice  inside  end 3array n'' string
         ] }
         { CHAR: { [
-            n 1 + string "}}" take-until-multi :> ( inside end n' string' )
-            tok 1 extend-slice
-            inside
-            end 3array
-            n'
-            string
+            n 1 + string "}}" multiline-string-until :> ( inside end n' string' )
+            tok 1 extend-slice  inside  end 3array n' string
         ] }
     } case ;
 
@@ -187,34 +169,46 @@ ERROR: closing-brace-expected n string last ;
         [ drop complete-token ] ! something like {foo}
     } cond ;
 
+ERROR: string-expected-got-eof n string ;
 : read-string' ( n string -- n' string )
-    "\"\\" take-until-separator {
-        { f [ "error123" throw ] }
-        { CHAR: " [ [ drop ] 2dip ] }
-        { CHAR: \ [ [ drop ] 2dip read-string' ] }
-        [ "errorr1212" throw ]
-    } case ;
+    over [
+        { CHAR: \ CHAR: " } take-including-separator {
+        ! "\"\\" take-including-separator {
+            { f [ [ drop ] 2dip ] }
+            { CHAR: " [ [ drop ] 2dip ] }
+            { CHAR: \ [ take-next [ 2drop ] 2dip read-string' ] }
+            [ "impossible" throw ]
+        } case
+    ] [
+        string-expected-got-eof
+    ] if ;
 
 :: read-string ( name n string -- seq n' string )
     n string read-string' :> ( n' seq' )
     name
-    n n' 1 - string ?<slice>
-    n' 1 - n' string ?<slice>
+    n dup 1 + string <slice>
+    n' [ 1 - n' ] [ string length [ 2 - ] [ 1 - ] bi ] if* string <slice>
     3array n' string ;
 
+: advance-1 ( n string -- n/f string )
+    over [
+        [ 1 + ] dip 2dup length >= [ [ drop f ] dip ] when
+    ] when ;
+
+ERROR: whitespace-expected-after-string n string ch ;
 : token ( n/f string -- token n'/f string )
     over [
         skip-blank over
         [
-            "!([{\"\s\r\n" take-until-either
+            ! XXX: check bad escape sequences
             ! seq n string ch
-            {
+            "!([{\"\s\r\n" take-until-either {
                 { f [ [ drop f ] dip ] } ! XXX: what here
                 { CHAR: ! [ pick empty? [ [ drop ] 2dip skip-til-eol token ] [ complete-token ] if ] }
                 { CHAR: ( [ read-paren ] }
                 { CHAR: [ [ read-bracket ] }
                 { CHAR: { [ read-brace ] }
-                { CHAR: " [ read-string ] }
+                { CHAR: " [ read-string take-next rot [ dup blank? [ drop ] [ whitespace-expected-after-string ] if ] when* ] }
                 [ drop ] ! "\s\r\n" found
             } case
             ! ensure-token [ drop token ] [ nip ] if
@@ -258,7 +252,11 @@ M: object object>sequence ;
 ERROR: token-expected-but-got-eof n string token ;
 : parse-until ( n/f string token -- obj/f n/f string )
     pick [
-        '[ [ parse rot [ [ , ] [ object>sequence ] bi _ sequence= not ] [ f ] if* ] loop ] { } make -rot
+        dup '[
+            [ parse rot [ [ , ] [ object>sequence ] bi _ sequence= not
+        ] [
+            _ token-expected-but-got-eof ] if* ] loop
+        ] { } make -rot
     ] [
         token-expected-but-got-eof
     ] if ;

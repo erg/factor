@@ -31,4 +31,22 @@ IN: modern.factor.tests
 ! Incomplete word definitions
 [ ": suffix ;" qparse ] must-fail
 
+! Incomplete parse
+[ "CONSTANT: a (" qparse ] must-fail
+[ "CONSTANT: a {" qparse ] must-fail
+[ "CONSTANT: a [" qparse ] must-fail
+[ "CONSTANT: a \"" qparse ] must-fail
+! Regression
+[ "CONSTANT: a ( " qparse ] must-fail
+[ "CONSTANT: a { " qparse ] must-fail
+[ "CONSTANT: a [ " qparse ] must-fail
+[ "CONSTANT: a \" " qparse ] must-fail
+
+! Strings
+[ "\"abc" qparse ] must-fail
+[ "\"abc\"abc" qparse ] must-fail
+
 { } [ 0 0 ": suffix ( a b -- c ) ;" qparse-function 3drop ] unit-test
+
+{ }
+[ "[ H{ } clone callbacks set-global ] \"alien\" add-startup-hook" qparse drop ] unit-test
