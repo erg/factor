@@ -175,21 +175,21 @@ QPARSER: subroutine SUBROUTINE: token parse ;
 ! words[ funky
 QPARSER: let-block [let "]" parse-until ;
 ! XXX:
-! QPARSER: interpolate I[ "]I" multiline-string-until ;
-! QPARSER: xml-bracket [XML "XML]" multiline-string-until ;
-! QPARSER: infix [infix "infix]" multiline-string-until ;
-! QPARSER: morse [MORSE "MORSE]" multiline-string-until ;
-! QPARSER: ebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
-! QPARSER: ebnf-acute <EBNF token "EBNF>" multiline-string-until ; ! going away
-! QPARSER: literate <LITERATE "LITERATE>" multiline-string-until ;
-! QPARSER: xml-acute <XML "XML>" multiline-string-until ;
+QPARSER: interpolate I[ "]I" multiline-string-until ;
+QPARSER: xml-bracket [XML "XML]" multiline-string-until ;
+QPARSER: infix [infix "infix]" multiline-string-until ;
+QPARSER: morse [MORSE "MORSE]" multiline-string-until ;
+QPARSER: ebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
+QPARSER: ebnf-acute <EBNF token "EBNF>" multiline-string-until ; ! going away
+QPARSER: literate <LITERATE "LITERATE>" multiline-string-until ;
+QPARSER: xml-acute <XML "XML>" multiline-string-until ;
 
 ! XXX:
 ! QPARSER: backtick ` "`" multiline-string-until ;
 ! QPARSER: applescript APPLESCRIPT: new-word ";APPLESCRIPT" multiline-string-until ;
 ! QPARSER: long-string STRING: token "\n;" multiline-string-until ;
 ! QPARSER: glsl-shader GLSL-SHADER: token token "\n;" multiline-string-until ;
-! QPARSER: ebnf EBNF: token ";EBNF" multiline-string-until ;
+QPARSER: ebnf EBNF: token ";EBNF" multiline-string-until ;
 
 
 ! words@
