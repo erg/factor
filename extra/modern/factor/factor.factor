@@ -14,3 +14,6 @@ QPARSER: char CHAR: raw ;
 ! QPARSER: qualified QUALIFIED: token ;
 ! QPARSER: qualified-with QUALIFIED-WITH: token token ;
 ! QPARSER: forget FORGET: token ;
+
+
+QPARSER: builtin BUILTIN: existing-class body ;

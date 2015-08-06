@@ -114,7 +114,7 @@ ERROR: closing-paren-expected last n string ;
 : read-paren ( seq n string -- seq n' string )
     2dup ?nth [ closing-paren-expected ] unless*
     blank? [
-        ")" parse-until -roll [ prefix ] 2dip
+        ")" parse-until [ swap prefix ] 2dip
     ] [
         complete-token
     ] if ;
@@ -175,7 +175,7 @@ ERROR: closing-bracket-expected last n string ;
 : read-bracket ( last n string -- seq n' string )
     2dup ?nth [ closing-bracket-expected ] unless* {
         { [ dup "=[" member? ] [ read-long-bracket ] } ! double bracket, read [==[foo]==]
-        { [ dup blank? ] [ drop "]" parse-until -roll [ prefix ] 2dip ] } ! regular[ word
+        { [ dup blank? ] [ drop "]" parse-until [ swap prefix ] 2dip ] } ! regular[ word
         [ drop complete-token ] ! something like [foo]
     } cond ;
 
@@ -183,7 +183,7 @@ ERROR: closing-brace-expected n string last ;
 : read-brace ( n string seq -- n' string seq )
     2dup ?nth [ closing-brace-expected ] unless* {
         { [ dup "={" member? ] [ read-long-brace ] } ! double brace read {=={foo}==}
-        { [ dup blank? ] [ drop "}" parse-until -roll [ prefix ] 2dip ] } ! regular{ word
+        { [ dup blank? ] [ drop "}" parse-until [ swap prefix ] 2dip ] } ! regular{ word
         [ drop complete-token ] ! something like {foo}
     } cond ;
 
@@ -210,10 +210,10 @@ ERROR: closing-brace-expected n string last ;
         skip-blank over
         [
             "!([{\"\s\r\n" take-until-either
-            ! n string seq ch
+            ! seq n string ch
             {
                 { f [ ] } ! XXX: what here
-                { CHAR: ! [ drop skip-til-eol token ] }
+                { CHAR: ! [ [ drop ] 2dip skip-til-eol token ] }
                 { CHAR: ( [ read-paren ] }
                 { CHAR: [ [ read-bracket ] }
                 { CHAR: { [ read-brace ] }
@@ -225,6 +225,12 @@ ERROR: closing-brace-expected n string last ;
     ] [
         2drop f f f
     ] if ; inline recursive
+
+: new-class ( n/f string -- token n'/f string ) token ;
+: new-word ( n/f string -- token n'/f string ) token ;
+: existing-class ( n/f string -- token n'/f string ) token ;
+: existing-word ( n/f string -- token n'/f string ) token ;
+: body ( n/f string -- seq n'/f string ) ";" parse-until ;
 
 : raw ( n/f string -- slice/f n'/f string )
     over [
@@ -243,16 +249,12 @@ ERROR: expected-error got expected ;
     n [
         n string token :> ( tok n' string )
         tok n' string tok [ parse-action ] when
-        ! tok [ tok n' string parse-action ] [ tok n' string ] if
     ] [
         f f f
     ] if ;
-    ! over
-    ! [ token pick [ parse-action ] when ] ! prefix here
-    ! [ 2drop f f f ] if ; inline
 
 : parse-until ( n/f string token -- obj/f n/f string )
-    '[ [ parse rot [ dup , _ sequence= not ] [ f ] if* ] loop ] { } make ;
+    '[ [ parse rot [ dup , _ sequence= not ] [ f ] if* ] loop ] { } make -rot ;
 
 : qparse ( string -- sequence )
     [ 0 ] dip [ parse rot ] loop>array 2nip ;
@@ -274,7 +276,6 @@ ERROR: expected-error got expected ;
         ] 3keep
         ! word (word) class token quot
         {
-            ! qparse-foo
             ! (word) class token quot
             [
                 [ drop ] 3dip
