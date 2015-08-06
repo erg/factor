@@ -191,19 +191,16 @@ ERROR: closing-brace-expected n string last ;
     "\"\\" take-until-separator {
         { f [ "error123" throw ] }
         { CHAR: " [ [ drop ] 2dip ] }
-        { CHAR: \ [ drop read-string' ] }
+        { CHAR: \ [ [ drop ] 2dip read-string' ] }
         [ "errorr1212" throw ]
     } case ;
 
 :: read-string ( name n string -- seq n' string )
-
     n string read-string' :> ( n' seq' )
     name
     n n' 1 - string ?<slice>
     n' 1 - n' string ?<slice>
-    3array
-    n'
-    string ;
+    3array n' string ;
 
 : token ( n/f string -- token n'/f string )
     over [
@@ -234,7 +231,7 @@ ERROR: closing-brace-expected n string last ;
 
 : raw ( n/f string -- slice/f n'/f string )
     over [
-        skip-blank take-until-whitespace [ drop ] 2dip
+        skip-blank take-until-whitespace drop
     ] [
         [ drop f f ] dip
     ] if ;
@@ -312,7 +309,7 @@ M: string >out ;
                 ( n n' string -- obj n' string ) define-declared
             ] [ ! (qparse-foo)
                 [ drop ] 4dip nip
-                [ 2dup 2drop ] compose ! stack depth should be 2 for the macro below....
+                [ 2dup 2drop ] prepose ! stack depth should be 2 for the macro below....
                 swap
                 '[ _ 2 output>array-n [ swap ] 2dip [ ?<slice> _ boa ] 2keep ]
                 ( n n' string -- obj n' string ) define-declared
