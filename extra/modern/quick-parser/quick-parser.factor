@@ -71,7 +71,7 @@ TUPLE: qsequence object slice ;
         n' string ch
     ] if ; inline
 
-ERROR: subseq-expected-but-got-eof string expected ;
+ERROR: subseq-expected-but-got-eof n string expected ;
 :: multiline-string-until ( n string multi -- inside end/f n' string )
     multi string n start* :> n'
     n' [ n string multi subseq-expected-but-got-eof ] unless
@@ -123,11 +123,13 @@ ERROR: closing-paren-expected last n string ;
     swap [ + ] dip <slice> ;
 
 ! [ ]
+ERROR: long-bracket-opening-mismatch tok n string ch ;
 :: read-long-bracket ( tok n string ch -- seq n string )
     ch {
         { CHAR: = [
-            n string "[" take-including-separator CHAR: [ = [ "omg error" throw ] unless :> ( tok2 n' string' )
-            tok2 length 1 - CHAR: = <string> "]" "]" surround :> needle
+            n string "[" take-including-separator :> ( tok2 n' string' ch )
+                ch CHAR: [ = [ tok n string ch long-bracket-opening-mismatch ]  unless
+        tok2 length 1 - CHAR: = <string> "]" "]" surround :> needle
 
             n' string' needle multiline-string-until :> ( inside end n'' string'' )
             tok tok2 length extend-slice  inside  end 3array n'' string
@@ -139,10 +141,12 @@ ERROR: closing-paren-expected last n string ;
     } case ;
 
 ! { }
+ERROR: long-brace-opening-mismatch tok n string ch ;
 :: read-long-brace ( tok n string ch -- seq n string )
     ch {
         { CHAR: = [
-            n string "{" take-including-separator CHAR: { = [ "omg error" throw ] unless :> ( tok2 n' string' )
+            n string "{" take-including-separator :> ( tok2 n' string' ch )
+                ch CHAR: { = [ tok n string ch long-brace-opening-mismatch ]  unless
             tok2 length 1 - CHAR: = <string> "}" "}" surround :> needle
 
             n' string' needle multiline-string-until :> ( inside end n'' string'' )
@@ -175,11 +179,9 @@ ERROR: string-expected-got-eof n string ;
 : read-string' ( n string -- n' string )
     over [
         { CHAR: \ CHAR: " } take-including-separator {
-        ! "\"\\" take-including-separator {
             { f [ [ drop ] 2dip ] }
             { CHAR: " [ [ drop ] 2dip ] }
             { CHAR: \ [ take-next [ 2drop ] 2dip read-string' ] }
-            [ "impossible" throw ]
         } case
     ] [
         string-expected-got-eof
