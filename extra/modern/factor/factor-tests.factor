@@ -28,12 +28,35 @@ IN: modern.factor.tests
 { t } [ "q[==[a]==]" qparse length 1 = ] unit-test
 { t } [ "q[====[a]====]" qparse length 1 = ] unit-test
 
+{ t } [ "q{{}}" qparse length 1 = ] unit-test
+{ t } [ "q{{a}}" qparse length 1 = ] unit-test
+{ t } [ "q{={a}=}" qparse length 1 = ] unit-test
+{ t } [ "q{=={a}==}" qparse length 1 = ] unit-test
+{ t } [ "q{===={a}====}" qparse length 1 = ] unit-test
+
+! Mismatched but ok
+{ t } [ "q[{a]]" qparse length 1 = ] unit-test
+{ t } [ "q{[a]]" qparse length 1 = ] unit-test
+{ t } [ "q{[a}]" qparse length 1 = ] unit-test
+
 [ "q[[a]=]" qparse ] must-fail
 [ "q[=[a]]" qparse ] must-fail
 [ "q[==[a]]" qparse ] must-fail
 [ "q[[a]==]" qparse ] must-fail
 [ "q[==[a]===]" qparse ] must-fail
 [ "q[===[a]==]" qparse ] must-fail
+
+[ "q{{a}=}" qparse ] must-fail
+[ "q{={a}}" qparse ] must-fail
+[ "q{=={a}}" qparse ] must-fail
+[ "q{{a}==}" qparse ] must-fail
+[ "q{=={a}===}" qparse ] must-fail
+[ "q{==={a}==}" qparse ] must-fail
+
+! Mismatched
+[ "q{{a}]" qparse ] must-fail
+[ "q{{a}]" qparse ] must-fail
+[ "q{{a]}" qparse ] must-fail
 
 ! Exclamation words
 { } [
