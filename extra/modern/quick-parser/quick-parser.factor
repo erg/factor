@@ -58,10 +58,10 @@ TUPLE: qsequence object slice ;
     n n' string ?<slice>
     n' string ch ; inline
 
-! If it's whitespace, don't include it in the slice
+! If it's whitespace or comment char, don't include it in the slice
 :: take-until-either ( n string tokens -- slice/f n' string ch )
     n string '[ tokens member? ] find-from
-    dup "\s\r\n" member? [
+    dup "!\s\r\n" member? [
         :> ( n' ch )
         n n' string ?<slice>
         n' string ch
@@ -138,6 +138,7 @@ ERROR: long-bracket-opening-mismatch tok n string ch ;
             n 1 + string "]]" multiline-string-until :> ( inside end n' string' )
             tok 1 extend-slice  inside  end 3array n' string
         ] }
+        [ [ tok n string ] dip long-bracket-opening-mismatch ]
     } case ;
 
 ! { }
@@ -199,6 +200,19 @@ ERROR: string-expected-got-eof n string ;
         [ 1 + ] dip 2dup length >= [ [ drop f ] dip ] when
     ] when ;
 
+: head?-from ( seq n begin -- ? )
+    [ tail-slice ] dip head? ; inline
+
+DEFER: token
+: take-comment ( tok n string -- n' string )
+    [ 1 + ] dip
+    2dup ?nth CHAR: [ = [
+        [ 1 + ] dip 2dup ?nth read-long-bracket
+        [ drop ] 2dip
+    ] [
+        [ drop ] 2dip skip-til-eol
+    ] if ;
+
 ERROR: whitespace-expected-after-string n string ch ;
 : token ( n/f string -- token n'/f string )
     over [
@@ -208,7 +222,7 @@ ERROR: whitespace-expected-after-string n string ch ;
             ! seq n string ch
             "!([{\"\s\r\n" take-until-either {
                 { f [ [ drop f ] dip ] } ! XXX: what here
-                { CHAR: ! [ pick empty? [ [ drop ] 2dip skip-til-eol token ] [ complete-token ] if ] }
+                { CHAR: ! [ pick empty? [ take-comment token ] [ complete-token ] if ] }
                 { CHAR: ( [ read-paren ] }
                 { CHAR: [ [ read-bracket ] }
                 { CHAR: { [ read-brace ] }
