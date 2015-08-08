@@ -34,12 +34,14 @@ QPARSER: regexp-! R! "!" multiline-string-until ;
 ! QPARSER: block [ "]" parse-until ;
 ! QPARSER: fry '[ "]" parse-until ;
 ! QPARSER: block-eval $[ "]" parse-until ;
-! QPARSER: block-locals [| "]" parse-until ;
 ! QPARSER: set-quot set[ "]" parse-until ;
 ! QPARSER: get-quot get[ "]" parse-until ;
 ! QPARSER: slots-quot slots[ "]" parse-until ;
 ! QPARSER: set-slots-quot set-slots[ "]" parse-until ;
 ! QPARSER: memo-block MEMO[ "]" parse-until ;
+
+QPARSER: block-locals [| "]" parse-until ;
+QPARSER: pipe-separator | ;
 
 ! words{
 ! QPARSER: array { "}" parse-until ;
@@ -101,18 +103,9 @@ QPARSER: regexp-! R! "!" multiline-string-until ;
 ! END OF GO AWAY
 
 
-QPARSER: comment ! skip-til-eol ;
-QPARSER: shell-comment #! skip-til-eol ;
-/*
-: parse-pnested-comment' ( level -- )
-    raw dup object>> {
-        { [ dup "(*" = ] [ drop , 1 + parse-pnested-comment' ] }
-        { [ dup "*)" = ] [ drop ptext doc-become , 1 - dup zero? [ drop ] [ parse-pnested-comment' ] if ] }
-        { [ dup f = ] [ "*)" expected ] } ! failed
-        [ drop , parse-pnested-comment' ]
-    } cond ;
-*/
-! QPARSER: nested-comment (* [ 1 parse-pnested-comment' ] { } make ;
+! QPARSER: comment ! skip-til-eol ;
+! QPARSER: shell-comment #! skip-til-eol ;
+QPARSER: c-comment /* "*/" multiline-string-until ;
 
 ! BEGIN REGULAR WORDS
 ! Single token words, probably don't need to be parsing words except for f maybe
