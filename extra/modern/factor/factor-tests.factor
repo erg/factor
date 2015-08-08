@@ -78,6 +78,47 @@ IN: modern.factor.tests
 [ "CONSTANT: a [ " qparse ] must-fail
 [ "CONSTANT: a \" " qparse ] must-fail
 
+! Malformed comments, yes malformed comments..
+[ "![" qparse ] must-fail
+[ "![=" qparse ] must-fail
+[ "![=[" qparse ] must-fail
+[ "![=[]" qparse ] must-fail
+[ "![=[]=" qparse ] must-fail
+[ "![=[]=[" qparse ] must-fail
+
+[ "![]]" qparse ] must-fail
+[ "![=]=]" qparse ] must-fail
+[ "![==]==]" qparse ] must-fail
+
+[ "![]]" qparse ] must-fail
+[ "![=[]]" qparse ] must-fail
+[ "![==[]=]" qparse ] must-fail
+[ "![[]" qparse ] must-fail
+[ "![=[=]" qparse ] must-fail
+[ "![==[==]" qparse ] must-fail
+[ "![[]" qparse ] must-fail
+[ "![=[]=" qparse ] must-fail
+[ "![==[]==" qparse ] must-fail
+
+! OK comments
+{ { } } [ "!" qparse ] unit-test
+{ { } } [ "! " qparse ] unit-test
+{ { } } [ "!!!!!!" qparse ] unit-test
+{ { } } [ "! ! ! ! ! !" qparse ] unit-test
+{ { } } [ "!a" qparse ] unit-test
+{ { } } [ "!abc" qparse ] unit-test
+{ { } } [ "! a" qparse ] unit-test
+{ { } } [ "! abc" qparse ] unit-test
+
+{ { } } [ "![[]]" qparse ] unit-test
+{ { } } [ "![=[]=]" qparse ] unit-test
+{ { } } [ "![==[]==]" qparse ] unit-test
+
+! Comments allow tokens or comments right after
+{ t } [ "![==[]==]a" qparse length 1 = ] unit-test
+{ { } } [ "![==[]==]!" qparse ] unit-test
+{ { } } [ "![==[]==]![[]]" qparse ] unit-test
+
 ! Strings
 [ "\"abc" qparse ] must-fail
 [ "\"abc\"abc" qparse ] must-fail
