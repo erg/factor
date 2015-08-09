@@ -141,6 +141,8 @@ QPARSER: qualified QUALIFIED: token ;
 QPARSER: qualified-with QUALIFIED-WITH: token token ;
 QPARSER: forget FORGET: token ;
 
+QPARSER: guid GUID: raw ;
+
 QPARSER: selector SELECTOR: token ; ! Smalltalk
 QPARSER: storage STORAGE: token ; ! units
 
@@ -265,8 +267,8 @@ QPARSER: imports IMPORTS: ";" raw-until ;
 QPARSER: special-object SPECIAL-OBJECT: token parse ;
 QPARSER: union UNION: new-class body ;
 QPARSER: intersection INTERSECTION: token body ;
-QPARSER: unicode-category CATEGORY: token token ;
-QPARSER: unicode-category-not CATEGORY-NOT: token token ;
+QPARSER: unicode-category CATEGORY: token body ;
+QPARSER: unicode-category-not CATEGORY-NOT: token body ;
 
 QPARSER: specialized-array SPECIALIZED-ARRAY: token ;
 QPARSER: specialized-arrays SPECIALIZED-ARRAYS: ";" raw-until ;
