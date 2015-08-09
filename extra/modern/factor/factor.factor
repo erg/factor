@@ -406,19 +406,20 @@ QPARSER: bind :> parse-bind ;
 QPARSER: escaped \ raw ;
 QPARSER: method-literal M\ token token ;
 
-! funky readahead one
+! funky readahead one, need this for things like CONSTANT: foo $ init-foo
+! XXX: Maybe call it $: instead.
 QPARSER: eval-dollar $ parse ;
 
 ! singleton parsing words
 
 ! Cocoa
 QPARSER: cfstring CFSTRING: new-word parse ;
-! QPARSER: class CLASS: new-class "<" expect existing-class parse ;
-! QPARSER: cocoa-method METHOD: "[" parse-until "]" parse-until ;
+QPARSER: class CLASS: new-class "<" expect token "[" raw-until "]" parse-until ;
+QPARSER: cocoa-method METHOD: token "[" raw-until "]" raw-until ; ! XXX: token is c-type
 QPARSER: framework FRAMEWORK: parse ;
 QPARSER: SEL: SEL: token ;
 ! QPARSER: cocoa-selector -> token ;
-! QPARSER: super-selector SUPER-> token ;
+QPARSER: super-selector SUPER-> token ;
 
 
 /*
