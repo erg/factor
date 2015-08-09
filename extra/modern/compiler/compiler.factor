@@ -22,9 +22,12 @@ IN: modern.compiler
     [ path>lexers ] map concat [ first ] map >out members ;
 
 
-: paths>top-level ( paths -- seq )
-    [ dup quick-parse-path [ slice? ] filter ] { } map>assoc harvest-values
-    values concat members natural-sort ;
+: paths>top-level-forms ( paths -- seq )
+    [ dup quick-parse-path [ slice? ] filter ] { } map>assoc harvest-values ;
+    ! values concat members natural-sort ;
+
+: paths>top-level-forms. ( paths -- )
+    paths>top-level-forms [ first2 [ print ] [ >out members natural-sort . ] bi* ] each ;
 
 : core-parsers ( -- seq ) core-source-files paths>parsers ;
 : core-lexers ( -- seq ) core-source-files paths>lexers ;
