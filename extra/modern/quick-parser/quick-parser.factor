@@ -24,33 +24,46 @@ drop read-string'
 SYMBOL: qparsers
 qparsers [ H{ } clone ] initialize
 
-SYMBOL: strings
-strings [ H{ } clone ] initialize
+SYMBOL: string-literals
+string-literals [ H{ } clone ] initialize
 
 SYMBOL: literals
 literals [ H{ } clone ] initialize
 
-SYMBOL: long-strings
-long-strings [ H{ } clone ] initialize
+SYMBOL: paren-literals
+paren-literals [ H{ } clone ] initialize
 
 : ?push-at ( parser key assoc -- )
     [ ?push members ] change-at ;
 
 : register-parser ( parser key -- ) qparsers get ?push-at ;
-: register-string ( parser key -- ) strings get ?push-at ;
-: register-literal ( parser key -- ) literals get ?push-at ;
-: register-long-string ( parser key -- ) long-strings get ?push-at ;
+
+: register-paren-literal ( parser -- ) dup name>> paren-literals get ?push-at ;
+: register-string-literal ( parser -- ) dup name>> string-literals get ?push-at ;
+: register-literal ( parser -- ) dup name>> literals get ?push-at ;
 
 ERROR: ambiguous-or-missing-parser seq ;
-: ensure-action ( seq -- word/* )
-    dup length 1 = [ first ] [ ambiguous-or-missing-parser ] if ;
+: choose-parser ( key assoc -- word/* )
+    ?at
+    [ dup length 1 = [ first ] [ ambiguous-or-missing-parser ] if ]
+    [ drop f ] if ;
 
 : lookup-action ( token -- word/f )
     dup slice? [ >string ] when
-    qparsers get ?at [ ensure-action ] [ drop f ] if ;
+    qparsers get choose-parser ;
 
 
 TUPLE: qsequence object slice ;
+TUPLE: paren-literal < qsequence ;
+TUPLE: string-literal < qsequence ;
+
+TUPLE: literal < qsequence ;
+TUPLE: compile-time-literal < literal ;
+TUPLE: run-time-literal < literal ;
+
+TUPLE: long-string-literal < qsequence ;
+TUPLE: compile-time-long-string-literal < long-string-literal ;
+TUPLE: run-time-long-string-literal < long-string-literal ;
 
 : ?<slice> ( n n' string -- slice )
     over [ nip [ length ] keep ] unless <slice> ; inline
@@ -122,12 +135,85 @@ ERROR: subseq-expected-but-got-eof n string expected ;
 
 DEFER: parse
 DEFER: parse-until
+: tag-lexed ( opening object ending class -- literal )
+    new
+    [
+        [ drop nip ] [
+            nip
+            [ from>> ]
+            [ [ to>> ] [ seq>> ] bi ] bi* <slice>
+        ] 3bi
+    ] dip
+        swap >>slice
+        swap >>object ; inline
+
+ERROR: unknown-string-literal opening seq ending ;
+ERROR: unknown-literal opening seq ending ;
+ERROR: unknown-paren-literal opening seq ending ;
+ERROR: unknown-long-string-literal opening seq ending ;
+
+! XXX: make sure no conflicts
+: lookup-string ( obj -- class/f ) [ CHAR: " = ] trim-tail string-literals get choose-parser ;
+: lookup-long-string ( obj -- class/f ) [ "[{=" member? ] trim-tail string-literals get choose-parser ;
+: lookup-literal ( obj -- class/f ) [ "{[(" member? ] trim-tail literals get choose-parser ;
+: lookup-paren-literal ( obj -- class/f ) [ CHAR: ( = ] trim-tail paren-literals get choose-parser ;
+
+: make-string ( opening contents ending -- seq/literal )
+    pick lookup-string [
+        string-literal tag-lexed
+    ] [
+        string-literal tag-lexed
+        ! unknown-string-literal
+    ] if ; inline
+
+: make-paren-literal ( opening contents ending -- seq/literal )
+    pick lookup-paren-literal [
+        paren-literal tag-lexed
+    ] [
+        paren-literal tag-lexed
+        ! unknown-paren-literal
+    ] if ; inline
+
+: make-compile-time-literal ( opening contents ending -- seq/literal )
+    pick lookup-literal [
+        compile-time-literal tag-lexed
+    ] [
+        compile-time-literal tag-lexed
+        ! unknown-literal
+    ] if ; inline
+
+: make-run-time-literal ( opening contents ending -- seq/literal )
+    pick lookup-literal [
+        run-time-literal tag-lexed
+    ] [
+        run-time-literal tag-lexed
+        ! unknown-literal
+    ] if ;
+
+: make-compile-time-long-string ( opening contents ending -- seq/literal )
+    pick lookup-long-string [
+        compile-time-long-string-literal tag-lexed
+    ] [
+        compile-time-long-string-literal tag-lexed
+        ! unknown-long-string-literal
+    ] if ;
+
+: make-run-time-long-string ( opening contents ending -- seq/literal )
+    pick lookup-long-string [
+        run-time-long-string-literal tag-lexed
+    ] [
+        run-time-long-string-literal tag-lexed
+        ! unknown-long-string-literal
+    ] if ;
+
+: cut-last ( seq -- seq' last )
+    [ but-last ] [ last ] bi ; inline
 
 ERROR: closing-paren-expected last n string ;
 : read-paren ( seq n string -- seq n' string )
     2dup ?nth [ closing-paren-expected ] unless*
     blank? [
-        ")" parse-until [ swap prefix ] 2dip
+        ")" parse-until [ cut-last make-paren-literal ] 2dip
     ] [
         complete-token
     ] if ;
@@ -140,28 +226,6 @@ ERROR: closing-paren-expected last n string ;
     [ first from>> ]
     [ last [ to>> ] [ seq>> ] bi ] bi <slice> ; inline
 
-: tag-lexed ( seq class -- literal )
-    new
-        swap [ >>object ] [ slices>slice >>slice ] bi ; inline
-
-ERROR: unknown-string seq ;
-ERROR: unknown-literal seq ;
-ERROR: unknown-long-string seq ;
-
-! XXX: make sure no conflicts
-: lookup-string ( obj -- class/f ) [ CHAR: " = ] trim-tail strings get at ;
-: lookup-literal ( obj -- class/f ) [ "{[(" member? ] trim-tail literals get at ;
-: lookup-long-string ( obj -- class/f ) "[{=" member? ] trim-tail long-strings get at ;
-
-: make-string ( seq -- seq/literal )
-    dup first lookup-string [ tag-lexed ] [ unknown-string ] if* ;
-
-: make-literal ( seq -- seq/literal )
-    dup first lookup-literal [ tag-lexed ] [ unknown-literal ] if* ;
-
-: make-long-string ( seq -- seq/literal )
-    dup first lookup-long-string [ tag-lexed ] [ unknown-long-string ] if* ;
-
 ! [ ]
 ERROR: long-bracket-opening-mismatch tok n string ch ;
 :: read-long-bracket ( tok n string ch -- seq n string )
@@ -172,11 +236,11 @@ ERROR: long-bracket-opening-mismatch tok n string ch ;
         tok2 length 1 - CHAR: = <string> "]" "]" surround :> needle
 
             n' string' needle multiline-string-until :> ( inside end n'' string'' )
-            tok tok2 length extend-slice  inside  end 3array make-long-string n'' string
+            tok tok2 length extend-slice  inside  end make-run-time-long-string n'' string
         ] }
         { CHAR: [ [
             n 1 + string "]]" multiline-string-until :> ( inside end n' string' )
-            tok 1 extend-slice  inside  end 3array make-long-string n' string
+            tok 1 extend-slice  inside  end make-run-time-long-string n' string
         ] }
         [ [ tok n string ] dip long-bracket-opening-mismatch ]
     } case ;
@@ -191,11 +255,11 @@ ERROR: long-brace-opening-mismatch tok n string ch ;
             tok2 length 1 - CHAR: = <string> "}" "}" surround :> needle
 
             n' string' needle multiline-string-until :> ( inside end n'' string'' )
-            tok tok2 length extend-slice  inside  end 3array make-long-string n'' string
+            tok tok2 length extend-slice  inside  end make-compile-time-long-string n'' string
         ] }
         { CHAR: { [
             n 1 + string "}}" multiline-string-until :> ( inside end n' string' )
-            tok 1 extend-slice  inside  end 3array make-long-string n' string
+            tok 1 extend-slice  inside  end make-compile-time-long-string n' string
         ] }
     } case ;
 
@@ -204,7 +268,7 @@ ERROR: closing-bracket-expected last n string ;
 : read-bracket ( last n string -- seq n' string )
     2dup ?nth [ closing-bracket-expected ] unless* {
         { [ dup "=[" member? ] [ read-long-bracket ] } ! double bracket, read [==[foo]==]
-        { [ dup blank? ] [ drop "]" parse-until [ swap prefix make-literal ] 2dip ] } ! regular[ word
+        { [ dup blank? ] [ drop "]" parse-until [ cut-last make-run-time-literal ] 2dip ] } ! regular[ word
         [ drop complete-token ] ! something like [foo]
     } cond ;
 
@@ -212,7 +276,7 @@ ERROR: closing-brace-expected n string last ;
 : read-brace ( n string seq -- n' string seq )
     2dup ?nth [ closing-brace-expected ] unless* {
         { [ dup "={" member? ] [ read-long-brace ] } ! double brace read {=={foo}==}
-        { [ dup blank? ] [ drop "}" parse-until [ swap prefix make-literal ] 2dip ] } ! regular{ word
+        { [ dup blank? ] [ drop "}" parse-until [ cut-last make-compile-time-literal ] 2dip ] } ! regular{ word
         [ drop complete-token ] ! something like {foo}
     } cond ;
 
@@ -233,7 +297,7 @@ ERROR: string-expected-got-eof n string ;
     name
     n dup 1 + string <slice>
     n' [ 1 - n' ] [ string length [ 2 - ] [ 1 - ] bi ] if* string <slice>
-    3array make-string
+    make-string
     n' string ;
 
 : advance-1 ( n string -- n/f string )
@@ -308,13 +372,14 @@ GENERIC: object>sequence ( obj -- string )
 M: qsequence object>sequence slice>> ;
 M: object object>sequence ;
 
-ERROR: token-expected-but-got-eof n string token ;
+ERROR: token-expected-but-got-eof n string expected ;
 : parse-until ( n/f string token -- obj/f n/f string )
     pick [
-        dup '[
-            [ parse rot [ [ , ] [ object>sequence ] bi _ sequence= not
-        ] [
-            _ token-expected-but-got-eof ] if* ] loop
+        dup [ pick ] dip '[
+            [
+                parse rot [ [ , ] [ object>sequence ] bi _ sequence= not ]
+                [ [ _ ] dip _ token-expected-but-got-eof ] if*
+            ] loop
         ] { } make -rot
     ] [
         token-expected-but-got-eof
@@ -382,26 +447,20 @@ SYNTAX: QPARSER:
     scan-token
     parser:parse-definition define-qparser ;
 
-: define-qsequence ( class -- )
-    qsequence { } define-tuple-class ;
-    
+: define-string-literal ( name -- )
+    [ string-literal { } define-tuple-class ] [ register-string-literal ] bi ;
 
-: define-string ( class -- )
-    [ define-qsequence ] [ register-string ] bi ;
+: define-paren-literal ( name -- )
+    [ paren-literal { } define-tuple-class ] [ register-paren-literal ] bi ;
 
-: define-literal ( class -- )
-    [ define-qsequence ] [ register-literal ] bi ;
-
-: define-long-string ( class -- )
-    [ define-qsequence ] [ register-long-string ] bi ;
+: define-literal ( name -- )
+    [ literal { } define-tuple-class ] [ register-literal ] bi ;
 
 SYNTAX: STRING-LITERAL:
-    scan-new-class define-string ;
+    scan-new-class define-string-literal ;
+
+SYNTAX: PAREN-LITERAL:
+    scan-new-class define-paren-literal ;
 
 SYNTAX: LITERAL:
     scan-new-class define-literal ;
-
-SYNTAX: LONG-STRING:
-    scan-new-class define-long-string ;
-
-! string, literal, long-string

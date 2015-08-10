@@ -127,3 +127,8 @@ IN: modern.factor.tests
 
 { }
 [ "[ H{ } clone callbacks set-global ] \"alien\" add-startup-hook" qparse drop ] unit-test
+
+
+! { t } [ "url\"google.com\"" qparse string-literal? ] unit-test
+! { t } [ "url[[google.com]]" qparse string-literal? ] unit-test
+! { t } [ "url{{google.com}}" qparse string-literal? ] unit-test
