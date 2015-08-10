@@ -2,10 +2,11 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs bootstrap.syntax classes.parser
 classes.tuple combinators combinators.smart fry generalizations
-io.encodings.utf8 io.files kernel lexer locals macros make math
-modern.paths multiline namespaces prettyprint sequences
-sequences.deep sequences.extras sequences.generalizations sets
-shuffle strings unicode.categories vectors vocabs.loader words ;
+hashtables io.encodings.utf8 io.files kernel lexer locals macros
+make math modern.paths multiline namespaces prettyprint
+sequences sequences.deep sequences.extras
+sequences.generalizations sets shuffle strings
+unicode.categories vectors vocabs.loader words ;
 QUALIFIED: parser
 QUALIFIED: lexer
 FROM: assocs => change-at ;
@@ -21,11 +22,24 @@ drop read-string'
 
 
 SYMBOL: qparsers
-
 qparsers [ H{ } clone ] initialize
 
-: register-parser ( parser key -- )
-    qparsers get [ ?push members ] change-at ;
+SYMBOL: strings
+strings [ H{ } clone ] initialize
+
+SYMBOL: literals
+literals [ H{ } clone ] initialize
+
+SYMBOL: long-strings
+long-strings [ H{ } clone ] initialize
+
+: ?push-at ( parser key assoc -- )
+    [ ?push members ] change-at ;
+
+: register-parser ( parser key -- ) qparsers get ?push-at ;
+: register-string ( parser key -- ) strings get ?push-at ;
+: register-literal ( parser key -- ) literals get ?push-at ;
+: register-long-string ( parser key -- ) long-strings get ?push-at ;
 
 ERROR: ambiguous-or-missing-parser seq ;
 : ensure-action ( seq -- word/* )
@@ -122,6 +136,32 @@ ERROR: closing-paren-expected last n string ;
     [ [ from>> ] [ to>> ] [ seq>> ] tri ] dip
     swap [ + ] dip <slice> ;
 
+: slices>slice ( slices -- slice )
+    [ first from>> ]
+    [ last [ to>> ] [ seq>> ] bi ] bi <slice> ; inline
+
+: tag-lexed ( seq class -- literal )
+    new
+        swap [ >>object ] [ slices>slice >>slice ] bi ; inline
+
+ERROR: unknown-string seq ;
+ERROR: unknown-literal seq ;
+ERROR: unknown-long-string seq ;
+
+! XXX: make sure no conflicts
+: lookup-string ( obj -- class/f ) [ CHAR: " = ] trim-tail strings get at ;
+: lookup-literal ( obj -- class/f ) [ "{[(" member? ] trim-tail literals get at ;
+: lookup-long-string ( obj -- class/f ) "[{=" member? ] trim-tail long-strings get at ;
+
+: make-string ( seq -- seq/literal )
+    dup first lookup-string [ tag-lexed ] [ unknown-string ] if* ;
+
+: make-literal ( seq -- seq/literal )
+    dup first lookup-literal [ tag-lexed ] [ unknown-literal ] if* ;
+
+: make-long-string ( seq -- seq/literal )
+    dup first lookup-long-string [ tag-lexed ] [ unknown-long-string ] if* ;
+
 ! [ ]
 ERROR: long-bracket-opening-mismatch tok n string ch ;
 :: read-long-bracket ( tok n string ch -- seq n string )
@@ -132,11 +172,11 @@ ERROR: long-bracket-opening-mismatch tok n string ch ;
         tok2 length 1 - CHAR: = <string> "]" "]" surround :> needle
 
             n' string' needle multiline-string-until :> ( inside end n'' string'' )
-            tok tok2 length extend-slice  inside  end 3array n'' string
+            tok tok2 length extend-slice  inside  end 3array make-long-string n'' string
         ] }
         { CHAR: [ [
             n 1 + string "]]" multiline-string-until :> ( inside end n' string' )
-            tok 1 extend-slice  inside  end 3array n' string
+            tok 1 extend-slice  inside  end 3array make-long-string n' string
         ] }
         [ [ tok n string ] dip long-bracket-opening-mismatch ]
     } case ;
@@ -151,11 +191,11 @@ ERROR: long-brace-opening-mismatch tok n string ch ;
             tok2 length 1 - CHAR: = <string> "}" "}" surround :> needle
 
             n' string' needle multiline-string-until :> ( inside end n'' string'' )
-            tok tok2 length extend-slice  inside  end 3array n'' string
+            tok tok2 length extend-slice  inside  end 3array make-long-string n'' string
         ] }
         { CHAR: { [
             n 1 + string "}}" multiline-string-until :> ( inside end n' string' )
-            tok 1 extend-slice  inside  end 3array n' string
+            tok 1 extend-slice  inside  end 3array make-long-string n' string
         ] }
     } case ;
 
@@ -164,7 +204,7 @@ ERROR: closing-bracket-expected last n string ;
 : read-bracket ( last n string -- seq n' string )
     2dup ?nth [ closing-bracket-expected ] unless* {
         { [ dup "=[" member? ] [ read-long-bracket ] } ! double bracket, read [==[foo]==]
-        { [ dup blank? ] [ drop "]" parse-until [ swap prefix ] 2dip ] } ! regular[ word
+        { [ dup blank? ] [ drop "]" parse-until [ swap prefix make-literal ] 2dip ] } ! regular[ word
         [ drop complete-token ] ! something like [foo]
     } cond ;
 
@@ -172,7 +212,7 @@ ERROR: closing-brace-expected n string last ;
 : read-brace ( n string seq -- n' string seq )
     2dup ?nth [ closing-brace-expected ] unless* {
         { [ dup "={" member? ] [ read-long-brace ] } ! double brace read {=={foo}==}
-        { [ dup blank? ] [ drop "}" parse-until [ swap prefix ] 2dip ] } ! regular{ word
+        { [ dup blank? ] [ drop "}" parse-until [ swap prefix make-literal ] 2dip ] } ! regular{ word
         [ drop complete-token ] ! something like {foo}
     } cond ;
 
@@ -193,7 +233,8 @@ ERROR: string-expected-got-eof n string ;
     name
     n dup 1 + string <slice>
     n' [ 1 - n' ] [ string length [ 2 - ] [ 1 - ] bi ] if* string <slice>
-    3array n' string ;
+    3array make-string
+    n' string ;
 
 : advance-1 ( n string -- n/f string )
     over [
@@ -340,3 +381,27 @@ SYNTAX: QPARSER:
     scan-new-class
     scan-token
     parser:parse-definition define-qparser ;
+
+: define-qsequence ( class -- )
+    qsequence { } define-tuple-class ;
+    
+
+: define-string ( class -- )
+    [ define-qsequence ] [ register-string ] bi ;
+
+: define-literal ( class -- )
+    [ define-qsequence ] [ register-literal ] bi ;
+
+: define-long-string ( class -- )
+    [ define-qsequence ] [ register-long-string ] bi ;
+
+SYNTAX: STRING-LITERAL:
+    scan-new-class define-string ;
+
+SYNTAX: LITERAL:
+    scan-new-class define-literal ;
+
+SYNTAX: LONG-STRING:
+    scan-new-class define-long-string ;
+
+! string, literal, long-string

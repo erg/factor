@@ -1,8 +1,8 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs classes io kernel make
-modern.paths modern.quick-parser sequences sequences.deep sets
-sorting ;
+modern.paths modern.quick-parser prettyprint sequences
+sequences.deep sets sorting ;
 QUALIFIED-WITH: modern.factor modern
 IN: modern.compiler
 
