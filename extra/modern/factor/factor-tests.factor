@@ -1,7 +1,7 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: kernel modern.factor modern.quick-parser sequences
-tools.test ;
+USING: accessors kernel modern.factor modern.quick-parser
+sequences tools.test ;
 IN: modern.factor.tests
 
 { t } [ "( )" qparse length 1 = ] unit-test
@@ -129,6 +129,33 @@ IN: modern.factor.tests
 [ "[ H{ } clone callbacks set-global ] \"alien\" add-startup-hook" qparse drop ] unit-test
 
 
-! { t } [ "url\"google.com\"" qparse string-literal? ] unit-test
-! { t } [ "url[[google.com]]" qparse string-literal? ] unit-test
-! { t } [ "url{{google.com}}" qparse string-literal? ] unit-test
+{ 1 } [ "SYMBOLS: ;" qparse first object>> length ] unit-test
+{ 0 } [ "SYMBOLS: ;" qparse first object>> first length ] unit-test
+{ 1 } [ "SYMBOLS: a b c ;" qparse first object>> length ] unit-test
+{ 3 } [ "SYMBOLS: a b c ;" qparse first object>> first length ] unit-test
+
+{ 1 } [ 0 0 "SYMBOLS: ;" qparse-symbols 2drop object>> length ] unit-test
+{ 0 } [ 0 0 "SYMBOLS: ;" qparse-symbols 2drop object>> first length ] unit-test
+{ 1 } [ 0 0 "SYMBOLS: a b c ;" qparse-symbols 2drop object>> length ] unit-test
+{ 3 } [ 0 0 "SYMBOLS: a b c ;" qparse-symbols 2drop object>> first length ] unit-test
+
+
+{ t } [ "url\"factorcode.org\"" qparse first string-literal? ] unit-test
+{ t } [ "url[[factorcode.org]]" qparse first run-time-long-string-literal? ] unit-test
+{ t } [ "url{{factorcode.org}}" qparse first compile-time-long-string-literal? ] unit-test
+
+{ t } [ "code[ a b ]" qparse first run-time-literal? ] unit-test
+{ t } [ "code{ a b }" qparse first compile-time-literal? ] unit-test
+{ t } [ "code( a b )" qparse first paren-literal? ] unit-test
+
+{ 2 } [ "code[ a b ]" qparse first object>> length ] unit-test
+{ 2 } [ "code{ a b }" qparse first object>> length ] unit-test
+{ 2 } [ "code( a b )" qparse first object>> length ] unit-test
+
+! Make sure we <slice> the entire object.
+{ t } [ "url\"factorcode.org\"" [ qparse first slice>> ] keep sequence= ] unit-test
+{ t } [ "url[[factorcode.org]]" [ qparse first slice>> ] keep sequence= ] unit-test
+{ t } [ "url{{factorcode.org}}" [ qparse first slice>> ] keep sequence= ] unit-test
+{ t } [ "code[ a b ]" [ qparse first slice>> ] keep sequence= ] unit-test
+{ t } [ "code{ a b }" [ qparse first slice>> ] keep sequence= ] unit-test
+{ t } [ "code( a b )" [ qparse first slice>> ] keep sequence= ] unit-test

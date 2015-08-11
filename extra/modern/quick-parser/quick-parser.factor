@@ -116,10 +116,6 @@ ERROR: subseq-expected-but-got-eof n string expected ;
 : skip-til-eol ( n string -- n' string )
     [ [ "\r\n" member? ] find-from drop ] keep ; inline
 
-: prepend-slice ( end begin -- slice )
-    [ nip from>> ]
-    [ drop [ to>> ] [ seq>> ] bi <slice> ] 2bi ; inline
-
 : append-slice ( begin end -- slice )
     [ drop from>> ]
     [ nip [ to>> ] [ seq>> ] bi <slice> ] 2bi ; inline
@@ -350,11 +346,12 @@ ERROR: whitespace-expected-after-string n string ch ;
         [ drop f f ] dip
     ] if ;
 
+! XXX: simplify
 ERROR: expected-error got expected ;
-: expect ( n/f string obj -- obj n'/f string )
+: expect ( n/f string obj -- n'/f string )
     -rot
     token
-    [ 2dup sequence= [ nip ] [ expected-error ] if ] 2dip ;
+    [ 2dup sequence= [ nip ] [ expected-error ] if drop ] 2dip ;
 
 :: parse ( n string -- obj/f n'/f string )
     n [
@@ -386,8 +383,22 @@ ERROR: token-expected-but-got-eof n string expected ;
         token-expected-but-got-eof
     ] if ;
 
+! XXX: simplify
 : raw-until ( n/f string token -- obj/f n/f string )
-    '[ [ raw rot [ dup , _ sequence= not ] [ f ] if* ] loop ] { } make -rot ;
+    pick [
+        [ f ] 3dip 3dup
+        '[
+            [
+                raw rot
+                [
+                    [ ] [ object>sequence ] bi _ sequence= not
+                    [ [ , ] [ [ drop ] 3dip -rot ] if ] keep
+                ] [ _ _ _ token-expected-but-got-eof ] if*
+            ] loop
+        ] { } make -roll [ drop ] 2dip
+    ] [
+        token-expected-but-got-eof
+    ] if ;
 
 : qparse ( string -- sequence )
     [ 0 ] dip [ parse rot ] loop>array 2nip ;
