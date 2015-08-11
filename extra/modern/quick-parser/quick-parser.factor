@@ -1,12 +1,12 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs bootstrap.syntax classes.parser
-classes.tuple combinators combinators.smart fry generalizations
-hashtables io.encodings.utf8 io.files kernel lexer locals macros
-make math modern.paths multiline namespaces prettyprint
-sequences sequences.deep sequences.extras
-sequences.generalizations sets shuffle strings
-unicode.categories vectors vocabs.loader words ;
+classes.tuple combinators combinators.short-circuit
+combinators.smart fry generalizations hashtables
+io.encodings.utf8 io.files kernel lexer locals macros make math
+modern.paths multiline namespaces prettyprint sequences
+sequences.deep sequences.extras sequences.generalizations sets
+shuffle strings unicode.categories vectors vocabs.loader words ;
 QUALIFIED: parser
 QUALIFIED: lexer
 FROM: assocs => change-at ;
@@ -324,7 +324,7 @@ ERROR: whitespace-expected-after-string n string ch ;
             ! seq n string ch
             "!([{\"\s\r\n" take-until-either {
                 { f [ [ drop f ] dip ] } ! XXX: what here
-                { CHAR: ! [ pick empty? [ take-comment token ] [ complete-token ] if ] }
+                { CHAR: ! [ pick { [ empty? ] [ "#" sequence= ] } 1|| [ take-comment token ] [ complete-token ] if ] }
                 { CHAR: ( [ read-paren ] }
                 { CHAR: [ [ read-bracket ] }
                 { CHAR: { [ read-brace ] }
