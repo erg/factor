@@ -54,16 +54,15 @@ ERROR: ambiguous-or-missing-parser seq ;
 
 
 TUPLE: qsequence object slice ;
-TUPLE: paren-literal < qsequence ;
-TUPLE: string-literal < qsequence ;
-
 TUPLE: literal < qsequence ;
+TUPLE: paren-literal < literal ;
+
 TUPLE: compile-time-literal < literal ;
 TUPLE: run-time-literal < literal ;
 
-TUPLE: long-string-literal < qsequence ;
-TUPLE: compile-time-long-string-literal < long-string-literal ;
-TUPLE: run-time-long-string-literal < long-string-literal ;
+TUPLE: string-literal < literal ;
+TUPLE: compile-time-long-string-literal < string-literal ;
+TUPLE: run-time-long-string-literal < string-literal ;
 
 : ?<slice> ( n n' string -- slice )
     over [ nip [ length ] keep ] unless <slice> ; inline
@@ -99,12 +98,15 @@ TUPLE: run-time-long-string-literal < long-string-literal ;
     ] if ; inline
 
 ERROR: subseq-expected-but-got-eof n string expected ;
-:: multiline-string-until ( n string multi -- inside end/f n' string )
+:: multiline-string-until' ( n string multi -- inside end n' string )
     multi string n start* :> n'
     n' [ n string multi subseq-expected-but-got-eof ] unless
     n n' string ?<slice>
     n' dup multi length + string ?<slice>
-    n' multi length + string ;
+    n' multi length +  string ;
+
+: multiline-string-until ( n string multi -- inside n' string )
+    multiline-string-until' [ drop ] 2dip ; inline
 
 : take-next ( n string -- ch n string )
     [ ?nth ]
@@ -130,6 +132,7 @@ ERROR: subseq-expected-but-got-eof n string expected ;
     ] [ ] if* ;
 
 DEFER: parse
+DEFER: parse-until'
 DEFER: parse-until
 : tag-lexed ( opening object ending class -- literal )
     new
@@ -206,7 +209,7 @@ ERROR: closing-paren-expected last n string ;
 : read-paren ( seq n string -- seq n' string )
     2dup ?nth [ closing-paren-expected ] unless*
     blank? [
-        ")" parse-until [ make-paren-literal ] 2dip
+        ")" parse-until' [ make-paren-literal ] 2dip
     ] [
         complete-token
     ] if ;
@@ -228,11 +231,12 @@ ERROR: long-bracket-opening-mismatch tok n string ch ;
                 ch CHAR: [ = [ tok n string ch long-bracket-opening-mismatch ]  unless
         tok2 length 1 - CHAR: = <string> "]" "]" surround :> needle
 
-            n' string' needle multiline-string-until :> ( inside end n'' string'' )
+            n' string' needle multiline-string-until' :> ( inside end n'' string'' )
             tok tok2 length extend-slice  inside  end make-run-time-long-string n'' string
+
         ] }
         { CHAR: [ [
-            n 1 + string "]]" multiline-string-until :> ( inside end n' string' )
+            n 1 + string "]]" multiline-string-until' :> ( inside end n' string' )
             tok 1 extend-slice  inside  end make-run-time-long-string n' string
         ] }
         [ [ tok n string ] dip long-bracket-opening-mismatch ]
@@ -247,11 +251,11 @@ ERROR: long-brace-opening-mismatch tok n string ch ;
                 ch CHAR: { = [ tok n string ch long-brace-opening-mismatch ]  unless
             tok2 length 1 - CHAR: = <string> "}" "}" surround :> needle
 
-            n' string' needle multiline-string-until :> ( inside end n'' string'' )
-            tok tok2 length extend-slice  inside  end make-compile-time-long-string n'' string
+            n' string' needle multiline-string-until' :> ( inside end n'' string'' )
+            tok tok2 length extend-slice  inside  end make-compile-time-long-string  n'' string
         ] }
         { CHAR: { [
-            n 1 + string "}}" multiline-string-until :> ( inside end n' string' )
+            n 1 + string "}}" multiline-string-until' :> ( inside end n' string' )
             tok 1 extend-slice  inside  end make-compile-time-long-string n' string
         ] }
     } case ;
@@ -261,7 +265,7 @@ ERROR: closing-bracket-expected last n string ;
 : read-bracket ( last n string -- seq n' string )
     2dup ?nth [ closing-bracket-expected ] unless* {
         { [ dup "=[" member? ] [ read-long-bracket ] } ! double bracket, read [==[foo]==]
-        { [ dup blank? ] [ drop "]" parse-until [ make-run-time-literal ] 2dip ] } ! regular[ word
+        { [ dup blank? ] [ drop "]" parse-until' [ make-run-time-literal ] 2dip ] } ! regular[ word
         [ drop complete-token ] ! something like [foo]
     } cond ;
 
@@ -269,7 +273,7 @@ ERROR: closing-brace-expected n string last ;
 : read-brace ( n string seq -- n' string seq )
     2dup ?nth [ closing-brace-expected ] unless* {
         { [ dup "={" member? ] [ read-long-brace ] } ! double brace read {=={foo}==}
-        { [ dup blank? ] [ drop "}" parse-until [ make-compile-time-literal ] 2dip ] } ! regular{ word
+        { [ dup blank? ] [ drop "}" parse-until' [ make-compile-time-literal ] 2dip ] } ! regular{ word
         [ drop complete-token ] ! something like {foo}
     } cond ;
 
@@ -337,7 +341,7 @@ ERROR: whitespace-expected-after-string n string ch ;
 : new-word ( n/f string -- token n'/f string ) token ;
 : existing-class ( n/f string -- token n'/f string ) token ;
 : existing-word ( n/f string -- token n'/f string ) token ;
-: body ( n/f string -- seq sep n'/f string ) ";" parse-until ;
+: body ( n/f string -- seq n'/f string ) ";" parse-until ;
 
 : raw ( n/f string -- slice/f n'/f string )
     over [
@@ -367,7 +371,7 @@ M: qsequence object>sequence slice>> ;
 M: object object>sequence ;
 
 ERROR: token-expected-but-got-eof n string expected ;
-: parse-until ( n string token -- obj/f last n/f string )
+: parse-until' ( n string token -- obj/f last n/f string )
     pick [
         [ f ] 3dip 3dup
         '[
@@ -382,6 +386,9 @@ ERROR: token-expected-but-got-eof n string expected ;
     ] [
         token-expected-but-got-eof
     ] if ;
+
+: parse-until ( n string token -- obj n/f string )
+    parse-until' [ drop ] 2dip ; inline
 
 ! XXX: simplify
 : raw-until ( n/f string token -- obj/f n/f string )
