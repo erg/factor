@@ -206,14 +206,11 @@ ERROR: unknown-long-string-literal opening seq ending ;
         ! unknown-long-string-literal
     ] if ;
 
-: cut-last ( seq -- seq' last )
-    [ but-last ] [ last ] bi ; inline
-
 ERROR: closing-paren-expected last n string ;
 : read-paren ( seq n string -- seq n' string )
     2dup ?nth [ closing-paren-expected ] unless*
     blank? [
-        ")" parse-until [ cut-last make-paren-literal ] 2dip
+        ")" parse-until [ make-paren-literal ] 2dip
     ] [
         complete-token
     ] if ;
@@ -268,7 +265,7 @@ ERROR: closing-bracket-expected last n string ;
 : read-bracket ( last n string -- seq n' string )
     2dup ?nth [ closing-bracket-expected ] unless* {
         { [ dup "=[" member? ] [ read-long-bracket ] } ! double bracket, read [==[foo]==]
-        { [ dup blank? ] [ drop "]" parse-until [ cut-last make-run-time-literal ] 2dip ] } ! regular[ word
+        { [ dup blank? ] [ drop "]" parse-until [ make-run-time-literal ] 2dip ] } ! regular[ word
         [ drop complete-token ] ! something like [foo]
     } cond ;
 
@@ -276,7 +273,7 @@ ERROR: closing-brace-expected n string last ;
 : read-brace ( n string seq -- n' string seq )
     2dup ?nth [ closing-brace-expected ] unless* {
         { [ dup "={" member? ] [ read-long-brace ] } ! double brace read {=={foo}==}
-        { [ dup blank? ] [ drop "}" parse-until [ cut-last make-compile-time-literal ] 2dip ] } ! regular{ word
+        { [ dup blank? ] [ drop "}" parse-until [ make-compile-time-literal ] 2dip ] } ! regular{ word
         [ drop complete-token ] ! something like {foo}
     } cond ;
 
@@ -344,7 +341,7 @@ ERROR: whitespace-expected-after-string n string ch ;
 : new-word ( n/f string -- token n'/f string ) token ;
 : existing-class ( n/f string -- token n'/f string ) token ;
 : existing-word ( n/f string -- token n'/f string ) token ;
-: body ( n/f string -- seq n'/f string ) ";" parse-until ;
+: body ( n/f string -- seq sep n'/f string ) ";" parse-until ;
 
 : raw ( n/f string -- slice/f n'/f string )
     over [
@@ -373,14 +370,18 @@ M: qsequence object>sequence slice>> ;
 M: object object>sequence ;
 
 ERROR: token-expected-but-got-eof n string expected ;
-: parse-until ( n/f string token -- obj/f n/f string )
+: parse-until ( n string token -- obj/f last n/f string )
     pick [
-        dup [ pick ] dip '[
+        [ f ] 3dip 3dup
+        '[
             [
-                parse rot [ [ , ] [ object>sequence ] bi _ sequence= not ]
-                [ [ _ ] dip _ token-expected-but-got-eof ] if*
+                parse rot
+                [
+                    [ ] [ object>sequence ] bi _ sequence= not
+                    [ [ , ] [ [ drop ] 3dip -rot ] if ] keep
+                ] [ _ _ _ token-expected-but-got-eof ] if*
             ] loop
-        ] { } make -rot
+        ] { } make -roll
     ] [
         token-expected-but-got-eof
     ] if ;
