@@ -42,3 +42,10 @@ IN: modern.compiler
 
 GENERIC: precompile ( obj -- seq )
 
+GENERIC: object>quotation ( obj -- )
+
+M: sequence object>quotation
+    [ object>quotation ] map concat call( -- ) ;
+
+M: function object>quotation
+    ;
