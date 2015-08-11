@@ -110,6 +110,15 @@ IN: modern.factor.tests
 { { } } [ "! a" qparse ] unit-test
 { { } } [ "! abc" qparse ] unit-test
 
+{ { } } [ "#!" qparse ] unit-test
+{ { } } [ "#! " qparse ] unit-test
+{ { } } [ "#!!!!!!" qparse ] unit-test
+{ { } } [ "#! ! ! ! ! !" qparse ] unit-test
+{ { } } [ "#!a" qparse ] unit-test
+{ { } } [ "#!abc" qparse ] unit-test
+{ { } } [ "#! a" qparse ] unit-test
+{ { } } [ "#! abc" qparse ] unit-test
+
 { { } } [ "![[]]" qparse ] unit-test
 { { } } [ "![=[]=]" qparse ] unit-test
 { { } } [ "![==[]==]" qparse ] unit-test
