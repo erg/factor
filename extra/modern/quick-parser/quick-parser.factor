@@ -2,11 +2,12 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays assocs bootstrap.syntax classes.parser
 classes.tuple combinators combinators.short-circuit
-combinators.smart fry generalizations hashtables
-io.encodings.utf8 io.files kernel lexer locals macros make math
-modern.paths multiline namespaces prettyprint sequences
-sequences.deep sequences.extras sequences.generalizations sets
-shuffle strings unicode.categories vectors vocabs.loader words ;
+combinators.smart fry generalizations hashtables io
+io.encodings.utf8 io.files io.streams.string kernel lexer locals
+macros make math modern.paths multiline namespaces prettyprint
+sequences sequences.deep sequences.extras
+sequences.generalizations sets shuffle strings
+unicode.categories vectors vocabs.loader words ;
 QUALIFIED: parser
 QUALIFIED: lexer
 FROM: assocs => change-at ;
@@ -429,6 +430,26 @@ M: string >out ;
 : qparse-vocab. ( path -- )
     qparse-vocab
     [ >out ] deep-map [ . ] each ;
+
+
+
+! Writing
+GENERIC: write-parsed ( obj -- )
+M: qsequence write-parsed slice>> write ;
+M: slice write-parsed >string write ;
+M: sequence write-parsed [ write-parsed ] each ;
+
+: write-parsed-objects ( seq -- )
+    [ write-parsed ] each nl ;
+
+: write-modern-string ( seq -- string )
+    [ write-parsed-objects ] with-string-writer ;
+
+: write-modern-file ( seq path -- )
+    utf8 [ write-parsed-objects ] with-file-writer ;
+
+
+
 
 <<
 : define-qparser ( class token quot -- )
