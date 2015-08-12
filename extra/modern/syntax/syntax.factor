@@ -1,7 +1,7 @@
 ! Copyright (C) 2013 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays io kernel modern.quick-parser multiline ;
-IN: modern.factor
+IN: modern.syntax
 QUALIFIED: sequences
 QUALIFIED: strings
 

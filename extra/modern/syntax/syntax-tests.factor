@@ -1,8 +1,8 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors kernel modern.factor modern.quick-parser
+USING: accessors kernel modern.syntax modern.quick-parser
 sequences tools.test ;
-IN: modern.factor.tests
+IN: modern.syntax.tests
 
 { t } [ "( )" qparse length 1 = ] unit-test
 { t } [ "( a )" qparse length 1 = ] unit-test

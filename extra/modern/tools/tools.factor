@@ -2,7 +2,7 @@
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors assocs classes fry io kernel modern.paths
 modern.quick-parser sequences sequences.extras sorting ;
-QUALIFIED-WITH: modern.factor m
+QUALIFIED-WITH: modern.syntax m
 IN: modern.tools
 
 : all-parsed-alist ( -- alist )
