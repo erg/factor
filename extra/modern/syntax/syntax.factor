@@ -133,13 +133,15 @@ QPARSER: gb GB ;
 ! Single token parsers that need rename (?)
 QPARSER: in IN: token ;
 QPARSER: use USE: token ;
-QPARSER: unuse UNUSE: token ;
-QPARSER: from FROM: token "=>" expect ";" raw-until ;
-QPARSER: exclude EXCLUDE: token "=>" expect ";" raw-until ;
-QPARSER: rename RENAME: raw raw "=>" expect raw ;
-QPARSER: qualified QUALIFIED: token ;
-QPARSER: qualified-with QUALIFIED-WITH: token token ;
-QPARSER: forget FORGET: token ;
+
+QPARSER: unuse UNUSE: token ; ! XXX: remove this
+QPARSER: exclude EXCLUDE: token "=>" expect ";" raw-until ; ! XXX: remove
+QPARSER: rename RENAME: raw raw "=>" expect raw ; ! XXX: remove
+QPARSER: from FROM: token "=>" expect ";" raw-until ; ! XXX: remove
+QPARSER: qualified QUALIFIED: token ; ! XXX: make implicit
+QPARSER: qualified-with QUALIFIED-WITH: token token ; ! XXX: remove
+
+QPARSER: forget FORGET: token ; ! repl only (?)
 
 QPARSER: guid GUID: raw ;
 
