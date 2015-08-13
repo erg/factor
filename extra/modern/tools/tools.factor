@@ -7,7 +7,7 @@ IN: modern.tools
 
 : all-parsed-alist ( -- alist )
     all-factor-files
-    [ dup quick-parse-path ] { } map>assoc ;
+    [ dup quick-parse-path ] map>alist ;
 
 ! Find slots named foo. e.g. "length" all-slots-subseq print-alist-results
 : all-slots-subseq ( subseq -- seq )
@@ -15,7 +15,7 @@ IN: modern.tools
         all-parsed-alist
         [ [ class-of m:tuple = ] filter ] assoc-map
     ] dip '[
-        [ ] [ object>> second >out [ _ swap subseq? ] any?  ] map-filter f like
+        [ ] [ object>> second >out [ _ swap subseq? ] any? ] map-filter f like
     ] assoc-map sift-values ;
 
 : print-alist-results ( seq -- )

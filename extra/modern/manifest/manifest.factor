@@ -1,12 +1,19 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays byte-arrays combinators.short-circuit
-constructors kernel modern.paths modern.quick-parser
-modern.syntax multiline quotations sequences strings ;
+USING: accessors arrays assocs byte-arrays
+combinators.short-circuit constructors kernel modern.paths
+modern.quick-parser modern.syntax modern.tools multiline
+quotations sequences strings ;
 QUALIFIED: syntax
 IN: modern.manifest
 
+ERROR: unimplemented ;
+
 /*
+all-loose-source
+dup random first2 [ print ] [ [ dup slice? [ >string ] when ] map describe ] bi*
+
+
 ! passes
 0) collect all using/use forms as first pass
 1) define all symbols as second pass
@@ -41,8 +48,6 @@ CONSTANT: loose-code-quot
         } 1||
     ]
 no UNUSE: -- check!
-
-ERROR: unimplemented ;
 
 ! find 10 largest factor files
 ! find . -name \*.factor -type f -print0 | xargs -0 du | sort -n | tail -10 | cut -f2 | xargs -I{} du -sh {}
@@ -99,6 +104,8 @@ TUPLE: module
 { source-contents string }
 { docs-contents string }
 { tests-contents string } ;
+
+
 */
 
 TUPLE: loading path in using qualified ;
@@ -194,6 +201,15 @@ M: qualified-with obj>vocab-names object>> first2 [ >string ] bi@ <qualified2-wi
 
 : load-modern-vocab ( vocab-name -- loading )
     modern-source-path load-modern-path ;
+
+: remove-tests ( alist -- alist' ) [ drop "-tests.factor" tail? ] assoc-reject ;
+: remove-docs ( alist -- alist' ) [ drop "-docs.factor" tail? ] assoc-reject ;
+
+: all-loose-code ( -- seq )
+    all-parsed-alist [ loose-code-quot filter ] assoc-map harvest-values ;
+
+: all-loose-source ( -- seq )
+    all-loose-code remove-tests remove-docs ;
 
 
 : x64 ( -- obj )

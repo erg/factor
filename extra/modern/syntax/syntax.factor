@@ -416,8 +416,11 @@ QPARSER: eval-dollar $ parse ;
 
 ! Cocoa
 QPARSER: cfstring CFSTRING: new-word parse ;
-QPARSER: class CLASS: new-class "<" expect token "[" raw-until "]" parse-until ;
-QPARSER: cocoa-method METHOD: token "[" raw-until "]" raw-until ; ! XXX: token is c-type
+
+QPARSER: class CLASS: new-class "<" expect ";" parse-until ;
+QPARSER: cocoa-method METHOD: token ";" parse-until ;
+QPARSER: cocoa-protocol COCOA-PROTOCOL: token ;
+
 QPARSER: framework FRAMEWORK: parse ;
 QPARSER: SEL: SEL: token ;
 ! QPARSER: cocoa-selector -> token ;
