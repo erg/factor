@@ -120,12 +120,14 @@ QPARSER: flushable flushable ;
 QPARSER: foldable foldable ;
 QPARSER: inline inline ;
 QPARSER: recursive recursive ;
-QPARSER: d-register D ;
-QPARSER: r-register R ;
 QPARSER: breakpoint B ;
 QPARSER: call-next-method call-next-method ;
 QPARSER: no-compile no-compile ; ! extra/benchmark/raytracer-simd/raytracer-simd.factor
 ! QPARSER: specialized specialized ; ! what is this? gone?
+
+! Compiler
+QPARSER: d-register D: token ;
+QPARSER: r-register R: token ;
 
 ! opengl break
 QPARSER: gb GB ;
