@@ -13,6 +13,9 @@ ERROR: unimplemented ;
 all-loose-source
 dup random first2 [ print ] [ [ dup slice? [ >string ] when ] map describe ] bi*
 
+all-loose-source
+dup [ first2 [ print ] [ [ dup slice? [ >string ] when ] map describe ] bi* ] each
+
 
 ! passes
 0) collect all using/use forms as first pass

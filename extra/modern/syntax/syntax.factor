@@ -125,10 +125,13 @@ QPARSER: r-register R ;
 QPARSER: breakpoint B ;
 QPARSER: call-next-method call-next-method ;
 QPARSER: no-compile no-compile ;
-QPARSER: cycles cycles ;
-QPARSER: opcode opcode ;
 QPARSER: specialized specialized ;
 QPARSER: gb GB ;
+
+! XXX: cpu.8080
+QPARSER: isntruction INSTRUCTION: ";" raw-until ;
+QPARSER: cycles cycles: token ;
+QPARSER: opcode opcode: token ;
 
 ! Single token parsers that need rename (?)
 QPARSER: in IN: token ;
@@ -372,7 +375,6 @@ QPARSER: holiday HOLIDAY: new-word body ;
 QPARSER: holiday-name HOLIDAY-NAME: existing-word existing-class parse ;
 
 
-QPARSER: isntruction INSTRUCTION: ";" raw-until ;
 QPARSER: pool POOL: existing-class token ;
 
 QPARSER: mdbtuple MDBTUPLE: ";" parse-until ;
