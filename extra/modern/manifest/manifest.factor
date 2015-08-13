@@ -26,6 +26,11 @@ all-loose-source
 [ nip [ dup slice? [ >string "add-startup-hook" sequence= ] [ drop f ] if ] any? ] assoc-filter
 dup [ first2 [ print ] [ [ dup slice? [ >string ] when ] map describe ] bi* ] each
 
+! multiple IN:
+all-parsed-alist
+[ [ in? ] filter  ] assoc-map
+[ nip second length 1 > ] assoc-filter
+
 
 ! passes
 0) collect all using/use forms as first pass
@@ -145,6 +150,7 @@ CONSTANT: using-quot
 CONSTANT: loose-code-quot
     [
         {
+            [ char? ]
             [ slice? ]
             [ escaped? ]
             [ string-literal? ]
