@@ -112,7 +112,7 @@ QPARSER: c-comment /* "*/" multiline-string-until ;
 QPARSER: f f ;
 QPARSER: private-begin <PRIVATE ;
 QPARSER: private-end PRIVATE> ;
-QPARSER: BAD-ALIEN BAD-ALIEN ;
+QPARSER: BAD-ALIEN BAD-ALIEN ; ! alien.syntax
 QPARSER: delimiter delimiter ;
 QPARSER: deprecated deprecated ;
 QPARSER: final final ;
@@ -124,12 +124,14 @@ QPARSER: d-register D ;
 QPARSER: r-register R ;
 QPARSER: breakpoint B ;
 QPARSER: call-next-method call-next-method ;
-QPARSER: no-compile no-compile ;
-QPARSER: specialized specialized ;
+QPARSER: no-compile no-compile ; ! extra/benchmark/raytracer-simd/raytracer-simd.factor
+! QPARSER: specialized specialized ; ! what is this? gone?
+
+! opengl break
 QPARSER: gb GB ;
 
 ! XXX: cpu.8080
-QPARSER: isntruction INSTRUCTION: ";" raw-until ;
+QPARSER: instruction INSTRUCTION: ";" raw-until ;
 QPARSER: cycles cycles: token ;
 QPARSER: opcode opcode: token ;
 

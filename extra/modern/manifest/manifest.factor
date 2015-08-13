@@ -16,6 +16,16 @@ dup random first2 [ print ] [ [ dup slice? [ >string ] when ] map describe ] bi*
 all-loose-source
 dup [ first2 [ print ] [ [ dup slice? [ >string ] when ] map describe ] bi* ] each
 
+! files without any unit-tests
+all-loose-source
+[ nip [ dup slice? [ >string "unit-test" sequence= ] [ drop f ] if ] any? ] assoc-reject
+dup [ first2 [ print ] [ [ dup slice? [ >string ] when ] map describe ] bi* ] each
+
+! With add-startup-hook
+all-loose-source
+[ nip [ dup slice? [ >string "add-startup-hook" sequence= ] [ drop f ] if ] any? ] assoc-filter
+dup [ first2 [ print ] [ [ dup slice? [ >string ] when ] map describe ] bi* ] each
+
 
 ! passes
 0) collect all using/use forms as first pass
