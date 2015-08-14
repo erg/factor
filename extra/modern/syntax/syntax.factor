@@ -355,7 +355,6 @@ QPARSER: role-tuple ROLE-TUPLE: ";" raw-until ;
 QPARSER: variant VARIANT: ";" raw-until ;
 QPARSER: variant-member VARIANT-MEMBER: ";" raw-until ;
 
-! QPARSER: d D: token ; ! XXX: fixme, conflicts with D: in compiler
 QPARSER: decimal DECIMAL: token ;
 
 QPARSER: after AFTER: existing-class existing-word body ;
