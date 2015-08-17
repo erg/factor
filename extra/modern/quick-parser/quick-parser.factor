@@ -54,7 +54,12 @@ ERROR: ambiguous-or-missing-parser seq ;
     qparsers get choose-parser ;
 
 
-TUPLE: qsequence object slice ;
+TUPLE: qsequence object slice in private? compilation-unit? decorators ;
+: new-qsequence ( object slice class -- obj )
+    new
+        swap >>slice
+        swap >>object ; inline
+
 TUPLE: literal < qsequence ;
 TUPLE: paren-literal < literal ;
 
@@ -467,13 +472,13 @@ M: sequence write-parsed [ write-parsed ] each ;
                 [ drop ] 3dip
                 [ '[ _ expect ] ] dip compose
                 swap
-                '[ _ 2 output>array-n [ swap ] 2dip [ ?<slice> _ boa ] 2keep ]
+                '[ _ 2 output>array-n [ swap ] 2dip [ ?<slice> _ new-qsequence ] 2keep ]
                 ( n n' string -- obj n' string ) define-declared
             ] [ ! (qparse-foo)
                 [ drop ] 4dip nip
                 [ 2dup 2drop ] prepose ! stack depth should be 2 for the macro below....
                 swap
-                '[ _ 2 output>array-n [ swap ] 2dip [ ?<slice> _ boa ] 2keep ]
+                '[ _ 2 output>array-n [ swap ] 2dip [ ?<slice> _ new-qsequence ] 2keep ]
                 ( n n' string -- obj n' string ) define-declared
             ] [ ! (word) token register
                 [ drop ] 4dip drop nip register-parser

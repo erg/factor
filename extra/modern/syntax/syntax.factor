@@ -98,7 +98,7 @@ QPARSER: f f ;
 QPARSER: private-begin <PRIVATE ;
 QPARSER: private-end PRIVATE> ;
 QPARSER: BAD-ALIEN BAD-ALIEN ; ! alien.syntax
-QPARSER: delimiter delimiter ;
+QPARSER: delimiter delimiter ; ! XXX: not really used?
 QPARSER: deprecated deprecated ;
 QPARSER: final final ;
 QPARSER: flushable flushable ;
