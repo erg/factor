@@ -5,18 +5,9 @@ IN: modern.syntax
 QUALIFIED: sequences
 QUALIFIED: strings
 
-! Test cases:
-! ALIAS: foo{ bar{
-! HELP: foo{
-
 ! Can go away:
 QPARSER: heredoc HEREDOC: token pick strings:>string multiline-string-until ;
-! string literals
-! QPARSER: " " ;
-! QPARSER: P" P" ;
-! QPARSER: URL" URL" ;
-! QPARSER: SBUF" SBUF" ;
-! QPARSER: DLL" DLL" ;
+! string literals: P" URL" SBUF" DLL"
 
 QPARSER: compilation-unit-begin << ; ! going away
 QPARSER: compilation-unit-end >> ; ! going away
@@ -100,15 +91,9 @@ QPARSER: pipe-separator | ;
 ! QPARSER: data-map!-parens data-map!( (parse-psignature) ;
 ! QPARSER: shuffle-parens shuffle( (parse-psignature) ;
 
-! END OF GO AWAY
-
-
-! QPARSER: comment ! skip-til-eol ;
-! QPARSER: shell-comment #! skip-til-eol ;
 QPARSER: c-comment /* "*/" multiline-string-until ;
 
 ! BEGIN REGULAR WORDS
-! Single token words, probably don't need to be parsing words except for f maybe
 QPARSER: f f ;
 QPARSER: private-begin <PRIVATE ;
 QPARSER: private-end PRIVATE> ;
@@ -123,7 +108,6 @@ QPARSER: recursive recursive ;
 QPARSER: breakpoint B ;
 QPARSER: call-next-method call-next-method ;
 QPARSER: no-compile no-compile ; ! extra/benchmark/raytracer-simd/raytracer-simd.factor
-! QPARSER: specialized specialized ; ! what is this? gone?
 
 ! Compiler
 QPARSER: d-register D: token ;
@@ -171,8 +155,6 @@ QPARSER: cuda-library CUDA-LIBRARY: new-word existing-class token ; ! XXX: token
 QPARSER: c-callback CALLBACK: token token parse ;
 QPARSER: subroutine SUBROUTINE: token parse ;
 
-
-! WEIRD
 ! words[ funky
 QPARSER: let-block [let "]" parse-until ;
 QPARSER: interpolate [I "I]" multiline-string-until ;
@@ -190,14 +172,11 @@ QPARSER: long-string STRING: token "\n;" multiline-string-until ;
 QPARSER: glsl-shader GLSL-SHADER: token token "\n;" multiline-string-until ;
 QPARSER: ebnf EBNF: token ";EBNF" multiline-string-until ;
 
-
 ! words@
 QPARSER: struct-literal-at S@ token parse ; ! [[ ]]
 QPARSER: c-array@ c-array@ parse parse parse ; ! [[ ]]
 
-
 ! words:
-
 QPARSER: function : new-word parse body ;
 QPARSER: function-locals :: new-word parse body ;
 QPARSER: alias ALIAS: raw raw ;
@@ -263,7 +242,6 @@ QPARSER: c-global C-GLOBAL: token token ;
 QPARSER: hints HINTS: parse body ;
 QPARSER: builtin BUILTIN: existing-class body ;
 QPARSER: main MAIN: existing-word ;
-
 
 QPARSER: destructor DESTRUCTOR: existing-word ;
 QPARSER: predicate PREDICATE: new-class "<" expect parse body ;
@@ -340,23 +318,17 @@ QPARSER: match-vars MATCH-VARS: body ;
 QPARSER: pixel-format-attribute-table PIXEL-FORMAT-ATTRIBUTE-TABLE: new-word parse parse ;
 QPARSER: rect RECT: parse parse ;
 
-
 QPARSER: c-global-literal &: token ;
-
 QPARSER: slot-constructor SLOT-CONSTRUCTOR: token ;
 QPARSER: slot-protocol SLOT-PROTOCOL: ";" raw-until ;
-
 QPARSER: tip TIP: ";" parse-until ;
 QPARSER: tokenizer TOKENIZER: existing-word ; ! hmm
 QPARSER: x509 X509_V_: new-word token ;
-
 QPARSER: role ROLE: ";" raw-until ;
 QPARSER: role-tuple ROLE-TUPLE: ";" raw-until ;
 QPARSER: variant VARIANT: ";" raw-until ;
 QPARSER: variant-member VARIANT-MEMBER: ";" raw-until ;
-
 QPARSER: decimal DECIMAL: token ;
-
 QPARSER: after AFTER: existing-class existing-word body ;
 QPARSER: before BEFORE: existing-class existing-word body ;
 QPARSER: chloe CHLOE: new-word body ;
@@ -373,13 +345,10 @@ QPARSER: foreign-enum-type FOREIGN-ENUM-TYPE: token token ;
 QPARSER: foreign-record-type FOREIGN-RECORD-TYPE: token token ;
 QPARSER: implement-structs IMPLEMENT-STRUCTS: ";" raw-until ;
 
-
 QPARSER: holiday HOLIDAY: new-word body ;
 QPARSER: holiday-name HOLIDAY-NAME: existing-word existing-class parse ;
 
-
 QPARSER: pool POOL: existing-class token ;
-
 QPARSER: mdbtuple MDBTUPLE: ";" parse-until ;
 
 QPARSER: py-from PY-FROM: new-word "=>" expect ";" parse-until ;
@@ -387,7 +356,6 @@ QPARSER: py-methods PY-METHODS: new-word "=>" expect ";" parse-until ;
 QPARSER: py-qualified-from PY-QUALIFIED-FROM: new-word "=>" expect ";" parse-until ;
 QPARSER: renaming RENAMING: new-word parse parse parse ;
 QPARSER: roll ROLL: token ;
-
 
 QPARSER: singletons-union SINGLETONS-UNION: new-class ";" parse-until ;
 ! slides
@@ -400,15 +368,14 @@ QPARSER: xml-error XML-ERROR: new-class ";" raw-until ;
 QPARSER: xml-ns XML-NS: new-word token ;
 QPARSER: feedback-format feedback-format: token ;
 QPARSER: geometry-shader-vertices-out geometry-shader-vertices-out: parse ;
-! funky
 
+! funky
 : parse-bind ( n string -- seq n'/f string )
     raw pick "(" sequences:sequence= [
         ")" raw-until [ swap sequences:prefix ] 2dip
     ] when ;
 QPARSER: bind :> parse-bind ;
 
-! =================================================
 ! words\
 QPARSER: escaped \ raw ;
 QPARSER: method-literal M\ token token ;
@@ -416,8 +383,6 @@ QPARSER: method-literal M\ token token ;
 ! funky readahead one, need this for things like CONSTANT: foo $ init-foo
 ! XXX: Maybe call it $: instead.
 QPARSER: eval-dollar $ parse ;
-
-! singleton parsing words
 
 ! Cocoa
 QPARSER: cfstring CFSTRING: new-word parse ;
@@ -428,16 +393,5 @@ QPARSER: cocoa-protocol COCOA-PROTOCOL: token ;
 
 QPARSER: framework FRAMEWORK: parse ;
 QPARSER: SEL: SEL: token ;
-! QPARSER: cocoa-selector -> token ;
+QPARSER: cocoa-selector -> token ;
 QPARSER: super-selector SUPER-> token ;
-
-
-/*
-parsers get-global keys
-all-words [ "syntax" word-prop ] filter
-[ name>> ] map swap diff
-natural-sort
-[ . ] each
-
-"%>"
-*/

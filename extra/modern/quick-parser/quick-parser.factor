@@ -482,9 +482,9 @@ M: sequence write-parsed [ write-parsed ] each ;
     ] 3bi ;
 >>
 
+! scan-token [ create-class-in ] [ ] bi
 SYNTAX: QPARSER:
-    scan-new-class
-    scan-token
+    scan-new-class scan-token
     parser:parse-definition define-qparser ;
 
 : define-string-literal ( name -- )
