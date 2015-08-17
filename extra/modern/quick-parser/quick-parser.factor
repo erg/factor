@@ -68,6 +68,8 @@ TUPLE: run-time-literal < literal ;
 
 TUPLE: character-literal < literal ;
 
+TUPLE: escaped < literal ;
+
 TUPLE: string-literal < literal ;
 TUPLE: compile-time-long-string-literal < string-literal ;
 TUPLE: run-time-long-string-literal < string-literal ;
@@ -154,6 +156,17 @@ DEFER: parse-until
         swap >>slice
         swap >>object ; inline
 
+: tag-opening-lexed ( opening object class -- literal )
+    new
+    [
+        [ nip ] [
+            [ from>> ]
+            [ [ to>> ] [ seq>> ] bi ] bi* <slice>
+        ] 2bi
+    ] dip
+        swap >>slice
+        swap >>object ; inline
+
 ERROR: unknown-string-literal opening seq ending ;
 ERROR: unknown-character-literal opening seq ending ;
 ERROR: unknown-literal opening seq ending ;
@@ -173,6 +186,9 @@ ERROR: unknown-long-string-literal opening seq ending ;
         character-literal tag-lexed
         ! unknown-string-literal
     ] if ; inline
+
+: make-escaped ( opening contents -- literal )
+    escaped tag-opening-lexed ; inline
 
 : make-string ( opening contents ending -- seq/literal )
     pick lookup-string [
@@ -339,8 +355,8 @@ ERROR: character-expected-got-eof n string ;
         [ 1 + ] dip 2dup length >= [ [ drop f ] dip ] when
     ] when ;
 
-: head?-from ( seq n begin -- ? )
-    [ tail-slice ] dip head? ; inline
+: head?-from ( begin? n string -- ? )
+    swap tail-slice swap head? ; inline
 
 DEFER: token
 : take-comment ( tok n string -- n' string )
@@ -360,21 +376,32 @@ ERROR: whitespace-expected-after-string n string ch ;
         [ whitespace-expected-after-string ] if
     ] when* ;
 
+DEFER: raw
 : token ( n/f string -- token n'/f string )
     over [
         skip-blank over
         [
             ! XXX: check bad escape sequences
             ! seq n string ch
-            "!([{\"'\s\r\n" take-until-either {
+            ! "\\!([{\"'\s\r\n" take-until-either {
+            "!([{\"\s\r\n" take-until-either {
                 { f [ [ drop f ] dip ] } ! XXX: what here
                 { CHAR: ! [ pick { [ empty? ] [ "#" sequence= ] } 1|| [ take-comment token ] [ complete-token ] if ] }
                 { CHAR: ( [ read-paren ] }
                 { CHAR: [ [ read-bracket ] }
                 { CHAR: { [ read-brace ] }
-                { CHAR: ' [ pick empty? [ read-character skip-space-after-string ] [ complete-token ] if ] }
+                ! { CHAR: \ [ raw [ make-escaped ] 2dip ] }
+                ! { CHAR: ' [
+                    ! pick length 1 = [
+                        ! "[" 2over head?-from [
+                            ! complete-token
+                        ! ] [
+                            ! read-character skip-space-after-string
+                        ! ] if
+                    ! ] [ complete-token ] if
+                ! ] }
                 { CHAR: " [ read-string skip-space-after-string ] }
-                [ drop ] ! "\s\r\n" found
+                [ drop ] ! "\s\r\n" found ! put LEXER: in the lexer? hmm
             } case
             ! ensure-token [ drop token ] [ nip ] if
         ] [ [ drop f f ] dip ] if
