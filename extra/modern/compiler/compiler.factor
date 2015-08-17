@@ -3,7 +3,7 @@
 USING: accessors arrays assocs classes constructors hash-sets io
 kernel make modern.paths modern.quick-parser modern.syntax
 namespaces prettyprint sequences sequences.deep sets sorting
-strings ;
+strings multiline ;
 QUALIFIED-WITH: modern.syntax modern
 FROM: syntax => f inline ;
 IN: modern.compiler
@@ -48,7 +48,7 @@ CONSTRUCTOR: <linear-state> linear-state ( -- obj )
     V{ } clone >>decorators ;
 
 : with-linear-state ( quot -- )
-    [ linear-state new \ linear-state ] dip with-variable ; inline
+    [ <linear-state> \ linear-state ] dip with-variable ; inline
 
 : add-using ( in -- ) linear-state get using>> adjoin ;
 : set-in ( in -- ) linear-state get in<< ;
@@ -73,8 +73,11 @@ CONSTRUCTOR: <linear-state> linear-state ( -- obj )
 : set-word-compilation-unit ( -- )
     get-compilation-unit [ get-last-word [ compilation-unit?<< ] [ drop ] if* ] when* ;
 
-: name-first ( object -- string )
-    object>> first >string ;
+DEFER: name-of
+: name-first ( object -- string ) object>> first >string ;
+: name-second ( object -- string ) object>> first >string ;
+: name-sequence ( object -- strings ) object>> first [ name-of ] map ;
+
 GENERIC: name-of ( obj -- name )
 M: modern:function name-of name-first ;
 M: modern:constructor name-of name-first ;
@@ -94,11 +97,14 @@ M: modern:hook name-of name-first ;
 M: modern:method name-of object>> first2 2array ;
 M: modern:constant name-of name-first ;
 M: modern:singleton name-of name-first ;
-M: modern:singletons name-of object>> first [ >string ] map ;
+M: modern:singletons name-of name-sequence ;
 M: modern:symbol name-of name-first ;
-M: modern:symbols name-of object>> first [ >string ] map ;
+M: modern:symbols name-of name-sequence ;
 M: modern:defer name-of name-first ;
-! M: modern:defer name-of name-first ; ! XXX: defer with decorators?
+M: modern:alias name-of name-first ;
+M: modern:c-function name-of name-first ;
+M: modern:gl-function name-of name-first ;
+M: modern:macro name-of name-second ;
 M: object name-of drop f ;
 
 : transfer-state ( -- )
@@ -133,3 +139,13 @@ M: modern:delimiter meta' add-decorator f ;
         transfer-state
         \ linear-state get
     ] with-linear-state ;
+
+/*
+clear
+basis-source-files
+[
+    dup .
+    quick-parse-path
+    dup meta drop sift [ dup qsequence? [ in>> ] [ drop f ] if ] reject describe drop
+] each
+*/

@@ -393,5 +393,5 @@ QPARSER: cocoa-protocol COCOA-PROTOCOL: token ;
 
 QPARSER: framework FRAMEWORK: parse ;
 QPARSER: SEL: SEL: token ;
-QPARSER: cocoa-selector -> token ;
 QPARSER: super-selector SUPER-> token ;
+! QPARSER: cocoa-selector -> token ;
