@@ -41,3 +41,8 @@ IN: modern.quick-parser.tests
 { t } [ "\"\"" qparse length 1 = ] unit-test
 { t } [ "foo\"\"" qparse length 1 = ] unit-test
 { t } [ "foo\"abc\"" qparse length 1 = ] unit-test
+
+{ t } [ "''" qparse length 1 = ] unit-test
+{ t } [ "'a'" qparse length 1 = ] unit-test
+{ t } [ "'\a'" qparse length 1 = ] unit-test
+{ t } [ "'\aasdf'" qparse length 1 = ] unit-test

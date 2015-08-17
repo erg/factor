@@ -66,6 +66,8 @@ TUPLE: paren-literal < literal ;
 TUPLE: compile-time-literal < literal ;
 TUPLE: run-time-literal < literal ;
 
+TUPLE: character-literal < literal ;
+
 TUPLE: string-literal < literal ;
 TUPLE: compile-time-long-string-literal < string-literal ;
 TUPLE: run-time-long-string-literal < string-literal ;
@@ -153,6 +155,7 @@ DEFER: parse-until
         swap >>object ; inline
 
 ERROR: unknown-string-literal opening seq ending ;
+ERROR: unknown-character-literal opening seq ending ;
 ERROR: unknown-literal opening seq ending ;
 ERROR: unknown-paren-literal opening seq ending ;
 ERROR: unknown-long-string-literal opening seq ending ;
@@ -162,6 +165,14 @@ ERROR: unknown-long-string-literal opening seq ending ;
 : lookup-long-string ( obj -- class/f ) [ "[{=" member? ] trim-tail string-literals get choose-parser ;
 : lookup-literal ( obj -- class/f ) [ "{[(" member? ] trim-tail literals get choose-parser ;
 : lookup-paren-literal ( obj -- class/f ) [ CHAR: ( = ] trim-tail paren-literals get choose-parser ;
+
+: make-character ( opening contents ending -- seq/literal )
+    pick lookup-string [
+        character-literal tag-lexed
+    ] [
+        character-literal tag-lexed
+        ! unknown-string-literal
+    ] if ; inline
 
 : make-string ( opening contents ending -- seq/literal )
     pick lookup-string [
@@ -303,6 +314,26 @@ ERROR: string-expected-got-eof n string ;
     make-string
     n' string ;
 
+ERROR: character-expected-got-eof n string ;
+: read-character' ( n string -- n' string )
+    over [
+        { CHAR: \ CHAR: ' } take-including-separator {
+            { f [ [ drop ] 2dip ] }
+            { CHAR: ' [ [ drop ] 2dip ] }
+            { CHAR: \ [ take-next [ 2drop ] 2dip read-character' ] }
+        } case
+    ] [
+        string-expected-got-eof
+    ] if ;
+
+:: read-character ( name n string -- seq n' string )
+    n string read-character' :> ( n' seq' )
+    name
+    n dup 1 + string <slice>
+    n' [ 1 - n' ] [ string length [ 2 - ] [ 1 - ] bi ] if* string <slice>
+    make-character
+    n' string ;
+
 : advance-1 ( n string -- n/f string )
     over [
         [ 1 + ] dip 2dup length >= [ [ drop f ] dip ] when
@@ -322,19 +353,27 @@ DEFER: token
     ] if ;
 
 ERROR: whitespace-expected-after-string n string ch ;
+: skip-space-after-string ( n string -- n' string )
+    take-next rot [
+        dup blank?
+        [ drop ]
+        [ whitespace-expected-after-string ] if
+    ] when* ;
+
 : token ( n/f string -- token n'/f string )
     over [
         skip-blank over
         [
             ! XXX: check bad escape sequences
             ! seq n string ch
-            "!([{\"\s\r\n" take-until-either {
+            "!([{\"'\s\r\n" take-until-either {
                 { f [ [ drop f ] dip ] } ! XXX: what here
                 { CHAR: ! [ pick { [ empty? ] [ "#" sequence= ] } 1|| [ take-comment token ] [ complete-token ] if ] }
                 { CHAR: ( [ read-paren ] }
                 { CHAR: [ [ read-bracket ] }
                 { CHAR: { [ read-brace ] }
-                { CHAR: " [ read-string take-next rot [ dup blank? [ drop ] [ whitespace-expected-after-string ] if ] when* ] }
+                { CHAR: ' [ pick empty? [ read-character skip-space-after-string ] [ complete-token ] if ] }
+                { CHAR: " [ read-string skip-space-after-string ] }
                 [ drop ] ! "\s\r\n" found
             } case
             ! ensure-token [ drop token ] [ nip ] if
