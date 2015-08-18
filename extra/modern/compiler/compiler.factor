@@ -1,9 +1,10 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
+
 USING: accessors arrays assocs classes constructors hash-sets io
 kernel make modern.paths modern.quick-parser modern.syntax
 namespaces prettyprint sequences sequences.deep sets sorting
-strings multiline ;
+strings multiline hashtables ;
 QUALIFIED-WITH: modern.syntax modern
 FROM: syntax => f inline ;
 IN: modern.compiler
@@ -112,33 +113,87 @@ M: object name-of drop f ;
     set-word-private
     set-word-in transfer-decorators ;
 
-GENERIC: meta' ( obj -- obj )
-M: object meta'
+GENERIC: meta-pass' ( obj -- obj )
+M: object meta-pass'
     dup name-of [
         transfer-state
         [ set-last-word ] [ ] bi
     ] [ ] if ;
 
-M: modern:using meta' object>> first [ >string add-using ] each f ;
-M: modern:use meta' object>> first >string add-using f ;
-M: modern:in meta' object>> first >string set-in f ;
-M: modern:private-begin meta' drop t set-private f ;
-M: modern:private-end meta' drop f set-private f ;
+M: modern:using meta-pass' object>> first [ >string add-using ] each f ;
+M: modern:use meta-pass' object>> first >string add-using f ;
+M: modern:in meta-pass' object>> first >string set-in f ;
+M: modern:private-begin meta-pass' drop t set-private f ;
+M: modern:private-end meta-pass' drop f set-private f ;
 
-M: modern:final meta' add-decorator f ;
-M: modern:foldable meta' add-decorator f ;
-M: modern:flushable meta' add-decorator f ;
-M: modern:inline meta' add-decorator f ;
-M: modern:recursive meta' add-decorator f ;
-M: modern:deprecated meta' add-decorator f ;
-M: modern:delimiter meta' add-decorator f ;
+M: modern:final meta-pass' add-decorator f ;
+M: modern:foldable meta-pass' add-decorator f ;
+M: modern:flushable meta-pass' add-decorator f ;
+M: modern:inline meta-pass' add-decorator f ;
+M: modern:recursive meta-pass' add-decorator f ;
+M: modern:deprecated meta-pass' add-decorator f ;
+M: modern:delimiter meta-pass' add-decorator f ;
 
-: meta ( parsed -- parsed linear-state )
+: meta-pass ( parsed -- parsed linear-state )
     [
-        [ meta' ] map
+        [ meta-pass' ] map
         transfer-state
         \ linear-state get
     ] with-linear-state ;
+
+TUPLE: qvocab namespace words classes ;
+CONSTRUCTOR: <qvocab> qvocab ( -- obj )
+    100 <hashtable> >>namespace
+    100 <hashtable> >>words
+    100 <hashtable> >>classes ;
+
+: current-qvocab ( -- qvocab )
+    ;
+
+ERROR: class-already-exists name ;
+: check-class ( string -- string )
+    dup current-qvocab classes>> get key? [
+        class-already-exists
+    ] when ;
+
+ERROR: word-already-exists name ;
+: check-word ( string -- string )
+    dup current-qvocab words>> get key? [
+        word-already-exists
+    ] when ;
+
+: (create-word) ( string -- word ) ;
+: (create-class) ( string -- class ) ;
+
+: create-word ( string -- word )
+    check-class check-word (create-word) ;
+
+: create-class ( string -- class )
+    check-class check-word (create-class) ;
+
+: create-class-word ( string -- class )
+    check-word check-class (create-word) (create-class) ;
+
+GENERIC: create-pass' ( obj -- obj/seq )
+
+M: object create-pass' drop f ;
+M: modern:singleton create-pass' object>> first >string create-class ;
+M: modern:singletons create-pass' object>> first [ >string create-class ] map ;
+
+
+: create ( parsed linear-state -- parsed )
+    [
+        [ create-pass' dup sequence? [ 1array ] unless ] map concat
+        \ linear-state get
+    ] with-linear-state ;
+
+: define-pass ( parsed linear-state -- parsed )
+    [
+        \ linear-state get
+    ] with-linear-state ;
+
+: quick-compile ( seq -- )
+    meta-pass create-pass define-pass ;
 
 /*
 clear
