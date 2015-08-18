@@ -557,7 +557,7 @@ M: sequence write-parsed [ write-parsed ] each ;
 >>
 
 ! scan-token [ create-class-in ] [ ] bi
-SYNTAX: QPARSER:
+SYNTAX: LEXER:
     scan-new-class scan-token
     parser:parse-definition define-qparser ;
 

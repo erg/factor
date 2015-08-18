@@ -6,392 +6,392 @@ QUALIFIED: sequences
 QUALIFIED: strings
 
 ! Can go away:
-QPARSER: heredoc HEREDOC: token pick strings:>string multiline-string-until ;
+LEXER: heredoc HEREDOC: token pick strings:>string multiline-string-until ;
 ! string literals: P" URL" SBUF" DLL"
 
-QPARSER: compilation-unit-begin << ; ! going away
-QPARSER: compilation-unit-end >> ; ! going away
+LEXER: compilation-unit-begin << ; ! going away
+LEXER: compilation-unit-end >> ; ! going away
 
-QPARSER: regexp-/ R/ "/" multiline-string-until ;
-QPARSER: regexp-# R# "#" multiline-string-until ;
-QPARSER: regexp-' R' "'" multiline-string-until ;
-QPARSER: regexp-( R( "(" multiline-string-until ;
-QPARSER: regexp-@ R@ "@" multiline-string-until ;
-QPARSER: regexp-` R` "`" multiline-string-until ;
-QPARSER: regexp-| R| "|" multiline-string-until ;
-QPARSER: regexp-! R! "!" multiline-string-until ;
+LEXER: regexp-/ R/ "/" multiline-string-until ;
+LEXER: regexp-# R# "#" multiline-string-until ;
+LEXER: regexp-' R' "'" multiline-string-until ;
+LEXER: regexp-( R( "(" multiline-string-until ;
+LEXER: regexp-@ R@ "@" multiline-string-until ;
+LEXER: regexp-` R` "`" multiline-string-until ;
+LEXER: regexp-| R| "|" multiline-string-until ;
+LEXER: regexp-! R! "!" multiline-string-until ;
 
 ! words[
-! QPARSER: block [ "]" parse-until ;
-! QPARSER: fry '[ "]" parse-until ;
-! QPARSER: block-eval $[ "]" parse-until ;
-! QPARSER: set-quot set[ "]" parse-until ;
-! QPARSER: get-quot get[ "]" parse-until ;
-! QPARSER: slots-quot slots[ "]" parse-until ;
-! QPARSER: set-slots-quot set-slots[ "]" parse-until ;
-! QPARSER: memo-block MEMO[ "]" parse-until ;
+! LEXER: block [ "]" parse-until ;
+! LEXER: fry '[ "]" parse-until ;
+! LEXER: block-eval $[ "]" parse-until ;
+! LEXER: set-quot set[ "]" parse-until ;
+! LEXER: get-quot get[ "]" parse-until ;
+! LEXER: slots-quot slots[ "]" parse-until ;
+! LEXER: set-slots-quot set-slots[ "]" parse-until ;
+! LEXER: memo-block MEMO[ "]" parse-until ;
 
-QPARSER: block-locals [| "]" parse-until ;
-QPARSER: pipe-separator | ;
+LEXER: block-locals [| "]" parse-until ;
+LEXER: pipe-separator | ;
 
 ! words{
-! QPARSER: array { "}" parse-until ;
-! QPARSER: vector V{ "}" parse-until ;
-! QPARSER: bitset ?{ "}" parse-until ;
-! QPARSER: eval-dollar-array ${ "}" parse-until ; ! going away
-! QPARSER: byte-array B{ "}" parse-until ;
-! QPARSER: byte-vector BV{ "}" parse-until ;
-! QPARSER: hashtable H{ "}" parse-until ;
-! QPARSER: hash-set HS{ "}" parse-until ;
-! QPARSER: tuple-literal T{ existing-class "}" parse-until ;
-! QPARSER: callstack-literal CS{ "}" parse-until ;
-! QPARSER: complex-literal C{ "}" parse-until ;
-! QPARSER: dlist-literal DL{ "}" parse-until ;
-! QPARSER: wrapper-literal W{ "}" parse-until ;
-! QPARSER: struct-literal S{ "}" parse-until ;
-! QPARSER: identity-hash-set IHS{ "}" parse-until ;
-! QPARSER: identity-hashtable IH{ "}" parse-until ;
-! QPARSER: set-array set{ "}" parse-until ;
-! QPARSER: get-array get{ "}" parse-until ;
-! QPARSER: slots-array slots{ "}" parse-until ;
-! QPARSER: set-slots-array set-slots{ "}" parse-until ;
-! QPARSER: copy-slots-array copy-slots{ "}" parse-until ;
-! QPARSER: flags flags{ "}" parse-until ;
-! QPARSER: union-array union{ "}" parse-until ;
-! QPARSER: intersection-array intersection{ "}" parse-until ;
-! QPARSER: maybe maybe{ "}" parse-until ;
-! QPARSER: not not{ "}" parse-until ;
-! QPARSER: c-array c-array{ "}" parse-until ;
+! LEXER: array { "}" parse-until ;
+! LEXER: vector V{ "}" parse-until ;
+! LEXER: bitset ?{ "}" parse-until ;
+! LEXER: eval-dollar-array ${ "}" parse-until ; ! going away
+! LEXER: byte-array B{ "}" parse-until ;
+! LEXER: byte-vector BV{ "}" parse-until ;
+! LEXER: hashtable H{ "}" parse-until ;
+! LEXER: hash-set HS{ "}" parse-until ;
+! LEXER: tuple-literal T{ existing-class "}" parse-until ;
+! LEXER: callstack-literal CS{ "}" parse-until ;
+! LEXER: complex-literal C{ "}" parse-until ;
+! LEXER: dlist-literal DL{ "}" parse-until ;
+! LEXER: wrapper-literal W{ "}" parse-until ;
+! LEXER: struct-literal S{ "}" parse-until ;
+! LEXER: identity-hash-set IHS{ "}" parse-until ;
+! LEXER: identity-hashtable IH{ "}" parse-until ;
+! LEXER: set-array set{ "}" parse-until ;
+! LEXER: get-array get{ "}" parse-until ;
+! LEXER: slots-array slots{ "}" parse-until ;
+! LEXER: set-slots-array set-slots{ "}" parse-until ;
+! LEXER: copy-slots-array copy-slots{ "}" parse-until ;
+! LEXER: flags flags{ "}" parse-until ;
+! LEXER: union-array union{ "}" parse-until ;
+! LEXER: intersection-array intersection{ "}" parse-until ;
+! LEXER: maybe maybe{ "}" parse-until ;
+! LEXER: not not{ "}" parse-until ;
+! LEXER: c-array c-array{ "}" parse-until ;
 
-! QPARSER: shaped-array sa{ "}" parse-until ;
-! QPARSER: avl AVL{ "}" parse-until ;
-! QPARSER: splay SPLAY{ "}" parse-until ;
-! QPARSER: tree TREE{ "}" parse-until ;
-! QPARSER: suffix-array SA{ "}" parse-until ;
-! QPARSER: valist VA{ "}" parse-until ;
-! QPARSER: vlist VL{ "}" parse-until ;
-! QPARSER: number-hash-set NHS{ "}" parse-until ;
-! QPARSER: number-hashtable NH{ "}" parse-until ;
-! QPARSER: nibble-array N{ "}" parse-until ;
-! QPARSER: persistent-hashtable PH{ "}" parse-until ;
-! QPARSER: persistent-vector PV{ "}" parse-until ;
-! QPARSER: sequence-hash-set SHS{ "}" parse-until ;
-! QPARSER: sequence-hashtable SH{ "}" parse-until ;
-! QPARSER: quote-word qw{ "}" parse-until ;
-! QPARSER: bit-vector ?V{ "}" parse-until ;
-! QPARSER: poker-hand HAND{ "}" parse-until ;
-! QPARSER: hex-array HEX{ "}" parse-until ;
+! LEXER: shaped-array sa{ "}" parse-until ;
+! LEXER: avl AVL{ "}" parse-until ;
+! LEXER: splay SPLAY{ "}" parse-until ;
+! LEXER: tree TREE{ "}" parse-until ;
+! LEXER: suffix-array SA{ "}" parse-until ;
+! LEXER: valist VA{ "}" parse-until ;
+! LEXER: vlist VL{ "}" parse-until ;
+! LEXER: number-hash-set NHS{ "}" parse-until ;
+! LEXER: number-hashtable NH{ "}" parse-until ;
+! LEXER: nibble-array N{ "}" parse-until ;
+! LEXER: persistent-hashtable PH{ "}" parse-until ;
+! LEXER: persistent-vector PV{ "}" parse-until ;
+! LEXER: sequence-hash-set SHS{ "}" parse-until ;
+! LEXER: sequence-hashtable SH{ "}" parse-until ;
+! LEXER: quote-word qw{ "}" parse-until ;
+! LEXER: bit-vector ?V{ "}" parse-until ;
+! LEXER: poker-hand HAND{ "}" parse-until ;
+! LEXER: hex-array HEX{ "}" parse-until ;
 
 ! words(
-! QPARSER: signature ( ")" parguments typed-raw-until ;
-! QPARSER: execute-parens execute( (parse-psignature) ;
-! QPARSER: call-parens call( (parse-psignature) ;
-! QPARSER: eval-parens eval( (parse-psignature) ;
-! QPARSER: data-map-parens data-map( (parse-psignature) ;
-! QPARSER: data-map!-parens data-map!( (parse-psignature) ;
-! QPARSER: shuffle-parens shuffle( (parse-psignature) ;
+! LEXER: signature ( ")" parguments typed-raw-until ;
+! LEXER: execute-parens execute( (parse-psignature) ;
+! LEXER: call-parens call( (parse-psignature) ;
+! LEXER: eval-parens eval( (parse-psignature) ;
+! LEXER: data-map-parens data-map( (parse-psignature) ;
+! LEXER: data-map!-parens data-map!( (parse-psignature) ;
+! LEXER: shuffle-parens shuffle( (parse-psignature) ;
 
-QPARSER: c-comment /* "*/" multiline-string-until ;
+LEXER: c-comment /* "*/" multiline-string-until ;
 
 ! BEGIN REGULAR WORDS
-QPARSER: f f ;
-QPARSER: private-begin <PRIVATE ;
-QPARSER: private-end PRIVATE> ;
-QPARSER: BAD-ALIEN BAD-ALIEN ; ! alien.syntax
-QPARSER: delimiter delimiter ; ! XXX: not really used?
-QPARSER: deprecated deprecated ;
-QPARSER: final final ;
-QPARSER: flushable flushable ;
-QPARSER: foldable foldable ;
-QPARSER: inline inline ;
-QPARSER: recursive recursive ;
-QPARSER: breakpoint B ;
-QPARSER: call-next-method call-next-method ;
-QPARSER: no-compile no-compile ; ! extra/benchmark/raytracer-simd/raytracer-simd.factor
+LEXER: f f ;
+LEXER: private-begin <PRIVATE ;
+LEXER: private-end PRIVATE> ;
+LEXER: BAD-ALIEN BAD-ALIEN ; ! alien.syntax
+LEXER: delimiter delimiter ; ! XXX: not really used?
+LEXER: deprecated deprecated ;
+LEXER: final final ;
+LEXER: flushable flushable ;
+LEXER: foldable foldable ;
+LEXER: inline inline ;
+LEXER: recursive recursive ;
+LEXER: breakpoint B ;
+LEXER: call-next-method call-next-method ;
+LEXER: no-compile no-compile ; ! extra/benchmark/raytracer-simd/raytracer-simd.factor
 
 ! Compiler
-QPARSER: d-register D: token ;
-QPARSER: r-register R: token ;
+LEXER: d-register D: token ;
+LEXER: r-register R: token ;
 
 ! opengl break
-QPARSER: gb GB ;
+LEXER: gb GB ;
 
 ! XXX: cpu.8080
-QPARSER: instruction INSTRUCTION: ";" raw-until ;
-QPARSER: cycles cycles: token ;
-QPARSER: opcode opcode: token ;
+LEXER: instruction INSTRUCTION: ";" raw-until ;
+LEXER: cycles cycles: token ;
+LEXER: opcode opcode: token ;
 
 ! Single token parsers that need rename (?)
-QPARSER: in IN: token ;
-QPARSER: use USE: token ;
+LEXER: in IN: token ;
+LEXER: use USE: token ;
 
-QPARSER: unuse UNUSE: token ; ! XXX: remove this
-QPARSER: exclude EXCLUDE: token "=>" expect ";" raw-until ; ! XXX: remove
-QPARSER: rename RENAME: raw raw "=>" expect raw ; ! XXX: remove
-QPARSER: from FROM: token "=>" expect ";" raw-until ; ! XXX: remove
-QPARSER: qualified QUALIFIED: token ; ! XXX: make implicit
-QPARSER: qualified-with QUALIFIED-WITH: token token ; ! XXX: remove
+LEXER: unuse UNUSE: token ; ! XXX: remove this
+LEXER: exclude EXCLUDE: token "=>" expect ";" raw-until ; ! XXX: remove
+LEXER: rename RENAME: raw raw "=>" expect raw ; ! XXX: remove
+LEXER: from FROM: token "=>" expect ";" raw-until ; ! XXX: remove
+LEXER: qualified QUALIFIED: token ; ! XXX: make implicit
+LEXER: qualified-with QUALIFIED-WITH: token token ; ! XXX: remove
 
-QPARSER: forget FORGET: token ; ! repl only (?)
+LEXER: forget FORGET: token ; ! repl only (?)
 
-QPARSER: guid GUID: raw ;
+LEXER: guid GUID: raw ;
 
-QPARSER: selector SELECTOR: token ; ! Smalltalk
-QPARSER: storage STORAGE: token ; ! units
+LEXER: selector SELECTOR: token ; ! Smalltalk
+LEXER: storage STORAGE: token ; ! units
 
 ! Nice, regular uppercase read til ; parsers
-QPARSER: using USING: ";" parse-until ;
-QPARSER: syntax-word SYNTAX: raw body ; ! needs \
-QPARSER: parser QPARSER: raw raw body ; ! needs \
+LEXER: using USING: ";" parse-until ;
+LEXER: syntax-word SYNTAX: raw body ; ! needs \
+LEXER: parser LEXER: raw raw body ; ! needs \
 
 ! Upper case but not explicit end
-QPARSER: c-function FUNCTION: token new-word parse ;
-QPARSER: function-alias FUNCTION-ALIAS: token token new-word parse ;
-QPARSER: x-function X-FUNCTION: token new-word parse ;
-QPARSER: gl-function GL-FUNCTION: token new-word parse parse ;
-QPARSER: cuda-function CUDA-FUNCTION: new-word parse ; ! no return value
-QPARSER: cuda-global CUDA-GLOBAL: new-word ;
-QPARSER: cuda-library CUDA-LIBRARY: new-word existing-class token ; ! XXX: token might have spaces...
-QPARSER: c-callback CALLBACK: token token parse ;
-QPARSER: subroutine SUBROUTINE: token parse ;
+LEXER: c-function FUNCTION: token new-word parse ;
+LEXER: function-alias FUNCTION-ALIAS: token token new-word parse ;
+LEXER: x-function X-FUNCTION: token new-word parse ;
+LEXER: gl-function GL-FUNCTION: token new-word parse parse ;
+LEXER: cuda-function CUDA-FUNCTION: new-word parse ; ! no return value
+LEXER: cuda-global CUDA-GLOBAL: new-word ;
+LEXER: cuda-library CUDA-LIBRARY: new-word existing-class token ; ! XXX: token might have spaces...
+LEXER: c-callback CALLBACK: token token parse ;
+LEXER: subroutine SUBROUTINE: token parse ;
 
 ! words[ funky
-QPARSER: let-block [let "]" parse-until ;
-QPARSER: interpolate [I "I]" multiline-string-until ;
-QPARSER: xml-bracket [XML "XML]" multiline-string-until ;
-QPARSER: infix [infix "infix]" multiline-string-until ;
-QPARSER: morse [MORSE "MORSE]" multiline-string-until ;
-QPARSER: ebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
-QPARSER: ebnf-acute <EBNF token "EBNF>" multiline-string-until ; ! going away
-QPARSER: literate <LITERATE "LITERATE>" multiline-string-until ;
-QPARSER: xml-acute <XML "XML>" multiline-string-until ;
+LEXER: let-block [let "]" parse-until ;
+LEXER: interpolate [I "I]" multiline-string-until ;
+LEXER: xml-bracket [XML "XML]" multiline-string-until ;
+LEXER: infix [infix "infix]" multiline-string-until ;
+LEXER: morse [MORSE "MORSE]" multiline-string-until ;
+LEXER: ebnf-bracket [EBNF token "EBNF]" multiline-string-until ; ! going away
+LEXER: ebnf-acute <EBNF token "EBNF>" multiline-string-until ; ! going away
+LEXER: literate <LITERATE "LITERATE>" multiline-string-until ;
+LEXER: xml-acute <XML "XML>" multiline-string-until ;
 
-QPARSER: backtick ` "`" multiline-string-until ;
-QPARSER: applescript APPLESCRIPT: new-word ";APPLESCRIPT" multiline-string-until ;
-QPARSER: long-string STRING: token "\n;" multiline-string-until ;
-QPARSER: glsl-shader GLSL-SHADER: token token "\n;" multiline-string-until ;
-QPARSER: ebnf EBNF: token ";EBNF" multiline-string-until ;
+LEXER: backtick ` "`" multiline-string-until ;
+LEXER: applescript APPLESCRIPT: new-word ";APPLESCRIPT" multiline-string-until ;
+LEXER: long-string STRING: token "\n;" multiline-string-until ;
+LEXER: glsl-shader GLSL-SHADER: token token "\n;" multiline-string-until ;
+LEXER: ebnf EBNF: token ";EBNF" multiline-string-until ;
 
 ! words@
-QPARSER: struct-literal-at S@ token parse ; ! [[ ]]
-QPARSER: c-array@ c-array@ parse parse parse ; ! [[ ]]
+LEXER: struct-literal-at S@ token parse ; ! [[ ]]
+LEXER: c-array@ c-array@ parse parse parse ; ! [[ ]]
 
 ! words:
-QPARSER: function : new-word parse body ;
-QPARSER: function-locals :: new-word parse body ;
-QPARSER: alias ALIAS: raw raw ;
-QPARSER: typed TYPED: new-word parse body ;
-QPARSER: typed-locals TYPED:: new-word parse body ;
-QPARSER: memo MEMO: new-word parse body ;
-QPARSER: memo-locals MEMO:: new-word parse body ;
-QPARSER: identity-memo IDENTITY-MEMO: new-word parse body ;
-QPARSER: identity-memo-locals IDENTITY-MEMO:: new-word parse body ;
-QPARSER: macro MACRO: new-word parse body ;
-QPARSER: macro-locals MACRO:: new-word parse body ;
-QPARSER: peg PEG: new-word parse body ;
-QPARSER: descriptive DESCRIPTIVE: new-word parse body ;
-QPARSER: descriptive-locals DESCRIPTIVE:: new-word parse body ;
-QPARSER: constructor-new CONSTRUCTOR: token token parse body ;
-QPARSER: primitive PRIMITIVE: new-word parse ;
+LEXER: function : new-word parse body ;
+LEXER: function-locals :: new-word parse body ;
+LEXER: alias ALIAS: raw raw ;
+LEXER: typed TYPED: new-word parse body ;
+LEXER: typed-locals TYPED:: new-word parse body ;
+LEXER: memo MEMO: new-word parse body ;
+LEXER: memo-locals MEMO:: new-word parse body ;
+LEXER: identity-memo IDENTITY-MEMO: new-word parse body ;
+LEXER: identity-memo-locals IDENTITY-MEMO:: new-word parse body ;
+LEXER: macro MACRO: new-word parse body ;
+LEXER: macro-locals MACRO:: new-word parse body ;
+LEXER: peg PEG: new-word parse body ;
+LEXER: descriptive DESCRIPTIVE: new-word parse body ;
+LEXER: descriptive-locals DESCRIPTIVE:: new-word parse body ;
+LEXER: constructor-new CONSTRUCTOR: token token parse body ;
+LEXER: primitive PRIMITIVE: new-word parse ;
 ! XXX: new def, can't use yet
-! QPARSER: functor FUNCTOR: token parse ";FUNCTOR" parse-until ;
-QPARSER: functor FUNCTOR: token ";FUNCTOR" multiline-string-until ;
-QPARSER: functor-syntax FUNCTOR-SYNTAX: token body ;
-QPARSER: generic GENERIC: new-class parse ;
-QPARSER: generic# GENERIC# new-class token parse ;
-QPARSER: hook HOOK: new-class existing-word parse ;
-QPARSER: method M: parse existing-word body ;
-QPARSER: method-locals M:: parse existing-word body ;
-QPARSER: math MATH: new-word parse ;
-QPARSER: pair-generic PAIR-GENERIC: new-class parse ;
-QPARSER: pair-m PAIR-M: existing-class existing-class existing-word body ;
-QPARSER: tags TAGS: new-word parse ;
-QPARSER: tag TAG: token existing-word body ;
-QPARSER: rule RULE: new-word ";" raw-until ;
-QPARSER: roman ROMAN: token ;
-QPARSER: roman-op ROMAN-OP: raw parse ;
-QPARSER: lazy LAZY: new-word parse body ;
-QPARSER: infix-locals INFIX:: new-word parse body ;
+! LEXER: functor FUNCTOR: token parse ";FUNCTOR" parse-until ;
+LEXER: functor FUNCTOR: token ";FUNCTOR" multiline-string-until ;
+LEXER: functor-syntax FUNCTOR-SYNTAX: token body ;
+LEXER: generic GENERIC: new-class parse ;
+LEXER: generic# GENERIC# new-class token parse ;
+LEXER: hook HOOK: new-class existing-word parse ;
+LEXER: method M: parse existing-word body ;
+LEXER: method-locals M:: parse existing-word body ;
+LEXER: math MATH: new-word parse ;
+LEXER: pair-generic PAIR-GENERIC: new-class parse ;
+LEXER: pair-m PAIR-M: existing-class existing-class existing-word body ;
+LEXER: tags TAGS: new-word parse ;
+LEXER: tag TAG: token existing-word body ;
+LEXER: rule RULE: new-word ";" raw-until ;
+LEXER: roman ROMAN: token ;
+LEXER: roman-op ROMAN-OP: raw parse ;
+LEXER: lazy LAZY: new-word parse body ;
+LEXER: infix-locals INFIX:: new-word parse body ;
 
 
-QPARSER: constant CONSTANT: token parse ;
-QPARSER: symbol SYMBOL: token ;
-QPARSER: symbols SYMBOLS: ";" raw-until ;
-QPARSER: postpone POSTPONE: raw ;
-QPARSER: defer DEFER: token ;
-QPARSER: char CHAR: raw ;
-QPARSER: alien ALIEN: token ;
+LEXER: constant CONSTANT: token parse ;
+LEXER: symbol SYMBOL: token ;
+LEXER: symbols SYMBOLS: ";" raw-until ;
+LEXER: postpone POSTPONE: raw ;
+LEXER: defer DEFER: token ;
+LEXER: char CHAR: raw ;
+LEXER: alien ALIEN: token ;
 
-QPARSER: tuple TUPLE: new-class body ;
-QPARSER: struct STRUCT: new-class body ;
-QPARSER: packed-struct PACKED-STRUCT: new-class body ;
-QPARSER: le-packed-struct LE-PACKED-STRUCT: new-class body ;
-QPARSER: be-packed-struct BE-PACKED-STRUCT: new-class body ;
-QPARSER: le-struct LE-STRUCT: new-class body ;
-QPARSER: be-struct BE-STRUCT: new-class body ;
-QPARSER: union-struct UNION-STRUCT: new-class body ;
-QPARSER: error ERROR: new-class body ;
-QPARSER: slot SLOT: token ;
-QPARSER: constructor C: token token ;
+LEXER: tuple TUPLE: new-class body ;
+LEXER: struct STRUCT: new-class body ;
+LEXER: packed-struct PACKED-STRUCT: new-class body ;
+LEXER: le-packed-struct LE-PACKED-STRUCT: new-class body ;
+LEXER: be-packed-struct BE-PACKED-STRUCT: new-class body ;
+LEXER: le-struct LE-STRUCT: new-class body ;
+LEXER: be-struct BE-STRUCT: new-class body ;
+LEXER: union-struct UNION-STRUCT: new-class body ;
+LEXER: error ERROR: new-class body ;
+LEXER: slot SLOT: token ;
+LEXER: constructor C: token token ;
 
-QPARSER: com-interface COM-INTERFACE: existing-word new-word parse ";" parse-until ;
-QPARSER: typedef TYPEDEF: token token ;
-QPARSER: library LIBRARY: token ;
-QPARSER: c-type C-TYPE: token ;
-QPARSER: c-global C-GLOBAL: token token ;
-QPARSER: hints HINTS: parse body ;
-QPARSER: builtin BUILTIN: existing-class body ;
-QPARSER: main MAIN: existing-word ;
+LEXER: com-interface COM-INTERFACE: existing-word new-word parse ";" parse-until ;
+LEXER: typedef TYPEDEF: token token ;
+LEXER: library LIBRARY: token ;
+LEXER: c-type C-TYPE: token ;
+LEXER: c-global C-GLOBAL: token token ;
+LEXER: hints HINTS: parse body ;
+LEXER: builtin BUILTIN: existing-class body ;
+LEXER: main MAIN: existing-word ;
 
-QPARSER: destructor DESTRUCTOR: existing-word ;
-QPARSER: predicate PREDICATE: new-class "<" expect parse body ;
-QPARSER: mixin MIXIN: new-class ;
-QPARSER: instance INSTANCE: existing-class existing-class ;
-QPARSER: singleton SINGLETON: new-class ;
-QPARSER: singletons SINGLETONS: body ;
-QPARSER: import IMPORT: token ;
-QPARSER: imports IMPORTS: ";" raw-until ;
-QPARSER: special-object SPECIAL-OBJECT: token parse ;
-QPARSER: union UNION: new-class body ;
-QPARSER: intersection INTERSECTION: token body ;
-QPARSER: unicode-category CATEGORY: token body ;
-QPARSER: unicode-category-not CATEGORY-NOT: token body ;
+LEXER: destructor DESTRUCTOR: existing-word ;
+LEXER: predicate PREDICATE: new-class "<" expect parse body ;
+LEXER: mixin MIXIN: new-class ;
+LEXER: instance INSTANCE: existing-class existing-class ;
+LEXER: singleton SINGLETON: new-class ;
+LEXER: singletons SINGLETONS: body ;
+LEXER: import IMPORT: token ;
+LEXER: imports IMPORTS: ";" raw-until ;
+LEXER: special-object SPECIAL-OBJECT: token parse ;
+LEXER: union UNION: new-class body ;
+LEXER: intersection INTERSECTION: token body ;
+LEXER: unicode-category CATEGORY: token body ;
+LEXER: unicode-category-not CATEGORY-NOT: token body ;
 
-QPARSER: specialized-array SPECIALIZED-ARRAY: token ;
-QPARSER: specialized-arrays SPECIALIZED-ARRAYS: ";" raw-until ;
-QPARSER: specialized-vector SPECIALIZED-VECTOR: token ;
-QPARSER: specialized-vectors SPECIALIZED-VECTORS: ";" raw-until ;
-QPARSER: vectored-struct VECTORED-STRUCT: existing-class ;
+LEXER: specialized-array SPECIALIZED-ARRAY: token ;
+LEXER: specialized-arrays SPECIALIZED-ARRAYS: ";" raw-until ;
+LEXER: specialized-vector SPECIALIZED-VECTOR: token ;
+LEXER: specialized-vectors SPECIALIZED-VECTORS: ";" raw-until ;
+LEXER: vectored-struct VECTORED-STRUCT: existing-class ;
 
-QPARSER: glsl-program GLSL-PROGRAM: token body ;
-QPARSER: uniform-tuple UNIFORM-TUPLE: token body ;
+LEXER: glsl-program GLSL-PROGRAM: token body ;
+LEXER: uniform-tuple UNIFORM-TUPLE: token body ;
 
-QPARSER: test TEST: token ;
-QPARSER: registers REGISTERS: body ;
-QPARSER: hi-registers HI-REGISTERS: body ;
-QPARSER: color COLOR: token ;
-QPARSER: hexcolor HEXCOLOR: token ;
-QPARSER: flexhexcolor FLEXHEXCOLOR: token ;
+LEXER: test TEST: token ;
+LEXER: registers REGISTERS: body ;
+LEXER: hi-registers HI-REGISTERS: body ;
+LEXER: color COLOR: token ;
+LEXER: hexcolor HEXCOLOR: token ;
+LEXER: flexhexcolor FLEXHEXCOLOR: token ;
 
-QPARSER: about ABOUT: token ;
-QPARSER: article ARTICLE: token body ;
-QPARSER: rotocol PROTOCOL: token body ;
+LEXER: about ABOUT: token ;
+LEXER: article ARTICLE: token body ;
+LEXER: rotocol PROTOCOL: token body ;
 
-QPARSER: insn INSN: new-word body ;
-QPARSER: vreg-insn VREG-INSN: token body ;
-QPARSER: flushable-insn FLUSHABLE-INSN: new-word body ;
-QPARSER: foldable-insn FOLDABLE-INSN: new-word body ;
+LEXER: insn INSN: new-word body ;
+LEXER: vreg-insn VREG-INSN: token body ;
+LEXER: flushable-insn FLUSHABLE-INSN: new-word body ;
+LEXER: foldable-insn FOLDABLE-INSN: new-word body ;
 
-QPARSER: codegen CODEGEN: token token ;
-QPARSER: conditional CONDITIONAL: token token ;
-QPARSER: simd-128 SIMD-128: token ;
-QPARSER: simd-128-cord SIMD-128-CORD: token token ;
-QPARSER: simd-instrinsic SIMD-INTRINSIC: token body ;
-QPARSER: simd-instrinsic-locals SIMD-INTRINSIC:: token body ;
-QPARSER: enum ENUM: token body ;
-QPARSER: pointer pointer: token ;
-QPARSER: help HELP: raw body ;
-QPARSER: name NAME: token token ;
-QPARSER: tr TR: token body ;
+LEXER: codegen CODEGEN: token token ;
+LEXER: conditional CONDITIONAL: token token ;
+LEXER: simd-128 SIMD-128: token ;
+LEXER: simd-128-cord SIMD-128-CORD: token token ;
+LEXER: simd-instrinsic SIMD-INTRINSIC: token body ;
+LEXER: simd-instrinsic-locals SIMD-INTRINSIC:: token body ;
+LEXER: enum ENUM: token body ;
+LEXER: pointer pointer: token ;
+LEXER: help HELP: raw body ;
+LEXER: name NAME: token token ;
+LEXER: tr TR: token body ;
 
-QPARSER: backward-analysis BACKWARD-ANALYSIS: token ;
-QPARSER: forward-analysis FORWARD-ANALYSIS: token ;
-QPARSER: register REGISTER: token ;
+LEXER: backward-analysis BACKWARD-ANALYSIS: token ;
+LEXER: forward-analysis FORWARD-ANALYSIS: token ;
+LEXER: register REGISTER: token ;
 
-QPARSER: log LOG: token token ;
-QPARSER: nan NAN: token ;
-QPARSER: broadcast BROADCAST: existing-word existing-class parse ;
-QPARSER: consult CONSULT: new-word existing-class body ;
+LEXER: log LOG: token token ;
+LEXER: nan NAN: token ;
+LEXER: broadcast BROADCAST: existing-word existing-class parse ;
+LEXER: consult CONSULT: new-word existing-class body ;
 
-QPARSER: mirc IRC: token parse ";" raw-until ;
-QPARSER: main-window MAIN-WINDOW: token parse body ;
-QPARSER: game GAME: token parse body ;
-QPARSER: solution SOLUTION: token ;
+LEXER: mirc IRC: token parse ";" raw-until ;
+LEXER: main-window MAIN-WINDOW: token parse body ;
+LEXER: game GAME: token parse body ;
+LEXER: solution SOLUTION: token ;
 
-QPARSER: 8-bit 8-BIT: token token token ;
-QPARSER: euc EUC: new-class parse ;
+LEXER: 8-bit 8-BIT: token token token ;
+LEXER: euc EUC: new-class parse ;
 
-QPARSER: breakpoint-parse-time B: raw ; ! going away
+LEXER: breakpoint-parse-time B: raw ; ! going away
 
-QPARSER: icon ICON: new-word token ;
-QPARSER: match-vars MATCH-VARS: body ;
-QPARSER: pixel-format-attribute-table PIXEL-FORMAT-ATTRIBUTE-TABLE: new-word parse parse ;
-QPARSER: rect RECT: parse parse ;
+LEXER: icon ICON: new-word token ;
+LEXER: match-vars MATCH-VARS: body ;
+LEXER: pixel-format-attribute-table PIXEL-FORMAT-ATTRIBUTE-TABLE: new-word parse parse ;
+LEXER: rect RECT: parse parse ;
 
-QPARSER: c-global-literal &: token ;
-QPARSER: slot-constructor SLOT-CONSTRUCTOR: token ;
-QPARSER: slot-protocol SLOT-PROTOCOL: ";" raw-until ;
-QPARSER: tip TIP: ";" parse-until ;
-QPARSER: tokenizer TOKENIZER: existing-word ; ! hmm
-QPARSER: x509 X509_V_: new-word token ;
-QPARSER: role ROLE: ";" raw-until ;
-QPARSER: role-tuple ROLE-TUPLE: ";" raw-until ;
-QPARSER: variant VARIANT: ";" raw-until ;
-QPARSER: variant-member VARIANT-MEMBER: ";" raw-until ;
-QPARSER: decimal DECIMAL: token ;
-QPARSER: after AFTER: existing-class existing-word body ;
-QPARSER: before BEFORE: existing-class existing-word body ;
-QPARSER: chloe CHLOE: new-word body ;
-QPARSER: component COMPONENT: token ;
-QPARSER: derivative DERIVATIVE: existing-word body ;
+LEXER: c-global-literal &: token ;
+LEXER: slot-constructor SLOT-CONSTRUCTOR: token ;
+LEXER: slot-protocol SLOT-PROTOCOL: ";" raw-until ;
+LEXER: tip TIP: ";" parse-until ;
+LEXER: tokenizer TOKENIZER: existing-word ; ! hmm
+LEXER: x509 X509_V_: new-word token ;
+LEXER: role ROLE: ";" raw-until ;
+LEXER: role-tuple ROLE-TUPLE: ";" raw-until ;
+LEXER: variant VARIANT: ";" raw-until ;
+LEXER: variant-member VARIANT-MEMBER: ";" raw-until ;
+LEXER: decimal DECIMAL: token ;
+LEXER: after AFTER: existing-class existing-word body ;
+LEXER: before BEFORE: existing-class existing-word body ;
+LEXER: chloe CHLOE: new-word body ;
+LEXER: component COMPONENT: token ;
+LEXER: derivative DERIVATIVE: existing-word body ;
 
-QPARSER: tuple-array TUPLE-ARRAY: token ;
-QPARSER: glsl-shader-file GLSL-SHADER-FILE: new-word existing-class parse ;
+LEXER: tuple-array TUPLE-ARRAY: token ;
+LEXER: glsl-shader-file GLSL-SHADER-FILE: new-word existing-class parse ;
 
 ! gobject-instrospection
-QPARSER: gif GIR: token ;
-QPARSER: foreign-atomic-type FOREIGN-ATOMIC-TYPE: token token ;
-QPARSER: foreign-enum-type FOREIGN-ENUM-TYPE: token token ;
-QPARSER: foreign-record-type FOREIGN-RECORD-TYPE: token token ;
-QPARSER: implement-structs IMPLEMENT-STRUCTS: ";" raw-until ;
+LEXER: gif GIR: token ;
+LEXER: foreign-atomic-type FOREIGN-ATOMIC-TYPE: token token ;
+LEXER: foreign-enum-type FOREIGN-ENUM-TYPE: token token ;
+LEXER: foreign-record-type FOREIGN-RECORD-TYPE: token token ;
+LEXER: implement-structs IMPLEMENT-STRUCTS: ";" raw-until ;
 
-QPARSER: holiday HOLIDAY: new-word body ;
-QPARSER: holiday-name HOLIDAY-NAME: existing-word existing-class parse ;
+LEXER: holiday HOLIDAY: new-word body ;
+LEXER: holiday-name HOLIDAY-NAME: existing-word existing-class parse ;
 
-QPARSER: pool POOL: existing-class token ;
-QPARSER: mdbtuple MDBTUPLE: ";" parse-until ;
+LEXER: pool POOL: existing-class token ;
+LEXER: mdbtuple MDBTUPLE: ";" parse-until ;
 
-QPARSER: py-from PY-FROM: new-word "=>" expect ";" parse-until ;
-QPARSER: py-methods PY-METHODS: new-word "=>" expect ";" parse-until ;
-QPARSER: py-qualified-from PY-QUALIFIED-FROM: new-word "=>" expect ";" parse-until ;
-QPARSER: renaming RENAMING: new-word parse parse parse ;
-QPARSER: roll ROLL: token ;
+LEXER: py-from PY-FROM: new-word "=>" expect ";" parse-until ;
+LEXER: py-methods PY-METHODS: new-word "=>" expect ";" parse-until ;
+LEXER: py-qualified-from PY-QUALIFIED-FROM: new-word "=>" expect ";" parse-until ;
+LEXER: renaming RENAMING: new-word parse parse parse ;
+LEXER: roll ROLL: token ;
 
-QPARSER: singletons-union SINGLETONS-UNION: new-class ";" parse-until ;
+LEXER: singletons-union SINGLETONS-UNION: new-class ";" parse-until ;
 ! slides
-QPARSER: strip-tease STRIP-TEASE: ";" parse-until ;
-QPARSER: use-rev USE-REV: token token ;
-QPARSER: vertext-format VERTEX-FORMAT: new-word ";" parse-until ;
-QPARSER: vertext-struct VERTEX-STRUCT: token token ;
-QPARSER: xkcd XKCD: token ;
-QPARSER: xml-error XML-ERROR: new-class ";" raw-until ;
-QPARSER: xml-ns XML-NS: new-word token ;
-QPARSER: feedback-format feedback-format: token ;
-QPARSER: geometry-shader-vertices-out geometry-shader-vertices-out: parse ;
+LEXER: strip-tease STRIP-TEASE: ";" parse-until ;
+LEXER: use-rev USE-REV: token token ;
+LEXER: vertext-format VERTEX-FORMAT: new-word ";" parse-until ;
+LEXER: vertext-struct VERTEX-STRUCT: token token ;
+LEXER: xkcd XKCD: token ;
+LEXER: xml-error XML-ERROR: new-class ";" raw-until ;
+LEXER: xml-ns XML-NS: new-word token ;
+LEXER: feedback-format feedback-format: token ;
+LEXER: geometry-shader-vertices-out geometry-shader-vertices-out: parse ;
 
 ! funky
 : parse-bind ( n string -- seq n'/f string )
     raw pick "(" sequences:sequence= [
         ")" raw-until [ swap sequences:prefix ] 2dip
     ] when ;
-QPARSER: bind :> parse-bind ;
+LEXER: bind :> parse-bind ;
 
 ! words\
-QPARSER: escaped \ raw ;
-QPARSER: method-literal M\ token token ;
+LEXER: escaped \ raw ;
+LEXER: method-literal M\ token token ;
 
 ! funky readahead one, need this for things like CONSTANT: foo $ init-foo
 ! XXX: Maybe call it $: instead.
-QPARSER: eval-dollar $ parse ;
+LEXER: eval-dollar $ parse ;
 
 ! Cocoa
-QPARSER: cfstring CFSTRING: new-word parse ;
+LEXER: cfstring CFSTRING: new-word parse ;
 
-QPARSER: class CLASS: new-class "<" expect ";" parse-until ;
-QPARSER: cocoa-method METHOD: token ";" parse-until ;
-QPARSER: cocoa-protocol COCOA-PROTOCOL: token ;
+LEXER: class CLASS: new-class "<" expect ";" parse-until ;
+LEXER: cocoa-method METHOD: token ";" parse-until ;
+LEXER: cocoa-protocol COCOA-PROTOCOL: token ;
 
-QPARSER: framework FRAMEWORK: parse ;
-QPARSER: SEL: SEL: token ;
-QPARSER: super-selector SUPER-> token ;
-! QPARSER: cocoa-selector -> token ;
+LEXER: framework FRAMEWORK: parse ;
+LEXER: SEL: SEL: token ;
+LEXER: super-selector SUPER-> token ;
+! LEXER: cocoa-selector -> token ;
