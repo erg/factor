@@ -66,9 +66,8 @@ TUPLE: paren-literal < literal ;
 TUPLE: compile-time-literal < literal ;
 TUPLE: run-time-literal < literal ;
 
-TUPLE: character-literal < literal ;
-
-TUPLE: escaped < literal ;
+! TUPLE: character-literal < literal ;
+! TUPLE: escaped < literal ;
 
 TUPLE: string-literal < literal ;
 TUPLE: compile-time-long-string-literal < string-literal ;
@@ -179,6 +178,7 @@ ERROR: unknown-long-string-literal opening seq ending ;
 : lookup-literal ( obj -- class/f ) [ "{[(" member? ] trim-tail literals get choose-parser ;
 : lookup-paren-literal ( obj -- class/f ) [ CHAR: ( = ] trim-tail paren-literals get choose-parser ;
 
+/*
 : make-character ( opening contents ending -- seq/literal )
     pick lookup-string [
         character-literal tag-lexed
@@ -189,6 +189,7 @@ ERROR: unknown-long-string-literal opening seq ending ;
 
 : make-escaped ( opening contents -- literal )
     escaped tag-opening-lexed ; inline
+*/
 
 : make-string ( opening contents ending -- seq/literal )
     pick lookup-string [
@@ -330,6 +331,7 @@ ERROR: string-expected-got-eof n string ;
     make-string
     n' string ;
 
+/*
 ERROR: character-expected-got-eof n string ;
 : read-character' ( n string -- n' string )
     over [
@@ -349,6 +351,7 @@ ERROR: character-expected-got-eof n string ;
     n' [ 1 - n' ] [ string length [ 2 - ] [ 1 - ] bi ] if* string <slice>
     make-character
     n' string ;
+*/
 
 : advance-1 ( n string -- n/f string )
     over [
