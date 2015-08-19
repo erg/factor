@@ -43,7 +43,7 @@ IN: modern.compiler
     members natural-sort
     [ name>> "M: modern:" " precompile ;" surround print ] each ;
 
-TUPLE: linear-state { using hash-set } in compilation-unit? private? last-word decorators namespace ;
+TUPLE: linear-state { using hash-set } in compilation-unit? private? last-word decorators qvocab ;
 CONSTRUCTOR: <linear-state> linear-state ( -- obj )
     HS{ } clone >>using
     V{ } clone >>decorators ;
@@ -134,12 +134,8 @@ M: modern:recursive meta-pass' add-decorator f ;
 M: modern:deprecated meta-pass' add-decorator f ;
 M: modern:delimiter meta-pass' add-decorator f ;
 
-: meta-pass ( parsed -- parsed linear-state )
-    [
-        [ meta-pass' ] map
-        transfer-state
-        \ linear-state get
-    ] with-linear-state ;
+: meta-pass ( parsed -- parsed )
+    [ meta-pass' ] map transfer-state ;
 
 TUPLE: qvocab namespace words classes ;
 CONSTRUCTOR: <qvocab> qvocab ( -- obj )
@@ -148,7 +144,7 @@ CONSTRUCTOR: <qvocab> qvocab ( -- obj )
     100 <hashtable> >>classes ;
 
 : current-qvocab ( -- qvocab )
-    ;
+    linear-state get qvocab>> ;
 
 ERROR: class-already-exists name ;
 : check-class ( string -- string )
@@ -181,19 +177,21 @@ M: modern:singleton create-pass' object>> first >string create-class ;
 M: modern:singletons create-pass' object>> first [ >string create-class ] map ;
 
 
-: create ( parsed linear-state -- parsed )
+: create-pass ( parsed -- parsed )
     [
-        [ create-pass' dup sequence? [ 1array ] unless ] map concat
-        \ linear-state get
-    ] with-linear-state ;
+        create-pass' dup sequence? [ 1array ] unless
+    ] map concat ;
 
-: define-pass ( parsed linear-state -- parsed )
+
+GENERIC: define-pass' ( obj -- quot )
+: define-pass ( parsed -- parsed )
+    [ define-pass' ] map ;
+
+: quick-compile ( seq -- linear-state )
     [
-        \ linear-state get
+        meta-pass create-pass define-pass compile
+        linear-state get
     ] with-linear-state ;
-
-: quick-compile ( seq -- )
-    meta-pass create-pass define-pass ;
 
 /*
 clear
@@ -203,4 +201,8 @@ basis-source-files
     quick-parse-path
     dup meta drop sift [ dup qsequence? [ in>> ] [ drop f ] if ] reject describe drop
 ] each
+
+
+recompile - dup def>> { } map>assoc
+! modify-code-heap
 */
