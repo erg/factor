@@ -1,12 +1,13 @@
 ! Copyright (C) 2015 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-
-USING: accessors arrays assocs classes constructors hash-sets io
-kernel make modern.paths modern.quick-parser modern.syntax
+USING: accessors arrays assocs classes compiler.units
+constructors hash-sets hashtables io kernel make math
+modern.paths modern.quick-parser modern.syntax multiline
 namespaces prettyprint sequences sequences.deep sets sorting
-strings multiline hashtables ;
+strings words.private fry combinators ;
 QUALIFIED-WITH: modern.syntax modern
 FROM: syntax => f inline ;
+QUALIFIED: words
 IN: modern.compiler
 
 : path>parsers ( name -- seq )
@@ -43,17 +44,38 @@ IN: modern.compiler
     members natural-sort
     [ name>> "M: modern:" " precompile ;" surround print ] each ;
 
-TUPLE: linear-state { using hash-set } in compilation-unit? private? last-word decorators qvocab ;
+TUPLE: qvocab namespace words classes ;
+CONSTRUCTOR: <qvocab> qvocab ( -- obj )
+    100 <hashtable> >>namespace
+    100 <hashtable> >>words
+    100 <hashtable> >>classes ;
+
+! dict is all vocabs
+TUPLE: linear-state { using hash-set } in compilation-unit? private? last-word decorators dict ;
 CONSTRUCTOR: <linear-state> linear-state ( -- obj )
     HS{ } clone >>using
-    V{ } clone >>decorators ;
+    V{ } clone >>decorators
+    10 <hashtable> >>dict ;
 
 : with-linear-state ( quot -- )
     [ <linear-state> \ linear-state ] dip with-variable ; inline
 
+: current-dict ( -- qvocab )
+    linear-state get dict>> ;
+
+: current-qvocab ( -- qvocab )
+    linear-state get [ dict>> ] [ in>> ] bi of ;
+
+: make-qvocab ( name -- )
+    [ <qvocab> ] dip linear-state get dict>> set-at ;
+
+: lookup-qvocab ( name -- qvocab )
+    [ linear-state get dict>> ] dip of ;
+
 : add-using ( in -- ) linear-state get using>> adjoin ;
 : set-in ( in -- ) linear-state get in<< ;
 : get-in ( -- obj ) linear-state get in>> ;
+: get-dict ( -- obj ) linear-state get dict>> ;
 : set-private ( ? -- ) linear-state get private?<< ;
 : get-private ( -- obj ) linear-state get private?>> ;
 : set-compilation-unit ( ? -- ) linear-state get compilation-unit?<< ;
@@ -113,85 +135,116 @@ M: object name-of drop f ;
     set-word-private
     set-word-in transfer-decorators ;
 
-GENERIC: meta-pass' ( obj -- obj )
+GENERIC: meta-pass' ( obj -- )
 M: object meta-pass'
     dup name-of [
         transfer-state
-        [ set-last-word ] [ ] bi
-    ] [ ] if ;
+        set-last-word
+    ] [ drop ] if ;
 
-M: modern:using meta-pass' object>> first [ >string add-using ] each f ;
-M: modern:use meta-pass' object>> first >string add-using f ;
-M: modern:in meta-pass' object>> first >string set-in f ;
-M: modern:private-begin meta-pass' drop t set-private f ;
-M: modern:private-end meta-pass' drop f set-private f ;
+M: modern:using meta-pass' object>> first [ >string add-using ] each ;
+M: modern:use meta-pass' object>> first >string add-using ;
+M: modern:in meta-pass' object>> first >string [ set-in ] [ make-qvocab ] bi ;
+M: modern:private-begin meta-pass' drop t set-private ;
+M: modern:private-end meta-pass' drop f set-private ;
 
-M: modern:final meta-pass' add-decorator f ;
-M: modern:foldable meta-pass' add-decorator f ;
-M: modern:flushable meta-pass' add-decorator f ;
-M: modern:inline meta-pass' add-decorator f ;
-M: modern:recursive meta-pass' add-decorator f ;
-M: modern:deprecated meta-pass' add-decorator f ;
-M: modern:delimiter meta-pass' add-decorator f ;
+M: modern:final meta-pass' add-decorator ;
+M: modern:foldable meta-pass' add-decorator ;
+M: modern:flushable meta-pass' add-decorator ;
+M: modern:inline meta-pass' add-decorator ;
+M: modern:recursive meta-pass' add-decorator ;
+M: modern:deprecated meta-pass' add-decorator ;
+M: modern:delimiter meta-pass' add-decorator ;
 
-: meta-pass ( parsed -- parsed )
-    [ meta-pass' ] map transfer-state ;
+: meta-pass ( parsed -- )
+    [ meta-pass' ] each transfer-state ;
 
-TUPLE: qvocab namespace words classes ;
-CONSTRUCTOR: <qvocab> qvocab ( -- obj )
-    100 <hashtable> >>namespace
-    100 <hashtable> >>words
-    100 <hashtable> >>classes ;
 
-: current-qvocab ( -- qvocab )
-    linear-state get qvocab>> ;
-
-ERROR: class-already-exists name ;
-: check-class ( string -- string )
-    dup current-qvocab classes>> get key? [
+ERROR: class-already-exists name vocaab ;
+ERROR: no-vocab name vocab ;
+: check-class ( name vocab -- name vocab )
+    dup [ no-vocab ] unless
+    2dup lookup-qvocab classes>> key? [
         class-already-exists
     ] when ;
 
-ERROR: word-already-exists name ;
-: check-word ( string -- string )
-    dup current-qvocab words>> get key? [
+ERROR: word-already-exists name vocab ;
+: check-word ( name vocab -- name vocab )
+    dup [ no-vocab ] unless
+    2dup lookup-qvocab words>> key? [
         word-already-exists
     ] when ;
 
-: (create-word) ( string -- word ) ;
-: (create-class) ( string -- class ) ;
+! XXX: module repository
+: word-hashcode ( name vocab -- hashcode )
+    [ hashcode ] bi@ hash-combine >fixnum ;
 
-: create-word ( string -- word )
-    check-class check-word (create-word) ;
+: make-word ( name vocab -- word )
+    2dup word-hashcode (word) ; ! XXX: add to compilation-unit
 
-: create-class ( string -- class )
-    check-class check-word (create-class) ;
+: add-class-prop ( word -- word' )
+    dup t "class" words:set-word-prop ;
 
-: create-class-word ( string -- class )
-    check-word check-class (create-word) (create-class) ;
+: record-word ( word -- )
+    dup name>> current-qvocab words>> set-at ;
 
-GENERIC: create-pass' ( obj -- obj/seq )
+: record-class ( word -- )
+    dup name>> current-qvocab classes>> set-at ;
 
-M: object create-pass' drop f ;
-M: modern:singleton create-pass' object>> first >string create-class ;
-M: modern:singletons create-pass' object>> first [ >string create-class ] map ;
+: record-namespace ( word -- )
+    dup name>> current-qvocab namespace>> set-at ;
+
+: make-class ( name vocab -- class )
+    make-word add-class-prop ;
+
+: create-word ( string vocab -- word )
+    check-class check-word
+    make-word [ record-word ] [ record-namespace ] [ ] tri ;
 
 
-: create-pass ( parsed -- parsed )
-    [
-        create-pass' dup sequence? [ 1array ] unless
-    ] map concat ;
+: create-class ( string vocab -- class )
+    check-class check-word
+    make-class [ record-class ] [ record-namespace ] [ ] tri ;
+
+: create-class-word ( string vocab -- class )
+    check-class check-word
+    make-class { [ record-word ] [ record-class ] [ record-namespace ] [ ] } cleave ;
+
+GENERIC: create-pass' ( obj -- )
+
+M: object create-pass' drop ;
+M: modern:singleton create-pass' [ object>> first >string ] [ in>> ] bi create-class drop ;
+M: modern:singletons create-pass' [ object>> first ] [ in>> ] bi '[ >string _ create-class drop ] each ;
+M: modern:symbol create-pass' [ object>> first >string ] [ in>> ] bi create-word drop ;
+M: modern:symbols create-pass' [ object>> first ] [ in>> ] bi '[ >string _ create-word drop ] each ;
+
+
+: create-pass ( parsed -- )
+    [ create-pass' ] each ;
 
 
 GENERIC: define-pass' ( obj -- quot )
-: define-pass ( parsed -- parsed )
-    [ define-pass' ] map ;
+M: modern:in define-pass' drop [ ] ;
+! M: modern:function define-pass' drop [ ] ;
+M: modern:symbol define-pass' drop [ ] ;
+
+: define-pass ( parsed -- quot )
+    [ define-pass' ] map concat ;
 
 : quick-compile ( seq -- linear-state )
     [
-        meta-pass create-pass define-pass compile
+        [ meta-pass ]
+        [ create-pass ]
+        [ define-pass ] tri
+        "would compile: " print . ! compile
         linear-state get
     ] with-linear-state ;
+
+: quick-compile-vocab ( name -- linear-state )
+    qparse-vocab quick-compile ;
+
+: quick-compile-string ( name -- linear-state )
+    qparse quick-compile ;
 
 /*
 clear
@@ -202,6 +255,8 @@ basis-source-files
     dup meta drop sift [ dup qsequence? [ in>> ] [ drop f ] if ] reject describe drop
 ] each
 
+
+word def effect define-inline
 
 recompile - dup def>> { } map>assoc
 ! modify-code-heap
