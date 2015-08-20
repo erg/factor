@@ -4,7 +4,7 @@ USING: accessors arrays assocs classes compiler.units
 constructors hash-sets hashtables io kernel make math
 modern.paths modern.quick-parser modern.syntax multiline
 namespaces prettyprint sequences sequences.deep sets sorting
-strings words.private fry combinators ;
+strings words.private fry combinators quotations words.symbol ;
 QUALIFIED-WITH: modern.syntax modern
 FROM: syntax => f inline ;
 QUALIFIED: words
@@ -16,7 +16,6 @@ IN: modern.compiler
 
 : paths>parsers ( names -- seq )
     [ path>parsers ] map concat members ;
-
 
 : path>lexers ( name -- seq )
     quick-parse-path
@@ -194,6 +193,10 @@ ERROR: word-already-exists name vocab ;
 : record-namespace ( word -- )
     dup name>> current-qvocab namespace>> set-at ;
 
+ERROR: identifier-not-found name ;
+: lookup-in-linear-state ( name -- word )
+    current-qvocab namespace>> ?at [ identifier-not-found ] unless ;
+
 : make-class ( name vocab -- class )
     make-word add-class-prop ;
 
@@ -218,27 +221,29 @@ M: modern:singletons create-pass' [ object>> first ] [ in>> ] bi '[ >string _ cr
 M: modern:symbol create-pass' [ object>> first >string ] [ in>> ] bi create-word drop ;
 M: modern:symbols create-pass' [ object>> first ] [ in>> ] bi '[ >string _ create-word drop ] each ;
 
-
 : create-pass ( parsed -- )
     [ create-pass' ] each ;
 
 
-GENERIC: define-pass' ( obj -- quot )
-M: modern:in define-pass' drop [ ] ;
-! M: modern:function define-pass' drop [ ] ;
-M: modern:symbol define-pass' drop [ ] ;
+GENERIC: define-pass' ( obj -- )
+M: modern:in define-pass' drop ;
+M: modern:symbol define-pass' name-first lookup-in-linear-state define-symbol ;
 
-: define-pass ( parsed -- quot )
-    [ define-pass' ] map concat ;
+: define-pass ( parsed -- )
+    [ define-pass' ] each ;
 
 : quick-compile ( seq -- linear-state )
     [
-        [ meta-pass ]
-        [ create-pass ]
-        [ define-pass ] tri
-        "would compile: " print . ! compile
-        linear-state get
-    ] with-linear-state ;
+        [
+            [ meta-pass ]
+            [ create-pass ]
+            [ define-pass ] tri
+            current-qvocab namespace>> values
+            [ "compiling words:" print . ]
+            [ compile ] bi
+            linear-state get
+        ] with-linear-state
+    ] with-compilation-unit ;
 
 : quick-compile-vocab ( name -- linear-state )
     qparse-vocab quick-compile ;
